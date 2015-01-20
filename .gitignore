@@ -1,0 +1,10 @@
+
+# Workspace config for PyCharm?
+.idea/
+
+# pyc files (sortof compilations of the py files..)
+*.pyc
+
+# windows .ini filer
+*.ini
+

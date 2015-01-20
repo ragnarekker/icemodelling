@@ -1,0 +1,131 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<SOAP-ENV:Body>
+<ns1:getTimeserieTypesPropertiesResponse xmlns:ns1="http://no/met/metdata/MetDataService.wsdl" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
+<return xmlns:ns2="http://schemas.xmlsoap.org/soap/encoding/" xsi:type="ns2:Array" xmlns:ns3="http://no.met.metdata/IMetDataService.xsd" ns2:arrayType="ns3:no_met_metdata_TimeSerieTypes[15]">
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_DIURNAL</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser døgnverdier for valgt periode, elementer og stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">0</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Døgnverdier</serieTypeName>
+<table xsi:type="xsd:string">T_DIURNAL</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_MONTH</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser månedsverdier for valgt periode, elementer og stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">1</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Månedsverdier</serieTypeName>
+<table xsi:type="xsd:string">T_MONTH</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_OBS</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser observasjoner for periode og elementer fra valgte stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">2</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Observasjoner</serieTypeName>
+<table xsi:type="xsd:string">T_XDATA</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string" xsi:nil="true"/>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser månedsnormaler for elementer og stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">3</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Månedsnormaler</serieTypeName>
+<table xsi:type="xsd:string">T_NORMAL_MONTH</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string" xsi:nil="true"/>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser døgnnormaler for elementer og stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">4</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Døgnnormaler</serieTypeName>
+<table xsi:type="xsd:string">T_NORMAL_DIURNAL</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string" xsi:nil="true"/>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser døgnekstremer for utvalgte elementer og stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">5</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Døgnekstremer</serieTypeName>
+<table xsi:type="xsd:string">T_RECORDS_DIURNAL</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_HOMOGEN_MONTH</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser homogene månedsverdier for valgt periode, elementer og stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">7</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Homogene månedsverdier</serieTypeName>
+<table xsi:type="xsd:string">T_HOMOGEN_MONTH</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_FDATA</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser metardata for periode og elementer fra valgte flyplasser og stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">8</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Metardata</serieTypeName>
+<table xsi:type="xsd:string">T_FDATA</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_EDATA</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Gir data om det fysiske miljø (E-data) fra et utvalg av oljeplattformene på Norsk Kontinentalsokkel.</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">9</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Miljødata (Environmental data)</serieTypeName>
+<table xsi:type="xsd:string">T_EDATA</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string" xsi:nil="true"/>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser ekstremer for utvalgte elementer og fylker</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">10</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Ekstremer per fylke</serieTypeName>
+<table xsi:type="xsd:string">T_RECORDS</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_MONTH</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser datadekning i prosent for valgt periode, elementer og stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">11</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Datadekning (månedsvis)</serieTypeName>
+<table xsi:type="xsd:string">T_COVER</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_OBS</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser observasjoner fra SVV stasjoner for periode og elementer fra valgte stasjoner</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">13</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Observasjoner fra SVV</serieTypeName>
+<table xsi:type="xsd:string">T_SVVDATA</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_OBS</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser observasjoner fra stasjoner med ti minutters oppløsning (hovedsaklig nedbør RR_010)</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">14</serieTypeID>
+<serieTypeName xsi:type="xsd:string">10 minutts observasjoner</serieTypeName>
+<table xsi:type="xsd:string">T_10MINUTE_DATA </table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_EDATA</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">10 min data fra et utvalg av oljeplattformene på Norsk Kontinentalsokkel.</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">15</serieTypeID>
+<serieTypeName xsi:type="xsd:string">10 min maritime data</serieTypeName>
+<table xsi:type="xsd:string">T_MERMAID</table>
+</item>
+<item xsi:type="ns3:no_met_metdata_TimeSerieTypes">
+<elemTable xsi:type="xsd:string">T_ELEM_PROJ</elemTable>
+<language xsi:type="xsd:string">no</language>
+<serieTypeDescription xsi:type="xsd:string">Viser prosjekt observasjoner minuttoppløst</serieTypeDescription>
+<serieTypeID xsi:type="xsd:int">16</serieTypeID>
+<serieTypeName xsi:type="xsd:string">Ulike prosjekt data</serieTypeName>
+<table xsi:type="xsd:string">T_AVINOR</table>
+</item>
+</return>
+</ns1:getTimeserieTypesPropertiesResponse>
+
+</SOAP-ENV:Body>
+</SOAP-ENV:Envelope>
+

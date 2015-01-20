@@ -1,0 +1,11 @@
+################
+#
+#  Observed icecolumns on Otrøvannet winter 2012-2013
+#  values given as [value; type]
+#  Valid values are: date, water_line and all the ice types
+#  Hashtags are omitted and ' ', \n and such are removed when reading the file
+#
+##################
+
+
+###############

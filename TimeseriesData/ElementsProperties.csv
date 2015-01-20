@@ -1,0 +1,144 @@
+Temperatur	TAND	Laveste registrerte temperatur i timen/døgnet (kl 00-23)
+Temperatur	TAXD	Høyeste registrerte temperatur i timen/døgnet (kl 00-23)
+Temperatur	TA25	Lufttemperatur ved observasjonstida høyde=25m
+Temperatur	TSN25	Snøtemperatur i °C, minimum  minuttverdi i timen dybde=25 cm
+Temperatur	TSN75	Snøtemperatur i °C, minimum  minuttverdi i timen dybde=75 cm
+Temperatur	TSN125	Snøtemperatur i °C, minimum  minuttverdi i timen dybde=125
+Temperatur	TSN175	Snøtemperatur i °C, minimum  minuttverdi i timen dybde=175 cm
+Temperatur	X1TAN	Minimumstemperatur sensor 1
+Temperatur	X1TAN_12	Minimumstemperatur siste 12 timer sensor 1
+Temperatur	X1TAX_12	Temperatur i ºC, maximum siste 24 timer sensor 1
+Snø	SSXDT	Dato for maksimal snødybde
+Temperatur	TAX_24	Maksimumstemperatur (24 timer)
+Temperatur	TAM_K	Middeltemperatur beregnet med Køppens formel
+Temperatur	TAMRR	Døgnverdi: Aritmetisk middel av 24 timeverdier (evt formelbasert middelverdi) for kl 06-06 utc
+Temperatur	TAN_24	Temperatur i ºC, minimum minuttverdi siste 24 timer
+Temperatur	TDX	Duggpunkttemperatur  i ºC, maksimum minuttverdi i timen
+Temperatur	TAN_12	Laveste registrerte temperatur siste 12 timer
+Temperatur	TRM	Temperatur i ºC, rullebane, timemiddel
+Temperatur	TRN	Temperatur i ºC, rullebane, minimum minuttverdi i timen
+Temperatur	TRX	Temperatur i ºC, rullebane, maksimum minuttverdi i timen
+Temperatur	TSM	Snøtemperatur i °C, timemiddel
+Temperatur	TSN	Snøtemperatur i °C, minimum  minuttverdi i timen
+Temperatur	TSX	Snøtemperatur i °C, maksimum  minuttverdi i timen
+Temperatur	TV	Temperatur fra sensor frest ned i veibanen
+Temperatur	TVM	Temperatur fra sensor frest ned i veibanen, middel av siste times 60 minuttverdier
+Temperatur	TVN	Temperatur fra sensor frest ned i veibanen, laveste verdi siste time
+Temperatur	TVX	Temperatur fra sensor frest ned i veibanen, høyeste verdi siste time
+Temperatur	TWM	Aritmetisk middel av sjøtemperaturen (TW) for hvert døgn
+Temperatur	TWF	Temperatur nær vannoverflata (innsjø)
+Temperatur	TAX_12	Høyeste registrerte temperatur siste 12 timer
+Temperatur	TGN_12	Temperatur målt 10 cm over bakkenivå, laveste verdi siste tolv timer
+Temperatur	TR	Temperatur i ºC, rullebane, nåverdi i 1 minutt
+Temperatur	TAM12M	Midlere temperatur målt kl.13, norsk tid
+Temperatur	TANDT	Dato for absolutt minimumstemperatur
+Temperatur	TAXDT	Dato for maksimumstemperatur
+Temperatur	TGNN	Månedens laveste gressminimumstemperatur
+Temperatur	X4TG	Gresstemperatur
+Temperatur	X2TGM	Midlere gresstemperatur - sensor 2
+Temperatur	X4TGM	Midlere gresstemperatur
+Temperatur	X2TGN	Minimum gresstemperatur - sensor 2
+Temperatur	X3TGX	Maksimum gresstemperatur - sensor 3
+Temperatur	X4TGX	Maksimum gresstemperatur
+Temperatur	TAMN	Laveste døgnmiddeltemperatur
+Temperatur	X2TW	Sjøtemperatur i ºC nær overflaten
+Temperatur	TAMX	Månedens høyeste middeltemperatur
+Temperatur	TDM	Duggpunkttemperatur  i ºC, timemiddel
+Temperatur	TDN	Duggpunkttemperatur  i ºC, minimum minuttverdi i timen
+Temperatur	TGM	Temperatur målt 10 cm over bakkenivå, middel av siste times 60 minuttverdier
+Temperatur	TGX	Temperatur målt 10 cm over bakkenivå, høyeste verdi siste time
+Temperatur	TNT	Minimumstermometerets topp (kontrollverdi)
+Temperatur	TXT	Maksimumstermometerets topp (kontrollverdi)
+Temperatur	TAMA	Avvik fra gjeldende temperaturnormal (1961-1990)
+Snø	SA	Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres som ".", -3 = "umulig å måle"
+Temperatur	X2TAX	Maksimumstemperatur - sensor 2
+Temperatur	TWN	Månedens laveste sjøtemperatur (TW)
+Temperatur	TM-20	Temperatur
+Temperatur	TAM18M	Midlere temperatur målt kl.19, norsk tid
+Temperatur	TAM_24	"Timeverdi: Aritmetisk middel av minuttverdier Døgnverdi: Aritmetisk middel av 24 timeverdier (kl 00-00), evt formelbasert middelverdi ut fra færre observasjoner (kl 18-18)Månedsverdi: Aritmetisk midd
+Temperatur	GD17	Også kalt graddagstall eller fyringsgrader. Tallet avledes av døgnmiddeltemperaturen (antall grader < 17 ºC)
+Temperatur	VSUM	Tall som avledes av døgnmiddeltemperaturen (antall grader > 0 ºC)
+Snø	SDX	Månedsverdi: Største observerte snødekke
+Temperatur	TWX	Månedens høyeste sjøtemperatur (TW)
+Temperatur	TAXM	Månedsverdi: Aritmetisk middel av hvert døgns maksimumstemperatur
+Temperatur	X3TW	Sjøtemperatur i ºC nær overflaten
+Temperatur	X1TA	Lufttemperatur - sensor 1
+Temperatur	X5TA	Lufttemperatur - sensor 5
+Temperatur	X6TA	Lufttemperatur - sensor 6
+Temperatur	X2TA	Lufttemperatur - sensor 2
+Temperatur	X3TA	Lufttemperatur - sensor 3
+Temperatur	X10TA	Lufttemperatur i 10m høyde
+Snø	EM	Markas tilstand (snø- og isdekke)
+Temperatur	X1TGM	Midlere gresstemperatur - sensor 1
+Temperatur	X1TGN	Minimum gresstemperatur - sensor 1
+Temperatur	X1TW	Sjøtemperatur i ºC nær overflaten
+Temperatur	X1TAX	Maksimumstemperatur - sensor 1
+Temperatur	X1TD	Duggpunktstemperatur (den temperaturen lufta må avkjøles før skydanning (metning) inntreffer
+Temperatur	X1TG	Gresstemperatur - sensor 1
+Temperatur	X1TJM10	Midlere jordtemperatur i 10 cm dybde
+Temperatur	X1TJM20	Midlere jordtemperatur i 20 cm dybde
+Temperatur	X1TJM50	Midlere jordtemperatur i 50 cm dybde
+Temperatur	X1TAM	Middeltemperatur - sensor 1
+Temperatur	X1TMN	Laveste middeltemperatur
+Temperatur	X1TN	Minimumstemperatur
+Temperatur	X1TGX	Maksimum gresstemperatur - sensor 1
+Temperatur	X2TD	Duggpunktstemperatur (den temperaturen lufta må avkjøles før skydanning (metning) inntreffer
+Snø	SAM	Månedsverdi: Aritmetisk middel av daglig snødybde
+Temperatur	TD	Duggpunktstemperatur (den temperaturen lufta må avkjøles til før skydannelse (metning) inntreffer)
+Temperatur	TGNX	Månedens høyeste gressminimumstemperatur
+Temperatur	TAM	"Timeverdi: Aritmetisk middel av minuttverdier Døgnverdi: Aritmetisk middel av 24 timeverdier (kl 00-00), evt formelbasert middelverdi ut fra færre observasjoner (kl 18-18)Månedsverdi: Aritmetisk middel av døgn-TAM "
+Temperatur	TM-10	Temperatur
+Temperatur	TM2	Middeltemperatur over 2 timer
+Temperatur	TAN	Laveste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+Temperatur	TAX	Høyeste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+Temperatur	TGNM	Aritmetisk middel av gressminimumstemperaturen for hvert døgn
+Temperatur	X4TA	Lufttemperatur - sensor 4
+Temperatur	TWB	Sjøtemperatur i °C, nær bunnen, målt kl 13
+Temperatur	X2TG	Gresstemperatur - sensor 2
+Temperatur	X3TG	Gresstemperatur - sensor 3
+Temperatur	TSA	Snøtemperatur i °C, nåverdi
+Snø	RWA	Smeltevannsum
+Snø	RW	Mengde snø som har smeltet (målt som vann)
+Temperatur	X2TJM10	Midlere jordtemperatur i 10 cm dybde
+Temperatur	X2TJM20	Midlere jordtemperatur i 20 cm dybde
+Temperatur	X2TJM50	Midlere jordtemperatur i 50 cm dybde
+Temperatur	X2TAM	Middeltemperatur - sensor 2
+Temperatur	X2TMN	Laveste middeltemperatur
+Temperatur	X2TN	Minimumstemperatur
+Temperatur	TAM06M	Midlere temperatur målt kl.07, norsk tid
+Temperatur	X2TGX	Maksimum gresstemperatur - sensor 2
+Snø	SAX	Månedsverdi: Høyeste målte snødybde
+Temperatur	X4TGN	Minimum gresstemperatur
+Temperatur	GD17_I	Også kalt graddagstall eller fyringsgrader. Tallet avledes av døgnmiddeltemperaturen (antall grader < 17 ºC). Månedsverdi interpolert ut fra griddete data.
+Snø	SAN	Månedsverdi: Laveste målte snødybde
+Snø	SDN	Månedsverdi: Minste observerte snødekke
+Temperatur	TANM	Månedsverdi: Aritmetisk middel av hvert døgns mimimumstemperatur
+Temperatur	TA	Lufttemperatur ved observasjonstiden
+Snø	SD	Oppgis med kodetall 1 - 4: 1 - 3 betyr at deler av marka er snødekt, og 4 at området rundt stasjonen er helt snødekt. Kode = -1 betyr "ikke snø", presenterast som "."
+Temperatur	TG	Temperatur målt 10 cm over bakkenivå
+Snø	SDM	Månedsverdi: Aritmetisk middel av daglig snødekke
+Temperatur	X3TGM	Midlere gresstemperatur - sensor 3
+Temperatur	TGN	Laveste registrerte temperatur i timen/døgnet/måneden, målt 10 cm over bakken
+Temperatur	X3TGN	Minimum gresstemperatur - sensor 3
+Temperatur	TW	Sjøtemperatur i °C, nær vannoverflaten
+Snø	SS_1	Snødybde, tilvekst siste time i cm
+Snø	SS_24	Snødybde, tilvekst siste 24 timer i cm
+Temperatur	TAK	Kalmanfiltrert temperatur i ºC
+Temperatur	TAN_X	Temperatur i ºC, minimum minuttverdi, vilkårlig periode
+Temperatur	TAX_X	Temperatur i ºC, maksimum minuttverdi, vilkårlig periode
+Temperatur	TDIF	Temperaturdifferanse
+Snø	SAE	Snødybde, tilvekst eller minking siste døgn
+Temperatur	VEKST	Tall som avledes av døgnmiddeltemperaturen (antall grader > 5 ºC)
+Temperatur	TSX25	Snøtemperatur i °C, maksimum  minuttverdi i timen
+Temperatur	TSX75	Snøtemperatur i °C, maksimum  minuttverdi i timen
+Temperatur	TSX125	Snøtemperatur i °C, maksimum  minuttverdi i timen
+Temperatur	TSX175	Snøtemperatur i °C, maksimum  minuttverdi i timen
+Temperatur	TAM_STDEV	Standardavvik av midlere lufttemperatur
+Temperatur	TA_DELTA	Vertikal temperaturdifferanse
+Temperatur	TA10	Temperatur i 10m høyde
+Snø	SIGNSTR_SHM	Signalstyrke, snødybdemåler
+Temperatur	X2TAN	Laveste registrerte temperatur i timen/døgnet (kl 18-18)/måneden sensor 1
+Temperatur	TSA25	Snøtemperatur i °C, nåverdi dybde=25 cm
+Temperatur	TSA75	Snøtemperatur i °C, nåverdi dybde 75 cm
+Temperatur	TSA125	Snøtemperatur i °C, nåverdi dybde=125 cm
+Temperatur	TSA175	Snøtemperatur i °C, nåverdi dybde=175 cm
