@@ -9,9 +9,11 @@ import copy
 import sqlite3 as db
 import datetime
 
-#plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
-plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
+plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
 databaseLocation = '/Users/ragnarekker/Documents/GitHub/Ice-modelling/Databases/cloudMakingResults.sqlite'
+
+# plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
+
 
 def __write2database(database, a, b, c, d, e, f, g, h, i, rms, date, stnr, period):
     """

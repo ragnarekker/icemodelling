@@ -8,11 +8,11 @@ import iceColumn
 import copy
 from TimeseriesIO import getMetData, readWeather, makeSnowChangeFromSnowTotal, plotIcecover, importColumns
 
-plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
-data_path = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\TimeseriesData\\"
+#plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
+#data_path = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\TimeseriesData\\"
 
-#plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
-#data_path = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/TimeseriesData/"
+plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
+data_path = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/TimeseriesData/"
 
 def calculateIceCover(inn_column, date, temp, sno):
 
