@@ -52,7 +52,7 @@ def getIceThickness(ic, dh_snow, temp, timestep):
                     # If the layer is the last layer of solids and thus at the bottom, we get freezing at the bottom
                     if i == len(ic.column)-1:
 
-                        # Stefans law calculates how much water will freeze
+                        # The heat flux equation gives how much water will freeze
                         dh = - temp * U_total * timestep / ic.rho_water / ic.L_black_ice
                         ic.addLayerAtIndex(i+1, dh, 'black_ice')
                         timestep = 0
@@ -64,8 +64,8 @@ def getIceThickness(ic, dh_snow, temp, timestep):
                         dh = math.sqrt(numpy.absolute(2 * ic.k_slush_ice / ic.rho_slush_ice / ic.L_slush_ice * temp * timestep))    # formula X?
                         timestep_used = ic.column[i][0]**2 * ic.rho_slush_ice * ic.L_slush_ice / 2 /  -temp / ic.k_slush_ice        # formula X sortet for time
                     else:
-                        dh = - temp * U_total * timestep / ic.getRho(ic.column[i][1]) / ic.L_slush_ice                              # Stefans law calculates how much slush will freeze
-                        timestep_used = ic.column[i][0] * ic.rho_slush_ice * ic.L_slush_ice / -temp / U_total                       # Stefans law sorted for time
+                        dh = - temp * U_total * timestep / ic.getRho(ic.column[i][1]) / ic.L_slush_ice                              # The heat flux equation gives how much slush will freeze
+                        timestep_used = ic.column[i][0] * ic.rho_slush_ice * ic.L_slush_ice / -temp / U_total                       # The heat flux equation sorted for time
 
                     # If a layer totaly freezes during the timeperiod, the rest of the time will be used to freeze a layer further down
                     if ic.column[i][0] < dh:
