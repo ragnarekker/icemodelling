@@ -1,28 +1,7 @@
 __author__ = 'raek'
 # -*- coding: utf-8 -*-
-# This file contains classes and methods for handling physical data over WHOLE timeseries
 
 import datetime
-
-def makeSnowChangeFromSnowTotal(snowTotal):
-    '''
-    Method takes a list of total snowdeapth and returns the dayly change (derivative).
-
-    :param snowTotal:   a list of floats representing the total snowcoverage of a locaton
-    :return:            a list of floats representing the net accumulation (only positive numbers) for the timeseries
-    '''
-
-    snowChange = []
-    snowChange.append(snowTotal[0])
-
-    for i in range(1, len(snowTotal), 1):
-        delta = (snowTotal[i]-snowTotal[i-1])
-        if delta > 0:
-            snowChange.append(delta)    # the model uses only change where it accumulates
-        else:
-            snowChange.append(0)
-
-    return snowChange
 
 def stripMetadata(weatherElementList, getDates):
     """

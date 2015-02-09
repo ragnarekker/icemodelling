@@ -14,7 +14,6 @@ from TimeseriesIO.getWSklima import getElementsFromTimeserieTypeStation
 
 from TimeseriesIO.plotTimeseries import plotIcecover
 
-from TimeseriesIO.timeseriesClasses import makeSnowChangeFromSnowTotal
 from TimeseriesIO.timeseriesClasses import stripMetadata
 from TimeseriesIO.timeseriesClasses import okta2unit
 from TimeseriesIO.timeseriesClasses import weatherElement

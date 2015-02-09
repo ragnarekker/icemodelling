@@ -5,6 +5,41 @@ __author__ = 'ragnarekker'
 import datetime
 
 
+def makeSnowChangeFromSnowTotal(snowTotal):
+    '''
+    Method takes a list of total snowdeapth and returns the dayly change (derivative).
+
+    :param snowTotal:   a list of floats representing the total snowcoverage of a locaton
+    :return:            a list of floats representing the net accumulation (only positive numbers) for the timeseries
+    '''
+
+    snowChange = []
+    snowChange.append(snowTotal[0])
+
+    for i in range(1, len(snowTotal), 1):
+        delta = (snowTotal[i]-snowTotal[i-1])
+        if delta > 0:
+            snowChange.append(delta)    # the model uses only change where it accumulates
+        else:
+            snowChange.append(0)
+
+    return snowChange
+
+def makeTempChangeFromTemp(temp):
+    '''
+    Method makes an array of temp change from yesterday to today
+    :param temp:    a list of floats with the dayly avarage temperature
+    :return:        a list of the change of temperature from yesterday to today
+    '''
+
+    dTemp = []
+    previousTemp = temp[0]
+    for t in temp:
+        dTemp.append(t - previousTemp)
+        previousTemp = t
+
+    return dTemp
+
 def tempFromTempAndSnow(temp, new_snow):
     """
     This method takes shifts temperature according to snow events. In theory clear nights will have a net
@@ -280,12 +315,8 @@ def ccFromTempchange(*args):
     # a temporary empty list to apply the filtering
     cloudsOut = [0.]*(len(temp) + len(gammaFilter) - 1)
 
-    # make array of tempchnge from yesturday to today
-    dtemp = []
-    tm1 = temp[0]
-    for t in temp:
-        dtemp.append(t - tm1)
-        tm1 = t
+    # make array of tempchnge from yesterday to today
+    dtemp = makeTempChangeFromTemp(temp)
 
     # loop through the tempchange arrray and apply filter proportional how strong the tempchange is
     for i in range(indexOfD0, len(dtemp)-daysAfterD0, 1):

@@ -4,6 +4,8 @@ __author__ = 'ragnarekker'
 __all__ = ['parameterization']
 
 # Methods and classes to be included in *
+from Calculations.parameterization import makeSnowChangeFromSnowTotal
+from Calculations.parameterization import makeTempChangeFromTemp
 from Calculations.parameterization import ccFromPrec
 from Calculations.parameterization import ccFromTempchange
 from Calculations.parameterization import ccFromPrecAndTemp
