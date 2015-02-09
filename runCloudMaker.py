@@ -329,12 +329,12 @@ def correlateCloudsAndTemp(stnr, startDate, endDate):
     loggdate = datetime.datetime.now()
     period = '{0} to {1}'.format(startDate,endDate)
 
-    tempOffset = range(-5,6,1)
-    dTempOffset = range(-3,4,1)
-    ccShift = range(-1,2,1)
-    sign_temp_dependant = [False, True]
-    sign_dTemp_dependant = [False, True]
-    useOneMinusClouds = [False, True]  # one minus cloudcover
+    tempOffset = [0] #range(-5,6,1)
+    dTempOffset = [0] #range(-3,4,1)
+    ccShift = range(-4,5,1)
+    sign_temp_dependant = [False]
+    sign_dTemp_dependant = [False]
+    useOneMinusClouds = [False]  # one minus cloudcover
 
     estimateSimulations = len(tempOffset)*len(dTempOffset) * len(ccShift) * len(sign_temp_dependant) * len(sign_dTemp_dependant) * len(useOneMinusClouds)
     doneSimulations = 0
