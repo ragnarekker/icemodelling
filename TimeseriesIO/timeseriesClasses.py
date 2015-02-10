@@ -187,12 +187,14 @@ class weatherElement():
 
         # Clouds come in octas and should be in units (ranging from 0 to 1) for further use
         if elementID == 'NNM':
-            if elementValue == 9.:
-                self.Value = None
+            if (elementValue == 9. or elementValue == -99999):
+                self.Value = 0.
+                self.Metadata.append({'On import':'unknown value replaced with 0.'})
             else:
                 self.Value = self.Value/8.
+                self.Metadata.append({'Converted':'from okta to unit'})
 
-            self.Metadata.append({'Converted':'from okta to unit'})
+
 
 
         # datacorrections. I found errors in data Im using from met

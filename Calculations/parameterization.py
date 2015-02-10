@@ -5,6 +5,8 @@ __author__ = 'ragnarekker'
 import datetime
 
 
+
+
 def makeSnowChangeFromSnowTotal(snowTotal):
     '''
     Method takes a list of total snowdeapth and returns the dayly change (derivative).
@@ -293,7 +295,7 @@ def ccFromAvaragePrecDays(prec):
     return cloudsOut
 
 # Needs comments
-def ccFromTempchange(*args):
+def ccFromTempChange(*args):
 
     # Take cloudcover and enforce affect of clouds on declining temps and clear weather on rizing temps.
     # http://stackoverflow.com/questions/5079609/methods-with-the-same-name-in-one-class-in-python
@@ -305,7 +307,7 @@ def ccFromTempchange(*args):
         p = args[1]
         gammaFilter = __getGammafilter(p[0], p[1], p[2], p[3])
 
-    temp = args[0]
+    dtemp = args[0]
 
     # add padding to the cloudsInn list so that it does ont go out of bound while appling the filtre.
     # Padding will be removed before return
@@ -313,10 +315,7 @@ def ccFromTempchange(*args):
     daysAfterD0 = len(gammaFilter)-indexOfD0-1
 
     # a temporary empty list to apply the filtering
-    cloudsOut = [0.]*(len(temp) + len(gammaFilter) - 1)
-
-    # make array of tempchnge from yesterday to today
-    dtemp = makeTempChangeFromTemp(temp)
+    cloudsOut = [0.]*(len(dtemp) + len(gammaFilter) - 1)
 
     # loop through the tempchange arrray and apply filter proportional how strong the tempchange is
     for i in range(indexOfD0, len(dtemp)-daysAfterD0, 1):
@@ -328,10 +327,19 @@ def ccFromTempchange(*args):
                 cloudsOut[i+j-indexOfD0] = 0.
 
 
-    # Cut of padding and return
-    cloudsOut = cloudsOut[indexOfD0:len(cloudsOut)-daysAfterD0]
+    # Cut of padding and return. Start counting from index 0 so remove  1
+    cloudsOut = cloudsOut[indexOfD0-1:len(cloudsOut)-daysAfterD0-1]
 
     return cloudsOut
+
+def ccFromTemp(*args):
+
+    temp = args[0]
+
+    # make array of tempchnge from yesterday to today
+    dtemp = makeTempChangeFromTemp(temp)
+
+    return  ccFromTempChange(dtemp, args[1])
 
 # Needs comments
 def ccGammaSmoothing(*args):
@@ -364,8 +372,8 @@ def ccGammaSmoothing(*args):
             if cloudsOut[i+j-indexOfD0] > 1.:
                 cloudsOut[i+j-indexOfD0] = 1.
 
-    # Cut of padding and return
-    cloudsOut = cloudsOut[indexOfD0:len(cloudsOut)-daysAfterD0]
+    # Cut of padding and return. Start counting from index 0 so remove and add 1
+    cloudsOut = cloudsOut[indexOfD0-1:len(cloudsOut)-daysAfterD0-1]
 
     return cloudsOut
 
@@ -375,11 +383,11 @@ def ccFromPrecAndTemp(*args):
     if len(args) == 2:
         ccPrec = ccFromPrec(args[0])
         ccPrec = ccGammaSmoothing(ccPrec)
-        ccTemp = ccFromTempchange(args[1])
+        ccTemp = ccFromTemp(args[1])
     elif len(args) == 4:
         ccPrec = ccFromPrec(args[0])
         ccPrec = ccGammaSmoothing(ccPrec, args[2])
-        ccTemp = ccFromTempchange(args[1], args[3])
+        ccTemp = ccFromTemp(args[1], args[3])
     else:
         print("Wrong input. Method taks 2 or 4 arguments.")
 

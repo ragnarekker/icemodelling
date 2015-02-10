@@ -1,3 +1,5 @@
+from Calculations import __getGammafilter
+
 __author__ = 'ragnarekker'
 # -*- coding: utf-8 -*-
 
@@ -9,12 +11,100 @@ import copy
 import sqlite3 as db
 import datetime
 
-#plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
-#databaseLocation = '/Users/ragnarekker/Documents/GitHub/Ice-modelling/Databases/cloudMakingResults.sqlite'
+plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
+databaseLocation = '/Users/ragnarekker/Documents/GitHub/Ice-modelling/Databases/cloudMakingResults.sqlite'
 
-plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
-databaseLocation = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Databases\\cloudMakingResults.sqlite"
+#plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
+#databaseLocation = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Databases\\cloudMakingResults.sqlite"
 
+def ccFromPrecAndTemp2(stnr, startDate, endDate):
+
+    # Values called once
+
+    ws_temp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
+    temp = stripMetadata(ws_temp, False)
+    dTemp = makeTempChangeFromTemp(temp)
+    dTemp_abs_raw = map(abs, dTemp)
+    sign_dTemp = __getSign(dTemp, 0)
+
+    ws_prec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
+    prec_raw = stripMetadata(ws_prec, False)
+
+    ws_cc = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
+    cc = stripMetadata(ws_cc, False)
+
+
+    # Calibration params
+
+    dTemp_limit = 5.
+    prec_limit = 10.
+    limit_temp = 5.
+    use_sign_dTemp = True
+    sign_terms = [1, 1, 1]
+    gamma_prec = [3.0, 1.0, 0.3, 0.4]
+    gamma_dtemp_low = [3.0, 2.0, 0.5, 0.1]
+    gamma_dtemp_high = [3.0, 2.0, 0.5, 0.1]
+
+
+    # The calculations
+
+    # Cutt off the highest dTemp values
+    dTemp_abs = []
+    for dT in dTemp_abs_raw:
+        if dT > dTemp_limit:
+            dTemp_abs.append(dTemp_limit)
+        else:
+            dTemp_abs.append(dT)
+
+    # Cut of the highest prec values
+    prec = []
+    for p in prec_raw:
+        if p > prec_limit:
+            prec.append(prec_limit)
+        else:
+            prec.append(p)
+
+    # Mask out positions in list where temps are above and below the threshhold temp
+    temp_filter_high = []
+    temp_filter_low = []
+    for t in temp:
+        if t >= limit_temp:
+            temp_filter_high.append(1.)
+            temp_filter_low.append(0.)
+        else:
+            temp_filter_high.append(0.)
+            temp_filter_low.append(1.)
+
+    # And make lists of dTemp_abs beloning to either high or low bands relative the threshhold temp
+    dTemp_low_abs = [dt*tfl for dt,tfl in zip(dTemp_abs, temp_filter_low)]
+    dTemp_high_abs = [dt*tfh for dt,tfh in zip(dTemp_abs, temp_filter_high)]
+
+    # If the sign of the temperature change is relevant; here are the relevant lists
+    dTemp_low_sign = [1]*len(dTemp)
+    dTemp_high_sign = [1]*len(dTemp)
+    if use_sign_dTemp == True:
+        dTemp_low_sign = [sdt*tfl for sdt,tfl in zip(sign_dTemp, temp_filter_low)]
+        dTemp_high_sign = [sdt*tfh for sdt,tfh in zip(sign_dTemp, temp_filter_high)]
+
+    # Also, if the different terms for temperature change in the cloudcover calculation shoud either contribute or
+    # subtract to the total; this is a mask for that.
+    dTemp_term_signs = [sign_terms[1]*tfl+sign_terms[2]*tfh for tfl,tfh in zip(temp_filter_low, temp_filter_high)]
+
+    # the separate terms in the equation
+    prec_term = ccFromTempChange(prec, gamma_prec)
+    dTemp_low_term = ccFromTempChange(dTemp_low_abs, gamma_dtemp_low)
+    dTemp_high_term = ccFromTempChange(dTemp_high_abs, gamma_dtemp_high)
+
+
+    ### NEEDS TO BE A INDEX BY INDEX CALCULATION
+    #cloudcover = prec_term
+    #            + dTemp_low_term * dTemp_term_signs * dTemp_low_sign
+    #            + dTemp_high_term * dTemp_high_sign * dTemp_term_signs
+
+
+    ### CUT OUT VALUES THAT ARE OUT OF RANGE (>0 and 1<)
+
+    a = 1
 
 
 def __writeRMC2database(database, a, b, c, d, e, f, g, h, i, rms, date, stnr, period):
@@ -62,7 +152,6 @@ def __writeCorrelation2database(database, cs, to, dto, depdT, depT, omc, crossCo
 
     return
 
-
 def __shiftClouds(cloudsInn, shift):
     """
     prec and temp measure form 07 to 07 thus ar values for yesturday. This means that a day shift of +1 og the observed
@@ -99,6 +188,27 @@ def __shiftClouds(cloudsInn, shift):
 
     else:
         return cloudsInn
+
+def __getSign(values, offset):
+    """
+    # tempOffset < 0 means that positive temps are set to have negative sign Eg. tempOffset = -5 sets 4deg to -1deg
+    # thus giving a negative sign.
+    :param values:
+    :param offset:
+    :return:
+    """
+
+    signs = []
+
+    for v in values:
+        if v + offset != 0.:
+            sign = (v + offset) / abs(v + offset)
+        else:
+            sign = 1
+
+        signs.append(sign)
+
+    return signs
 
 def doAREMCAnalyssis(stnr, startDate, endDate):
     """
@@ -161,147 +271,14 @@ def doAREMCAnalyssis(stnr, startDate, endDate):
 
     return
 
-def testCloudMaker(stnr, startDate, endDate, method):
-    """
-    gets data from a eKlima station and smooths the data depending on wich method we wish to test.
-    We find the root mean square to observations of clouds.
-    And we plott and save the result to Plots folder.
-
-    :param stnr:        eKlima station where there is cloudcover for testing method.
-    :param startDate:   simulations and referance data from this data
-    :param endDate:     simulations and referance data to this data
-    :param method:      specify wich method to be tested
-    :return:
-
-    Availabe methods to test:
-        ccFromPrecAndTemp
-        ccFromPrec
-        ccGammaSmoothing
-        ccFromTempchange
-
-
-    """
-
-    wsTemp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
-    wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
-    wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
-
-    temp, date = stripMetadata(wsTemp, getDates=True)
-    prec = stripMetadata(wsPrec, False)
-    clouds = stripMetadata(wsCC, False)
-
-    dayShift = 1
-    clouds = __shiftClouds(clouds, dayShift)
-
-    if method == 'ccFromPrec':
-        estClouds = ccFromPrec(prec)
-        gammaFigtext = 'No gamma smoothing and dayshift = {0}'.format(dayShift)
-    elif method == 'ccGammaSmoothing':
-        gammaPrec = [2.8, 2., 0.3, 0.4]
-        estClouds = ccFromPrec(prec)
-        estClouds = ccGammaSmoothing(estClouds, gammaPrec)
-        gammaFigtext = "gamma smoothing prec = {0} and dayshift = {1}".format(gammaPrec, dayShift)
-    elif method == 'ccFromTempchange':
-        gammaTemp = [4.8, 1., 5., 0.03]
-        estClouds = ccFromTempchange(temp, gammaTemp)
-        gammaFigtext = "gamma smoothing temp = {0} and dayshift = {1}".format(gammaTemp, dayShift)
-    elif method == 'ccFromPrecAndTemp':
-        gammaPrec = [2.8, 2., 0.3, 0.4]
-        gammaTemp = [4.8, 1., 5., 0.03]
-        estClouds = ccFromPrecAndTemp(prec, temp, gammaPrec, gammaTemp)
-        gammaFigtext = "prec = {0} and temp = {1} and dayshift = {2}".format(gammaPrec, gammaTemp, dayShift)
-    elif method == 'ccFromAverage':
-        estClouds = ccFromAvaragePrecDays(prec)
-        gammaFigtext = 'Cloudcover from avarage and dayshift = {0}'.format(dayShift)
-
-    fileName = "{3} {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7], method)
-
-    # What is the root mean square of estimatet vs observed clouds?
-    rms = np.sqrt(((np.array(estClouds) - np.array(clouds)) ** 2).mean())
-
-    # Figure dimensions
-    fsize = (16, 10)
-    plt.figure(figsize=fsize)
-    plt.clf()
-
-    # plot total snowdepth on land
-    plt.bar(date, prec, width=1, color="0.4")
-
-    # plot the estimated cloudcover
-    for i in range(0, len(estClouds) - 1, 1):
-        if estClouds[i] > 0:
-            plt.hlines(max(prec) * 1.2, date[i], date[i + 1], lw=45, color=str(-(estClouds[i] - 1.)))
-        elif estClouds[i] == None:
-            plt.hlines(max(prec) * 1.2, date[i], date[i + 1], lw=45, color="pink")
-        else:
-            plt.hlines(max(prec) * 1.2, date[i], date[i + 1], lw=45, color=str(-(estClouds[i] - 1.)))
-
-    # plot cloudcover from met
-    for i in range(0, len(clouds) - 1, 1):
-        if clouds[i] > 0:
-            plt.hlines(max(prec) * 1.1, date[i], date[i + 1], lw=45, color=str(-(clouds[i] - 1.)))
-        elif clouds[i] == None:
-            plt.hlines(max(prec) * 1.1, date[i], date[i + 1], lw=45, color="pink")
-        else:
-            plt.hlines(max(prec) * 1.1, date[i], date[i + 1], lw=45, color=str(-(clouds[i] - 1.)))
-
-    # this plots temperature on separate rightside axis
-    plt.twinx()
-    temp_pluss = []
-    temp_minus = []
-    for i in range(0, len(temp), 1):
-        if temp[i] >= 0:
-            temp_pluss.append(temp[i])
-            temp_minus.append(np.nan)
-        else:
-            temp_minus.append(temp[i])
-            temp_pluss.append(np.nan)
-    plt.plot(date, temp, "black")
-    plt.plot(date, temp_pluss, "red")
-    plt.plot(date, temp_minus, "blue")
-
-    # title and text fields
-    plt.title("{3} {0} {1} {2}".format(stnr, startDate[0:7], endDate[0:7], method))
-    plt.text(date[len(date)/2], min(temp)*1.2, 'gamma smoothing [shape, scale, days back, amplification]')
-    plt.text(date[len(date)/2], min(temp)*1.3, gammaFigtext)
-
-    # this is a scatterplot of modelled and estimated cloudcover
-    xfrac = 0.15
-    yfrac = (float(fsize[0])/float(fsize[1])) * xfrac
-    xpos = 0.95-xfrac
-    ypos = 0.42-yfrac
-    a = plt.axes([xpos, ypos, xfrac, yfrac])
-    a.scatter(clouds, estClouds)
-    plt.setp(a, xticks=[0, 0.5, 1], yticks=[0, 0.5, 1])
-
-    plt.text(0.0, -0.1, 'rms = {0}'.format(rms))
-
-    plt.savefig("{0}{1}".format(plot_folder, fileName))
-    return
-
-def __getSign(values, offset):
-    """
-    # tempOffset < 0 means that positive temps are set to have negative sign Eg. tempOffset = -5 sets 4deg to -1deg
-    # thus giving a negative sign.
-    :param values:
-    :param offset:
-    :return:
-    """
-
-    signs = []
-
-    for v in values:
-        if v + offset != 0:
-            sign = (v + offset) / abs(v + offset)
-        else:
-            sign = 1
-
-        signs.append(sign)
-
-    return signs
-
 def correlateCloudsAndTemp(stnr, startDate, endDate):
     """
+    DEAD END
+
+    This was an attempt to check different functions of temperature and how well they correlate with an observed
+    cloudcover. It turned out all different functions represent different signals so a cross correlation test and
+    finding wich has the highest number whont work because the correlation number wil be different from function to
+    function.
 
     :param stnr:
     :param startDate:
@@ -379,15 +356,227 @@ def correlateCloudsAndTemp(stnr, startDate, endDate):
 
     return
 
+def testCloudMaker(stnr, startDate, endDate, method):
+    """
+    gets data from a eKlima station and smooths the data depending on wich method we wish to test.
+    We find the root mean square to observations of clouds.
+    And we plott and save the result to Plots folder.
+
+    :param stnr:        eKlima station where there is cloudcover for testing method.
+    :param startDate:   simulations and referance data from this data
+    :param endDate:     simulations and referance data to this data
+    :param method:      specify wich method to be tested
+    :return:
+
+    Availabe methods to test:
+        ccFromPrecAndTemp
+        ccFromPrec
+        ccGammaSmoothing
+        ccFromTemp
+
+
+    """
+
+    wsTemp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
+    wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
+    wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
+
+    temp, date = stripMetadata(wsTemp, getDates=True)
+    prec = stripMetadata(wsPrec, False)
+    clouds = stripMetadata(wsCC, False)
+
+    dayShift = 1
+    clouds = __shiftClouds(clouds, dayShift)
+
+    if method == 'ccFromPrec':
+        estClouds = ccFromPrec(prec)
+        gammaFigtext = 'No gamma smoothing and dayshift = {0}'.format(dayShift)
+    elif method == 'ccGammaSmoothing':
+        gammaPrec = [2.8, 2., 0.3, 0.4]
+        estClouds = ccFromPrec(prec)
+        estClouds = ccGammaSmoothing(estClouds, gammaPrec)
+        gammaFigtext = "gamma smoothing prec = {0} and dayshift = {1}".format(gammaPrec, dayShift)
+    elif method == 'ccFromTemp':
+        gammaTemp = [4.8, 1., 5., 0.03]
+        estClouds = ccFromTemp(temp, gammaTemp)
+        gammaFigtext = "gamma smoothing temp = {0} and dayshift = {1}".format(gammaTemp, dayShift)
+    elif method == 'ccFromPrecAndTemp':
+        gammaPrec = [2.8, 2., 0.3, 0.4]
+        gammaTemp = [4.8, 1., 5., 0.03]
+        estClouds = ccFromPrecAndTemp(prec, temp, gammaPrec, gammaTemp)
+        gammaFigtext = "prec = {0} and temp = {1} and dayshift = {2}".format(gammaPrec, gammaTemp, dayShift)
+    elif method == 'ccFromAverage':
+        estClouds = ccFromAvaragePrecDays(prec)
+        gammaFigtext = 'Cloudcover from avarage and dayshift = {0}'.format(dayShift)
+
+    fileName = "{3} {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7], method)
+
+    # What is the root mean square of estimatet vs observed clouds?
+    rms = np.sqrt(((np.array(estClouds) - np.array(clouds)) ** 2).mean())
+
+    # Figure dimensions
+    fsize = (16, 10)
+    plt.figure(figsize=fsize)
+    plt.clf()
+
+    # plot total snowdepth on land
+    plt.bar(date, prec, width=1, color="0.4")
+
+    # plot the estimated cloudcover
+    for i in range(0, len(estClouds) - 1, 1):
+        if estClouds[i] > 0:
+            plt.hlines(max(prec) * 1.2, date[i], date[i + 1], lw=45, color=str(-(estClouds[i] - 1.)))
+        elif estClouds[i] == None:
+            plt.hlines(max(prec) * 1.2, date[i], date[i + 1], lw=45, color="pink")
+        else:
+            plt.hlines(max(prec) * 1.2, date[i], date[i + 1], lw=45, color=str(-(estClouds[i] - 1.)))
+
+    # plot cloudcover from met
+    for i in range(0, len(clouds) - 1, 1):
+        if clouds[i] > 0:
+            plt.hlines(max(prec) * 1.1, date[i], date[i + 1], lw=45, color=str(-(clouds[i] - 1.)))
+        elif clouds[i] == None:
+            plt.hlines(max(prec) * 1.1, date[i], date[i + 1], lw=45, color="pink")
+        else:
+            plt.hlines(max(prec) * 1.1, date[i], date[i + 1], lw=45, color=str(-(clouds[i] - 1.)))
+
+    # this plots temperature on separate rightside axis
+    plt.twinx()
+    temp_pluss = []
+    temp_minus = []
+    for i in range(0, len(temp), 1):
+        if temp[i] >= 0:
+            temp_pluss.append(temp[i])
+            temp_minus.append(np.nan)
+        else:
+            temp_minus.append(temp[i])
+            temp_pluss.append(np.nan)
+    plt.plot(date, temp, "black")
+    plt.plot(date, temp_pluss, "red")
+    plt.plot(date, temp_minus, "blue")
+
+    # title and text fields
+    plt.title("{3} {0} {1} {2}".format(stnr, startDate[0:7], endDate[0:7], method))
+    plt.text(date[len(date)/2], min(temp)*1.2, 'gamma smoothing [shape, scale, days back, amplification]')
+    plt.text(date[len(date)/2], min(temp)*1.3, gammaFigtext)
+
+    # this is a scatterplot of modelled and estimated cloudcover
+    xfrac = 0.15
+    yfrac = (float(fsize[0])/float(fsize[1])) * xfrac
+    xpos = 0.95-xfrac
+    ypos = 0.42-yfrac
+    a = plt.axes([xpos, ypos, xfrac, yfrac])
+    a.scatter(clouds, estClouds)
+    plt.setp(a, xticks=[0, 0.5, 1], yticks=[0, 0.5, 1])
+
+    plt.text(0.0, -0.1, 'rms = {0}'.format(rms))
+
+    plt.savefig("{0}{1}".format(plot_folder, fileName))
+    return
+
+def makeSomeScatterPlots(stnr, startDate, endDate):
+
+    import numpy as numpy
+
+    wsTemp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
+    wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
+    wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
+
+    temp, date = stripMetadata(wsTemp, getDates=True)
+    prec = stripMetadata(wsPrec, False)
+    clouds = stripMetadata(wsCC, False)
+
+
+
+    ##############
+
+    dtemp = makeTempChangeFromTemp(temp)
+
+    fsize = (10, 10)
+    plt.figure(figsize=fsize)
+    plt.clf()
+
+    plt.title("scatter dtemp clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7]))
+    fileName = "scatter dtemp clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7])
+
+    # Scatterplot
+    plt.scatter(clouds, dtemp)
+
+    # calc the trendline
+    z = numpy.polyfit(dtemp, clouds, 1)
+    p = numpy.poly1d(z)
+    plt.plot(dtemp, p(dtemp) )
+
+    # the line equation:
+    line_equation = "clouds = %.6f*dtemp + %.6f"%(z[0],z[1])
+    plt.text(0.0, -0.1, 'Line equation: {0}'.format(line_equation))
+
+    plt.savefig("{0}{1}".format(plot_folder, fileName))
+
+    ##########
+
+    abs_dtemp = map(abs, dtemp)
+
+    fsize = (10, 10)
+    plt.figure(figsize=fsize)
+    plt.clf()
+
+    plt.title("scatter abs_dtemp clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7]))
+    fileName = "scatter abs_dtemp clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7])
+
+    # Scatterplot
+    plt.scatter(abs_dtemp, clouds)
+
+    # calc the trendline
+    z = numpy.polyfit(abs_dtemp, clouds, 1)
+    p = numpy.poly1d(z)
+    plt.plot(abs_dtemp, p(abs_dtemp) )
+
+    # the line equation:
+    line_equation = "clouds = %.6f*abs_dtemp + %.6f"%(z[0],z[1])
+    plt.text(0.0, -0.1, 'Line equation: {0}'.format(line_equation))
+
+    plt.savefig("{0}{1}".format(plot_folder, fileName))
+
+    ###########
+
+    fsize = (10, 10)
+    plt.figure(figsize=fsize)
+    plt.clf()
+
+    plt.title("scatter prec clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7]))
+    fileName = "scatter prec clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7])
+
+    # Scatterplot
+    plt.scatter(prec, clouds)
+
+    # calc the trendline
+    z = numpy.polyfit(prec, clouds, 1)
+    p = numpy.poly1d(z)
+    plt.plot(prec, p(prec) )
+
+    # the line equation:
+    line_equation = "clouds = %.6f*prec + %.6f"%(z[0],z[1])
+    plt.text(0.0, -0.1, 'Line equation: {0}'.format(line_equation))
+
+    plt.savefig("{0}{1}".format(plot_folder, fileName))
+
+
+    return
+
 if __name__ == "__main__":
 
-    # testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrecAndTemp')
-    # testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrec')
-    # testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccGammaSmoothing')
-    #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromTempchange')
+    testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrecAndTemp')
+    testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrec')
+    testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccGammaSmoothing')
+    testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromTemp')
 
     #doAREMCAnalyssis(19710, '2011-10-01', '2012-06-01')
 
-    correlateCloudsAndTemp(19710, '2011-10-01', '2012-06-01')
+    #correlateCloudsAndTemp(19710, '2011-10-01', '2012-06-01')
+
+    #ccFromPrecAndTemp2(19710, '2011-10-01', '2012-06-01')
+
+    # makeSomeScatterPlots(19710, '2005-06-01', '2012-06-01')
 
     a = 1

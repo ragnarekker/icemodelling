@@ -7,6 +7,7 @@ __all__ = ['parameterization']
 from Calculations.parameterization import makeSnowChangeFromSnowTotal
 from Calculations.parameterization import makeTempChangeFromTemp
 from Calculations.parameterization import ccFromPrec
-from Calculations.parameterization import ccFromTempchange
+from Calculations.parameterization import ccFromTemp
 from Calculations.parameterization import ccFromPrecAndTemp
 from Calculations.parameterization import ccFromAvaragePrecDays
+from Calculations.parameterization import __getGammafilter
