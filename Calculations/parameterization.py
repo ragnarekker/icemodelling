@@ -6,7 +6,7 @@ import datetime
 
 
 
-
+## Works on arrays
 def makeSnowChangeFromSnowTotal(snowTotal):
     '''
     Method takes a list of total snowdeapth and returns the dayly change (derivative).
@@ -41,6 +41,16 @@ def makeTempChangeFromTemp(temp):
         previousTemp = t
 
     return dTemp
+
+
+
+## Works on single timesteps
+# needs comments
+def tempFromTempAndClouds(temp, cloudcover):
+
+    temp = temp + 2*(cloudcover - 1)
+
+    return temp
 
 def tempFromTempAndSnow(temp, new_snow):
     """
@@ -95,6 +105,8 @@ def unixTime2Normal(unixDatetime):
     dato = datetime.datetime.fromtimestamp(int(unixDatetimeInSeconds))
 
     return dato
+
+
 
 # Needs comments
 def __getGammafilter(a, lamda, negativeDays, hardness):
@@ -156,6 +168,41 @@ def __getGammafilter(a, lamda, negativeDays, hardness):
     gammaFilterNorm = [x/max(gammaFilter)*hardness for x in gammaFilter]
 
     return gammaFilterNorm
+
+# Needs commenst
+def justGammaSmoothing(*args):
+
+    # Get the gamma "smoothing" filter
+    if len(args) == 1:
+        print('need inputarguments')
+        #gammaFilter = __getGammafilter(5., 1., 1.5, 0.5)
+    elif len(args) == 2:
+        p = args[1]
+        gammaFilter = __getGammafilter(p[0], p[1], p[2], p[3])
+
+    listInn = args[0]
+
+    # add padding to the listInn so that it does ont go out of bound while appling the filtre.
+    # Padding will be removed before return
+    indexOfD0 = [i for i,x in enumerate(gammaFilter) if x == max(gammaFilter)][0]
+    daysAfterD0 = len(gammaFilter)-indexOfD0-1
+
+    paddingPrior = [0.] * indexOfD0
+    paddingAfter = [0.] * daysAfterD0
+    listInn = paddingPrior + listInn + paddingAfter
+
+    # a temporary empty list to apply the filtering
+    listOut = [0.]*len(listInn)
+
+    # Loop through the cloudsInn list and if there is precipitation apply the filter on days prior and after
+    for i in range(indexOfD0, len(listInn)-daysAfterD0, 1):
+        for j in range(0, len(gammaFilter), 1):
+            listOut[i+j-indexOfD0] = listOut[i+j-indexOfD0] + gammaFilter[j] * listInn[i]
+
+    # Cut of padding and return.
+    listOut = listOut[indexOfD0:len(listOut)-daysAfterD0]
+
+    return listOut
 
 # Needs coments
 def old_ccFromTempAndPrec(temp, prec):
@@ -275,6 +322,7 @@ def ccFromPrec(prec):
 
     return clouds
 
+# needs comments
 def ccFromAvaragePrecDays(prec):
 
 
@@ -298,40 +346,24 @@ def ccFromAvaragePrecDays(prec):
 def ccFromTempChange(*args):
 
     # Take cloudcover and enforce affect of clouds on declining temps and clear weather on rizing temps.
-    # http://stackoverflow.com/questions/5079609/methods-with-the-same-name-in-one-class-in-python
-
-    if len(args) == 1:
-        print('need inputarguments')
-        #gammaFilter = __getGammafilter(7.5, 1., 1.5, 0.1)
-    elif len(args) == 2:
-        p = args[1]
-        gammaFilter = __getGammafilter(p[0], p[1], p[2], p[3])
 
     dtemp = args[0]
+    dTemp_abs = map(abs, dtemp)
 
-    # add padding to the cloudsInn list so that it does ont go out of bound while appling the filtre.
-    # Padding will be removed before return
-    indexOfD0 = [i for i,x in enumerate(gammaFilter) if x == max(gammaFilter)][0]
-    daysAfterD0 = len(gammaFilter)-indexOfD0-1
+    cloudsOut = justGammaSmoothing(dTemp_abs, args[1])
 
-    # a temporary empty list to apply the filtering
-    cloudsOut = [0.]*(len(dtemp) + len(gammaFilter) - 1)
+    cloudsOut_cropped = []
+    for clo in cloudsOut:
+        if clo > 1.:
+            cloudsOut_cropped.append(1.)
+        elif clo < 0.:
+            cloudsOut_cropped.append(0.)
+        else:
+            cloudsOut_cropped.append(clo)
 
-    # loop through the tempchange arrray and apply filter proportional how strong the tempchange is
-    for i in range(indexOfD0, len(dtemp)-daysAfterD0, 1):
-        for j in range(0, len(gammaFilter), 1):
-            cloudsOut[i+j-indexOfD0] = cloudsOut[i+j-indexOfD0] + gammaFilter[j] * abs(dtemp[i])
-            if cloudsOut[i+j-indexOfD0] > 1.:
-                cloudsOut[i+j-indexOfD0] = 1.
-            if cloudsOut[i+j-indexOfD0] < 0.:
-                cloudsOut[i+j-indexOfD0] = 0.
+    return cloudsOut_cropped
 
-
-    # Cut of padding and return. Start counting from index 0 so remove  1
-    cloudsOut = cloudsOut[indexOfD0-1:len(cloudsOut)-daysAfterD0-1]
-
-    return cloudsOut
-
+# needs comments
 def ccFromTemp(*args):
 
     temp = args[0]
@@ -339,43 +371,23 @@ def ccFromTemp(*args):
     # make array of tempchnge from yesterday to today
     dtemp = makeTempChangeFromTemp(temp)
 
-    return  ccFromTempChange(dtemp, args[1])
+    return ccFromTempChange(dtemp, args[1])
 
 # Needs comments
 def ccGammaSmoothing(*args):
 
-    # Get the gamma "smoothing" filter
-    if len(args) == 1:
-        print('need inputarguments')
-        #gammaFilter = __getGammafilter(5., 1., 1.5, 0.5)
-    elif len(args) == 2:
-        p = args[1]
-        gammaFilter = __getGammafilter(p[0], p[1], p[2], p[3])
+    cloudsOut = justGammaSmoothing(args[0], args[1])
 
-    cloudsInn = args[0]
+    cloudsOut_cropped = []
+    for clo in cloudsOut:
+        if clo > 1.:
+            cloudsOut_cropped.append(1.)
+        elif clo < 0.:
+            cloudsOut_cropped.append(0.)
+        else:
+            cloudsOut_cropped.append(clo)
 
-    # add padding to the cloudsInn list so that it does ont go out of bound while appling the filtre.
-    # Padding will be removed before return
-    indexOfD0 = [i for i,x in enumerate(gammaFilter) if x == max(gammaFilter)][0]
-    daysAfterD0 = len(gammaFilter)-indexOfD0-1
-    paddingPrior = [0.] * indexOfD0
-    paddingAfter = [0.] * daysAfterD0
-    cloudsInn = paddingPrior + cloudsInn + paddingAfter
-
-    # a temporary empty list to apply the filtering
-    cloudsOut = [0.]*len(cloudsInn)
-
-    # Loop through the cloudsInn list and if there is precipitation apply the filter on days prior and after
-    for i in range(indexOfD0, len(cloudsInn)-daysAfterD0, 1):
-        for j in range(0, len(gammaFilter), 1):
-            cloudsOut[i+j-indexOfD0] = cloudsOut[i+j-indexOfD0] + gammaFilter[j] * cloudsInn[i]
-            if cloudsOut[i+j-indexOfD0] > 1.:
-                cloudsOut[i+j-indexOfD0] = 1.
-
-    # Cut of padding and return. Start counting from index 0 so remove and add 1
-    cloudsOut = cloudsOut[indexOfD0-1:len(cloudsOut)-daysAfterD0-1]
-
-    return cloudsOut
+    return cloudsOut_cropped
 
 # Needs comments
 def ccFromPrecAndTemp(*args):

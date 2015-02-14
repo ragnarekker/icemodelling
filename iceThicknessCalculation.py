@@ -7,7 +7,7 @@ import numpy
 from Calculations import parameterization
 
 
-def getIceThickness(ic, dh_snow, temp, timestep):
+def getIceThickness(*args):
 
     '''
     :param ic:          Ice column at the beginneing of the timestep.  object containng the icolumn with metadata
@@ -17,7 +17,22 @@ def getIceThickness(ic, dh_snow, temp, timestep):
     :return:            Ice column at end of timestep
     '''
 
-    temp = parameterization.tempFromTempAndSnow(temp, dh_snow)
+    ic = args[0]
+    timestep = args[1]
+
+    dh_snow = args[2]
+    temp = args[3]
+
+
+    if len(args) == 4:
+        temp = temp
+        # temp = parameterization.tempFromTempAndSnow(temp, dh_snow)
+    elif len(args) == 5:
+        cc = args[4]
+        temp = parameterization.tempFromTempAndClouds(temp, cc)
+    else:
+        print('Unknown number of arguments.')
+
 
     ic.timestepForward(timestep)      # after the calculation we are one day further down the winter
 

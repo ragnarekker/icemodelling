@@ -61,7 +61,7 @@ def getTimeserieTypesProperties():
 # Incomplete
 def getStationsFromTimeserieTypeElemCodes():
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getStationsFromTimeserieTypeElemCodes&timeserietypeID=0&elem_codes=ss_24%2C+tam&username="
-    # Asker har id 19710
+    # Asker har id 19710 og Blindern 18700
 
 
 def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output):
@@ -77,7 +77,7 @@ def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output):
     Output options:
         'list':         returns a list of dictionary elements.
         'xml':          returns NULL but saves a .xml file to the working folder.
-        'csv':          returns NULL but saves a .csv file to the working folder. The separation value are tab
+        'csv':          returns NULL but saves a .csv file to the working folder. The separation value is tab.
 
     Example of xml that is iterated:
 
@@ -252,8 +252,9 @@ if __name__ == "__main__":
     # getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'csv')
     # temp = getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'list')
     # sno = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
-    CC = getMetData(19710, 'NNM',  '2011-10-01', '2012-07-01', 0, 'list')
-    rr = getMetData(19710, 'RR',  '2011-10-01', '2012-06-01', 0, 'list')
-    elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
+    # CC = getMetData(19710, 'NNM',  '2011-10-01', '2012-07-01', 0, 'list')
+    # rr = getMetData(19710, 'RR',  '2011-10-01', '2012-06-01', 0, 'list')
+    # elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
+    elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
 
     a = 0

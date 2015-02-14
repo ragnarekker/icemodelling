@@ -20,9 +20,9 @@ databaseLocation = '/Users/ragnarekker/Documents/GitHub/Ice-modelling/Databases/
 def ccFromPrecAndTemp2(stnr, startDate, endDate):
 
     # Values called once
-
     ws_temp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
     temp = stripMetadata(ws_temp, False)
+
     dTemp = makeTempChangeFromTemp(temp)
     dTemp_abs_raw = map(abs, dTemp)
     sign_dTemp = __getSign(dTemp, 0)
@@ -30,20 +30,16 @@ def ccFromPrecAndTemp2(stnr, startDate, endDate):
     ws_prec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
     prec_raw = stripMetadata(ws_prec, False)
 
-    ws_cc = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
-    cc = stripMetadata(ws_cc, False)
-
 
     # Calibration params
-
     dTemp_limit = 5.
     prec_limit = 10.
-    limit_temp = 5.
-    use_sign_dTemp = True
+    limit_temp = 7.
+    use_sign_dTemp = False
     sign_terms = [1, 1, 1]
-    gamma_prec = [3.0, 1.0, 0.3, 0.4]
-    gamma_dtemp_low = [3.0, 2.0, 0.5, 0.1]
-    gamma_dtemp_high = [3.0, 2.0, 0.5, 0.1]
+    gamma_prec = [4.0, 1.0, 1.0, 0.1]
+    gamma_dtemp_low = [2.0, 2.0, 0.5, 0.07]
+    gamma_dtemp_high = [2.0, 2.0, 0.5, 0.07]
 
 
     # The calculations
@@ -61,6 +57,8 @@ def ccFromPrecAndTemp2(stnr, startDate, endDate):
     for p in prec_raw:
         if p > prec_limit:
             prec.append(prec_limit)
+        elif p < prec_limit/2 and p != 0.:
+            prec.append(prec_limit/2)
         else:
             prec.append(p)
 
@@ -86,7 +84,7 @@ def ccFromPrecAndTemp2(stnr, startDate, endDate):
         dTemp_low_sign = [sdt*tfl for sdt,tfl in zip(sign_dTemp, temp_filter_low)]
         dTemp_high_sign = [sdt*tfh for sdt,tfh in zip(sign_dTemp, temp_filter_high)]
 
-    # Also, if the different terms for temperature change in the cloudcover calculation shoud either contribute or
+    # Also, if the different terms for temperature change in the cloudcover calculation should either contribute or
     # subtract to the total; this is a mask for that.
     dTemp_term_signs = [sign_terms[1]*tfl+sign_terms[2]*tfh for tfl,tfh in zip(temp_filter_low, temp_filter_high)]
 
@@ -97,15 +95,21 @@ def ccFromPrecAndTemp2(stnr, startDate, endDate):
 
 
     ### NEEDS TO BE A INDEX BY INDEX CALCULATION
-    #cloudcover = prec_term
-    #            + dTemp_low_term * dTemp_term_signs * dTemp_low_sign
-    #            + dTemp_high_term * dTemp_high_sign * dTemp_term_signs
+    cloudcover = [pt + dtlt*dtts*dtls + dtht*dtts*dths for pt,dtlt,dtls,dtht,dths,dtts in
+                  zip(prec_term,dTemp_low_term, dTemp_low_sign, dTemp_high_term, dTemp_high_sign,dTemp_term_signs)]
 
 
-    ### CUT OUT VALUES THAT ARE OUT OF RANGE (>0 and 1<)
+    cropped_cloudcover = []
+    for cc in cloudcover:
+        if cc > 1.:
+            cropped_cloudcover.append(1.)
+        elif cc < 0.:
+            cropped_cloudcover.append(0.)
+        else:
+            cropped_cloudcover.append(cc)
 
-    a = 1
 
+    return cropped_cloudcover
 
 def __writeRMC2database(database, a, b, c, d, e, f, g, h, i, rms, date, stnr, period):
     """
@@ -408,6 +412,9 @@ def testCloudMaker(stnr, startDate, endDate, method):
     elif method == 'ccFromAverage':
         estClouds = ccFromAvaragePrecDays(prec)
         gammaFigtext = 'Cloudcover from avarage and dayshift = {0}'.format(dayShift)
+    elif method == 'ccFromPrecAndTemp2':
+        estClouds = ccFromPrecAndTemp2(stnr, startDate, endDate)
+        gammaFigtext = 'have no ide what this is for now...'
 
     fileName = "{3} {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7], method)
 
@@ -469,7 +476,7 @@ def testCloudMaker(stnr, startDate, endDate, method):
     a.scatter(clouds, estClouds)
     plt.setp(a, xticks=[0, 0.5, 1], yticks=[0, 0.5, 1])
 
-    plt.text(0.0, -0.1, 'rms = {0}'.format(rms))
+    plt.text(0.0, 0.1, 'rms = {0}'.format(rms))
 
     plt.savefig("{0}{1}".format(plot_folder, fileName))
     return
@@ -477,6 +484,9 @@ def testCloudMaker(stnr, startDate, endDate, method):
 def makeSomeScatterPlots(stnr, startDate, endDate):
 
     import numpy as numpy
+    import matplotlib.pyplot as plt
+    from scipy.stats import gaussian_kde
+
 
     wsTemp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
     wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
@@ -486,90 +496,127 @@ def makeSomeScatterPlots(stnr, startDate, endDate):
     prec = stripMetadata(wsPrec, False)
     clouds = stripMetadata(wsCC, False)
 
+    dTemp = makeTempChangeFromTemp(temp)
+    abs_dTemp = map(abs, dTemp)
+
+    method = 'dTemp_with_limit_vs_clouds'
+
+    if method == 'dTemp_with_limit_vs_clouds':
+
+        # Calibration params
+        limit_temperature = [7]
+
+        for limit_temp in limit_temperature:
+
+            # Mask out positions in list where temps are above and below the threshhold temp
+            temp_filter_high = []
+            temp_filter_low = []
+            for t in temp:
+                if t >= limit_temp:
+                    temp_filter_high.append(1.)
+                    temp_filter_low.append(0.)
+                else:
+                    temp_filter_high.append(0.)
+                    temp_filter_low.append(1.)
+
+            # And make lists of dTemp_abs beloning to either high or low bands relative the threshhold temp
+            dTemp_low_abs = [dt*tfl for dt,tfl in zip(abs_dTemp, temp_filter_low)]
+            dTemp_high_abs = [dt*tfh for dt,tfh in zip(abs_dTemp, temp_filter_high)]
+
+            fsize = (20, 20)
+            plt.figure(figsize=fsize)
+            plt.clf()
+
+            #### Generate data
+            x = [round(dtla,1) for dtla in dTemp_low_abs]
+            y = [round(cc,2) for cc in clouds]
+
+            # Calculate the point density
+            xy = np.vstack([x,y])
+            z = gaussian_kde(xy)(xy)
+
+            plt.subplot(2,2,1).scatter(x, y, c=z, s=100, edgecolor='')
+            plt.title("dtemp vs clouds (temp < {3}C) {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7], limit_temp))
+
+            ##### Generate data
+            x = [round(dtha, 1) for dtha in dTemp_high_abs]
+            y = clouds
+
+            # Calculate the point density
+            xy = np.vstack([x,y])
+            z = gaussian_kde(xy)(xy)
+
+            plt.subplot(2,2,2).scatter(x, y, c=z, s=100, edgecolor='')
+            plt.title("dtemp vs clouds (temp >= {3}C) {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7], limit_temp))
 
 
-    ##############
+            plt.subplot(2,2,3).hist(z)
 
-    dtemp = makeTempChangeFromTemp(temp)
 
-    fsize = (10, 10)
-    plt.figure(figsize=fsize)
-    plt.clf()
+            fileName = "scatter dtemp vs clouds temp_limit{3} {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7], limit_temp)
+            plt.savefig("{0}{1}".format(plot_folder, fileName))
 
-    plt.title("scatter dtemp clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7]))
-    fileName = "scatter dtemp clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7])
+    if method == 'dTemp_density':
 
-    # Scatterplot
-    plt.scatter(clouds, dtemp)
+        # Generate  data
+        x = abs_dTemp
+        y = clouds
 
-    # calc the trendline
-    z = numpy.polyfit(dtemp, clouds, 1)
-    p = numpy.poly1d(z)
-    plt.plot(dtemp, p(dtemp) )
+        # Calculate the point density
+        xy = np.vstack([x,y])
+        z = gaussian_kde(xy)(xy)
 
-    # the line equation:
-    line_equation = "clouds = %.6f*dtemp + %.6f"%(z[0],z[1])
-    plt.text(0.0, -0.1, 'Line equation: {0}'.format(line_equation))
+        fig, ax = plt.subplots()
+        ax.scatter(x, y, c=z, s=100, edgecolor='')
 
-    plt.savefig("{0}{1}".format(plot_folder, fileName))
+        plt.title("scatter dtemp_density clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7]))
+        fileName = "scatter dtemp_density {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7])
 
-    ##########
+        plt.savefig("{0}{1}".format(plot_folder, fileName))
 
-    abs_dtemp = map(abs, dtemp)
+    if method == 'prec':
 
-    fsize = (10, 10)
-    plt.figure(figsize=fsize)
-    plt.clf()
+        fsize = (10, 10)
+        plt.figure(figsize=fsize)
+        plt.clf()
 
-    plt.title("scatter abs_dtemp clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7]))
-    fileName = "scatter abs_dtemp clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7])
+        plt.title("scatter prec clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7]))
+        fileName = "scatter prec clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7])
 
-    # Scatterplot
-    plt.scatter(abs_dtemp, clouds)
+       # Generate data
+        x = prec
+        y = clouds
 
-    # calc the trendline
-    z = numpy.polyfit(abs_dtemp, clouds, 1)
-    p = numpy.poly1d(z)
-    plt.plot(abs_dtemp, p(abs_dtemp) )
+        # Calculate the point density
+        xy = np.vstack([x,y])
+        z = gaussian_kde(xy)(xy)
 
-    # the line equation:
-    line_equation = "clouds = %.6f*abs_dtemp + %.6f"%(z[0],z[1])
-    plt.text(0.0, -0.1, 'Line equation: {0}'.format(line_equation))
+        plt.scatter(x, y, c=z, s=100, edgecolor='')
 
-    plt.savefig("{0}{1}".format(plot_folder, fileName))
+        # calc the trendline
+        z = numpy.polyfit(prec, clouds, 1)
+        p = numpy.poly1d(z)
+        plt.plot(prec, p(prec) )
 
-    ###########
+        # the line equation:
+        line_equation = "clouds = %.6f*prec + %.6f"%(z[0],z[1])
+        plt.text(0.0, -0.1, 'Line equation: {0}'.format(line_equation))
 
-    fsize = (10, 10)
-    plt.figure(figsize=fsize)
-    plt.clf()
+        plt.savefig("{0}{1}".format(plot_folder, fileName))
 
-    plt.title("scatter prec clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7]))
-    fileName = "scatter prec clouds {0} {1} {2}.png".format(stnr, startDate[0:7], endDate[0:7])
 
-    # Scatterplot
-    plt.scatter(prec, clouds)
 
-    # calc the trendline
-    z = numpy.polyfit(prec, clouds, 1)
-    p = numpy.poly1d(z)
-    plt.plot(prec, p(prec) )
-
-    # the line equation:
-    line_equation = "clouds = %.6f*prec + %.6f"%(z[0],z[1])
-    plt.text(0.0, -0.1, 'Line equation: {0}'.format(line_equation))
-
-    plt.savefig("{0}{1}".format(plot_folder, fileName))
 
 
     return
 
 if __name__ == "__main__":
 
-    testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrecAndTemp')
-    testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrec')
-    testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccGammaSmoothing')
-    testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromTemp')
+    #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrecAndTemp')
+    #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrec')
+    #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccGammaSmoothing')
+    #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromTemp')
+    #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrecAndTemp2')
 
     #doAREMCAnalyssis(19710, '2011-10-01', '2012-06-01')
 
@@ -577,6 +624,6 @@ if __name__ == "__main__":
 
     #ccFromPrecAndTemp2(19710, '2011-10-01', '2012-06-01')
 
-    # makeSomeScatterPlots(19710, '2005-06-01', '2012-06-01')
+    makeSomeScatterPlots(19710, '2005-06-01', '2012-06-01')
 
     a = 1
