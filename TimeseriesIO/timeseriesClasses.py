@@ -57,6 +57,21 @@ def okta2unit(cloudCoverInOktaList):
 
     return cloudCoverInUnitsList
 
+def cm2m(weatherElementList):
+    """
+
+    :param weatherElementList:
+    :return:
+    """
+    weatherElementListSI = []
+
+    for we in weatherElementList:
+        we.Value = we.Value/100.
+        we.Metadata.append({'Converted':'from cm to m'})
+        weatherElementListSI.append(we)
+
+    return weatherElementListSI
+
 def makeDailyAvarage(weatherElementList):
     """
     Takes a list of weatherelements with resolution less that 24hrs and calculates the dayly avarage
@@ -96,6 +111,7 @@ def makeDailyAvarage(weatherElementList):
             # Make a new weatherelement and inherit relvant data from the old one
             newWeatherElement = weatherElement(e.LocationID, datetimeFromDate, e.ElementID, value/counter)
             newWeatherElement.Metadata = e.Metadata
+            newWeatherElement.Metadata.pop(0)  # first element is the original value form the input eatherelementlist
             newWeatherElement.Metadata.append({'DataManipulation':'24H Average from {0} values'.format(counter)})
 
             # Append it

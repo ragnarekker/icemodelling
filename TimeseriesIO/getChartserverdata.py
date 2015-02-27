@@ -5,7 +5,7 @@ import datetime
 
 import requests
 from Calculations import parameterization
-from timeseriesClasses import weatherElement, makeDailyAvarage
+from timeseriesClasses import weatherElement, makeDailyAvarage, cm2m
 
 # URL to the chartserver/ShowData service
 baseURL = "http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart&ver=1.0&vfmt=json"
@@ -51,7 +51,7 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, output):
 
     :param UTM33X:      {int} X coordinate in utm33N
     :param UTM33Y:      {int} Y coordinate in utm33N
-    :param elementID:   {string} Element ID in seNorge. Ex: elementID = 'fsw'
+    :param elementID:   {string} Element ID in seNorge. Ex: elementID = 'fsw' is 24hr new snow depth in [cm]
     :param fromDate:    {datetime} method returns [fromDate ,toDate>
     :param toDate:      {datetime} method returns [fromDate ,toDate>
     :param output:      {string} How to present the output.
@@ -76,6 +76,8 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, output):
 
     if output == 'list':
         weatherElementList = __makeWeatherElementListFromURL(url , 'UTM33 X{0} Y{1}'.format(UTM33X, UTM33Y), elementID, {'MethodName': 'Chartserver - getGriddata'})
+        if elementID == 'fsw' or elementID == 'sd':
+            weatherElementList = cm2m(weatherElementList)        # convert for [cm] til [m]
         return weatherElementList
 
     elif output == 'json':

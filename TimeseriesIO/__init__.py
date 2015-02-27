@@ -5,6 +5,7 @@ __all__ = ['getChartserverdata', 'getFiledata', 'getWSklima', 'plotTimeseries', 
 # Methods and classes to be included in *
 from TimeseriesIO.getChartserverdata import getGriddata
 from TimeseriesIO.getChartserverdata import getYrdata
+from TimeseriesIO.getChartserverdata import getStationdata
 
 from TimeseriesIO.getFiledata import readWeather
 from TimeseriesIO.getFiledata import importColumns
@@ -17,4 +18,5 @@ from TimeseriesIO.plotTimeseries import plotIcecover
 from TimeseriesIO.timeseriesClasses import stripMetadata
 from TimeseriesIO.timeseriesClasses import okta2unit
 from TimeseriesIO.timeseriesClasses import weatherElement
+from TimeseriesIO.timeseriesClasses import makeDailyAvarage
 

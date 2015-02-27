@@ -6,7 +6,7 @@ import datetime
 import iceThicknessCalculation
 import iceColumn
 import copy
-from TimeseriesIO import getMetData, readWeather, plotIcecover, importColumns, stripMetadata
+from TimeseriesIO import getMetData, readWeather, plotIcecover, importColumns, stripMetadata, getStationdata, makeDailyAvarage, getGriddata
 from Calculations.parameterization import *
 
 #plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
@@ -111,15 +111,45 @@ def runSemsvann(startDate, endDate):
     plot_filename = '{0}Semsvann {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     plotIcecover(icecover, observed_ice, date, temp, snotot, plot_filename)
 
+def runHakkloa(startDate, endDate):
+
+    fromDate = datetime.datetime.strptime(startDate, "%Y-%m-%d")
+    toDate   = datetime.datetime.strptime(endDate, "%Y-%m-%d")
+
+    csTemp = makeDailyAvarage(getStationdata('6.24.4','17.1', fromDate, toDate, 'list'))
+    csSno = makeDailyAvarage(getGriddata(260150, 6671135, 'fsw', fromDate, toDate, 'list'))
+    csSnotot = makeDailyAvarage(getGriddata(260150, 6671135, 'sd', fromDate, toDate, 'list'))
+
+    temp, date = stripMetadata(csTemp, True)
+    sno = stripMetadata(csSno, False)
+    snotot = stripMetadata(csSnotot, False)
+
+    observed_ice = []
+
+    if len(observed_ice) == 0:
+        icecover = calculateIceCover(iceColumn.iceColumn(date[0], []), date, temp, sno)
+    else:
+        icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno)
+
+    plot_filename = '{0}Hakkloa {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
+    plotIcecover(icecover, observed_ice, date, temp, snotot, plot_filename)
+
+    a = 1
+
+
+
+
 if __name__ == "__main__":
 
     # runSemsvann('2011-11-01', '2012-05-01')
     #runSemsvann('2012-11-01', '2013-06-01')
     #runSemsvann('2013-11-01', '2014-04-15')
 
-    runOrovannNVE('2011-11-15', '2012-06-20')
-    runOrovannMET('2011-11-15', '2012-06-20')
-    runOrovannMET('2012-11-15', '2013-06-20')
+    #runOrovannNVE('2011-11-15', '2012-06-20')
+    #runOrovannMET('2011-11-15', '2012-06-20')
+    #runOrovannMET('2012-11-15', '2013-06-20')
+
+    runHakkloa('2013-12-01', '2014-06-01')
 
 
 
