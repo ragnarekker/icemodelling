@@ -158,8 +158,8 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
     Parameters and return:
         :param stationID:       The station number
         :param elementID:       The weather element code
-        :param fromDate:        The from date as datatype datetime
-        :param toDate:          The to date as datatype datetime
+        :param fromDate:        The from date as string 'YYYY-MM-DD'
+        :param toDate:          The to date as string 'YYYY-MM-DD'
         :param timeseriesType:  The timeserie type to be requested. Eg 0 is daily avarage.
         :param output:          3 types of output are available.
         :return:                A list of weatherElements or files are made to working directory.
