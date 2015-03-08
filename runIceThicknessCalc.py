@@ -2,12 +2,13 @@ __author__ = 'ragnarekker'
 # -*- coding: utf-8 -*-
 
 
-import datetime
-import iceThicknessCalculation
-import iceColumn
 import copy
-from TimeseriesIO import getMetData, readWeather, plotIcecover, importColumns, stripMetadata, getStationdata, makeDailyAvarage, getGriddata
+
+import iceThicknessCalculation
+from TimeseriesIO import getMetData, readWeather, plotIcecover, importColumns, stripMetadata, getStationdata, makeDailyAvarage, getGriddata, \
+    IceColumn
 from Calculations.parameterization import *
+
 
 #plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
 #data_path = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\TimeseriesData\\"
@@ -82,7 +83,7 @@ def runOrovannMET(startDate, endDate):
     observed_ice_filename = '{0}Otroevann observasjoner {1}-{2}.csv'.format(data_path, startDate.year, endDate.year)
     observed_ice = importColumns(observed_ice_filename)
     if len(observed_ice) == 0:
-        icecover = calculateIceCover(iceColumn.iceColumn(date[0], []), date, temp, sno)
+        icecover = calculateIceCover(IceColumn.IceColumn(date[0], []), date, temp, sno)
     else:
         icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno)
 
@@ -104,7 +105,7 @@ def runSemsvann(startDate, endDate):
     observed_ice_filename = '{0}Semsvann observasjoner {1}-{2}.csv'.format(data_path, startDate[0:4], endDate[0:4])
     observed_ice = importColumns(observed_ice_filename)
     if len(observed_ice) == 0:
-        icecover = calculateIceCover(iceColumn.iceColumn(date[0], []), date, temp, sno, cc)
+        icecover = calculateIceCover(IceColumn.IceColumn(date[0], []), date, temp, sno, cc)
     else:
         icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
@@ -113,26 +114,26 @@ def runSemsvann(startDate, endDate):
 
 def runHakkloa(startDate, endDate):
 
-    fromDate = datetime.datetime.strptime(startDate, "%Y-%m-%d")
-    toDate   = datetime.datetime.strptime(endDate, "%Y-%m-%d")
+    from_date = datetime.datetime.strptime(startDate, "%Y-%m-%d")
+    to_date = datetime.datetime.strptime(endDate, "%Y-%m-%d")
 
-    csTemp = makeDailyAvarage(getStationdata('6.24.4','17.1', fromDate, toDate, 'list'))
-    csSno = makeDailyAvarage(getGriddata(260150, 6671135, 'fsw', fromDate, toDate, 'list'))
-    csSnotot = makeDailyAvarage(getGriddata(260150, 6671135, 'sd', fromDate, toDate, 'list'))
+    cs_temp = makeDailyAvarage(getStationdata('6.24.4','17.1', from_date, to_date, 'list'))
+    cs_sno = makeDailyAvarage(getGriddata(260150, 6671135, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = makeDailyAvarage(getGriddata(260150, 6671135, 'sd', from_date, to_date, 'list'))
 
-    temp, date = stripMetadata(csTemp, True)
-    sno = stripMetadata(csSno, False)
-    snotot = stripMetadata(csSnotot, False)
+    temp, date = stripMetadata(cs_temp, True)
+    sno = stripMetadata(cs_sno, False)
+    snotot = stripMetadata(cs_snotot, False)
 
     observed_ice = []
 
     if len(observed_ice) == 0:
-        icecover = calculateIceCover(iceColumn.iceColumn(date[0], []), date, temp, sno)
+        ice_cover = calculateIceCover(IceColumn.IceColumn(date[0], []), date, temp, sno)
     else:
-        icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno)
+        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno)
 
     plot_filename = '{0}Hakkloa {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
-    plotIcecover(icecover, observed_ice, date, temp, snotot, plot_filename)
+    plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
 
     a = 1
 

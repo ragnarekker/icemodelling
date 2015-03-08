@@ -34,8 +34,6 @@ def readWeather(from_date, to_date, filename):
 
     return date, temp, sno, snotot
 
-
-
 # new way to read observed icecolumns for file. Inputfile contains multiple observations. Method returns a list of icecoluns
 def importColumns(filepath_inn):
     '''
@@ -70,7 +68,7 @@ def importColumns(filepath_inn):
 
     '''
     import copy
-    import iceColumn
+    from TimeseriesIO import IceColumn
 
     # Read file
     innfile = open(filepath_inn)
@@ -81,7 +79,7 @@ def importColumns(filepath_inn):
     separator = ';'
 
     # This column is only for initiation and is removed from columns before returned
-    column = iceColumn.iceColumn(datetime.datetime(1,1,1), 0)
+    column = IceColumn.IceColumn(datetime.datetime(1,1,1), 0)
     columns = []
 
     for row in inndata:
@@ -93,7 +91,7 @@ def importColumns(filepath_inn):
             if row[1] == 'date':
                 columns.append(copy.deepcopy(column))
                 date = datetime.datetime.strptime(row[0], "%Y-%m-%d")
-                column = iceColumn.iceColumn(date, 0)
+                column = IceColumn.IceColumn(date, 0)
             elif row[1] == 'water_line':
                 column.water_line = float(row[0])
             else:
@@ -102,7 +100,7 @@ def importColumns(filepath_inn):
     # the last object is not added in the loop
     columns.append(column)
 
-    # this was the inital object. If data is the first element of the inputfile this object is ety.
+    # this was the inital object. If data is the first element of the inputfile this object is empty.
     # If date was not sett before rows with icelayers the icelayer data is lost.
     columns.remove(columns[0])
 
