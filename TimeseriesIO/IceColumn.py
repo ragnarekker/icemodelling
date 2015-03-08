@@ -10,7 +10,7 @@ import datetime
 from Calculations import parameterization
 
 
-class iceColumn:
+class IceColumn:
 
     # parameters to be initialized in constructor
     date = 0                        # date not initiallized
@@ -317,11 +317,11 @@ class iceColumn:
         elif type == 'water': return "red"
         else: return "yellow"
 
-# some tests of the functions in the iceColumn.py file
+# some tests of the functions in the IceColumn.py file
 def tests():
 
     date = datetime.datetime.strptime("2011-10-05", "%Y-%m-%d")
-    icecol = iceColumn(date, 0)
+    icecol = IceColumn(date, 0)
     #icecol.addLayerAtIndex(0, 0.1, 'new_snow')
     #icecol.updateSlushLevel()
     #icecol.mergeAndRemoveExcessLayers()
