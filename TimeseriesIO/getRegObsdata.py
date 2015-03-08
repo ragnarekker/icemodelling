@@ -173,6 +173,7 @@ def getIceThickness():
     url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".decode('utf8').format(apiVersion, oDataQuery, view)
     data = requests.get(url).json()
     datalist = data['d']['results']
+
     a = 1
 
 

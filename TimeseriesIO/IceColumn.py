@@ -3,6 +3,7 @@ __author__ = 'ragnarekker'
 
 # http://learntofish.wordpress.com/2011/12/06/tutorial-object-oriented-programming-in-python-part-2/
 # http://www.python-course.eu/object_oriented_programming.php
+#
 
 import math
 import datetime
