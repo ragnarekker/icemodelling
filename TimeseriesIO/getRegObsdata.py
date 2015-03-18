@@ -209,6 +209,7 @@ def __IceThicknessLayers(RegID):
 
 def __get_ice_type(IceLayerTID):
 
+    # http://api.nve.no/hydrology/regobs/v0.9.4/OData.svc/IceLayerKDV?$filter=Langkey%20eq%201%20&$format=json
     if IceLayerTID == 1:
         return 'black_ice'
     elif IceLayerTID == 3:
