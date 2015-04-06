@@ -6,7 +6,6 @@ import math
 import numpy
 from Calculations import parameterization
 
-
 def getIceThickness(*args):
 
     '''
@@ -139,11 +138,8 @@ def getIceThickness(*args):
 
     return ic
 
-
-
-
-# Adds a layers conductance to a total conductance
 def addLayerConductanceToTotal(U_total, k, h):
+    # Adds a layers conductance to a total conductance
     # Conductance is conductivity pr unit lenght. I.e. U = k/h where k is conductivity and h is height of icelayer
     # Sum of conductance follows the rule 1/U = 1/U1 + 1/U2 + ... + 1/Un
     if U_total == 0.:

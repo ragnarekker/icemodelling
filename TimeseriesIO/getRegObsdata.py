@@ -4,11 +4,10 @@ __author__ = 'ragnarekker'
 import requests
 import datetime
 from Calculations import parameterization
-from IceCover import *
+import IceCover as COV
+import IceColumn as COL
 
-apiVersion = "v0.9.4"
-
-
+apiVersion = "v0.9.9"
 
 def __removeNorwegianLetters(nameInn):
     """
@@ -71,11 +70,13 @@ def __changeUnicodeToUTF8Hex(nameInn):
 
 def getIceCover(LocationName, fromDate, toDate):
     """
+    Method returns a list of IceCover objects from regObs between fromDate to toDate.
 
-    :param LocationName:
-    :param fromDate:        The from date as string 'YYYY-MM-DD'
-    :param toDate:          The to date as string 'YYYY-MM-DD'
+    :param LocationName:    name as given in regObs in ObsLocation table
+    :param fromDate:        [string] The from date as 'YYYY-MM-DD'
+    :param toDate:          [string] The to date as 'YYYY-MM-DD'
     :return:
+
     """
 
     # http://api.nve.no/hydrology/regobs/v0.9.4/Odata.svc/IceCoverObsV?$filter=
@@ -103,27 +104,47 @@ def getIceCover(LocationName, fromDate, toDate):
         iceCoverDate = parameterization.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
         iceCoverName = ic['IceCoverName']
         iceCoverBefore = ic['IceCoverBeforeName']
-        iceCoverList.append(IceCover(iceCoverDate, iceCoverName, iceCoverBefore, LocationName))
+        cover = COV.IceCover(iceCoverDate, iceCoverName, iceCoverBefore, LocationName)
+        cover.set_regid(int(ic['RegID']))
+        iceCoverList.append(cover)
+
 
     return iceCoverList
 
 def getFirstIceCover(LocationName, fromDate, toDate):
     '''
-    :param LocationName:
-    :param fromDate:
-    :param toDate:
+    Returns the first observation where ice can form on a lake. That is if the ice cover is partly or fully
+    formed on observation location or the lake.
 
+    If no such obervation is found an "empty" icecover is returned at fromDate.
 
+    :param LocationName:    name as given in regObs in ObsLocation table
+    :param fromDate:        [string] The from date as 'YYYY-MM-DD'
+    :param toDate:          [string] The to date as 'YYYY-MM-DD'
     :return:
     '''
 
     iceCoverSeason = getIceCover(LocationName, fromDate, toDate)
 
     for ic in iceCoverSeason:
+        # if the ice cover is partly or fully formed on observation location or the lake
+        # 2) delvis islagt på målestedet
+        # 3) helt islagt på målestedet
+        # 21) hele sjøen islagt
         if (ic.iceCoverTID == 2) or (ic.iceCoverTID == 3) or (ic.iceCoverTID == 21):
-            return ic
+            # and if icecover before was
+            # 1) isfritt på målestedet
+            # 2) delvis islagt på målestedet,
+            # 11) islegging langs land
+            # 20) hele sjøen isfri,  this is fist ice
+            if (ic.iceCoverBeforeTID == 1) or (ic.iceCoverBeforeTID == 2) or \
+                    (ic.iceCoverBeforeTID == 11) or (ic.iceCoverBeforeTID == 20):
+                return ic
 
-    return IceCover(fromDate, "Ikke gitt", 'Ikke gitt', LocationName)
+    # datetime objects in icecover datatype
+    from_date = datetime.datetime.strptime(fromDate, "%Y-%m-%d")
+
+    return COV.IceCover(from_date, "Ikke gitt", 'Ikke gitt', LocationName)
 
 def getLastIceCover(LocationName, fromDate, toDate):
     '''
@@ -142,7 +163,9 @@ def getLastIceCover(LocationName, fromDate, toDate):
     iceCoverSeason = getIceCover(LocationName, fromDate, toDate)
     iceCoverSeason = reversed(iceCoverSeason)       # start looking at the back
 
-    noIceCover = IceCover(toDate, "Ikke gitt", 'Ikke gitt', LocationName)   # make "empty" icecover object on last date
+    # datetime objects in icecover datatype
+    to_date = datetime.datetime.strptime(toDate, "%Y-%m-%d")
+    noIceCover = COV.IceCover(to_date, "Ikke gitt", 'Ikke gitt', LocationName)   # make "empty" icecover object on last date
 
     for ic in iceCoverSeason:
         if (ic.iceCoverTID == 1) or (ic.iceCoverTID == 20):
@@ -152,8 +175,15 @@ def getLastIceCover(LocationName, fromDate, toDate):
 
     return noIceCover
 
-
 def getIceThickness(LocationName, fromDate, toDate):
+    '''
+    Method returns a list of ice thickness between two dates for a given location in regObs.
+
+    :param LocationName:
+    :param fromDate:
+    :param toDate:
+    :return:
+    '''
 
     view = 'IceThicknessV'
     OdataLocationName = __changeUnicodeToUTF8Hex(LocationName)  # Crazyshitencoding
@@ -168,17 +198,79 @@ def getIceThickness(LocationName, fromDate, toDate):
     data = requests.get(url).json()
     datalist = data['d']['results']
 
+    ice_columns = []
+
     for ic in datalist:
-        date = ic['DtObsTime']      ##### in unixtime
+        date = parameterization.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
         RegID = ic['RegID']
         layers = __IceThicknessLayers(RegID)
 
-        a = 1
+        ice_column = COL.IceColumn(date, layers)
+        ice_column.add_metadata('RegID', RegID)
+
+        ice_column.addLayerAtIndex(0, ic['SlushSnow'], 'slush')
+        ice_column.addLayerAtIndex(0, ic['SnowDepth'], 'snow')
+        ice_column.updateDraftHeight()
+        iha = ic['IceHeightAfter']
+        if iha == None:
+            iha = 0
+        ice_column.water_line = ice_column.draft_height - float(iha)
+
+        ice_columns.append(ice_column)
+
+
+    return ice_columns
+
+def getAllSeasonIce(LocationName, fromDate, toDate):
+    '''
+    This returns a list of all ice columns in a period from fromDate to toDate. At index 0 is first ice (date with no
+    icelayers) and on last index (-1) is last ice wich is the date where there is no more ice on the lake.
+
+    If no first or last ice is found in regObs the first or/and last dates in the request is used for initial and
+    end of icecover season,
+
+    :param LocationName:
+    :param fromDate:
+    :param toDate:
+    :return:
+    '''
+
+    first = getFirstIceCover(LocationName, fromDate, toDate)
+    last = getLastIceCover(LocationName, fromDate, toDate)
+
+    start_column = []
+    end_column = []
+
+    fc = COL.IceColumn(first.date, 0)
+    fc.add_metadata('RegID', first.RegID)
+    start_column.append(fc)
+
+    lc = COL.IceColumn(last.date, 0)
+    lc.add_metadata('RegID', first.RegID)
+    end_column.append(lc)
+
+    columns = getIceThickness(LocationName, fromDate, toDate)
+
+    all_columns = start_column + columns + end_column
+
+    return all_columns
+
 
 def __IceThicknessLayers(RegID):
-    # http://api.nve.no/hydrology/regobs/v0.9.5/Odata.svc/IceThicknessLayerV?$filter=RegID%20eq%2034801%20and%20LangKey%20eq%201&$format=json
+    '''
+    This method returns the ice layes of a given registration (RegID) in regObs. it reads only what is below the first
+    solid icelayer. Thus snow and slushsh on the ice is not covered here and is added seperately in the public method
+    for retreiving the full ice column.
 
-    ## method reads only ice, slushice and slush. Should it take more??
+    This method is intended as a internal method for getRegObdata.py
+
+    :param RegID:
+    :return:
+
+    Example og a ice layer object in regObs:
+    http://api.nve.no/hydrology/regobs/v0.9.5/Odata.svc/IceThicknessLayerV?$filter=RegID%20eq%2034801%20and%20LangKey%20eq%201&$format=json
+
+    '''
 
     view = 'IceThicknessLayerV'
 
@@ -208,22 +300,41 @@ def __IceThicknessLayers(RegID):
     return reversed_layes
 
 def __get_ice_type(IceLayerTID):
+    '''
+    Method retunes a ice type available in the IceColumn class given the regObs type IceLayerTID
 
-    # http://api.nve.no/hydrology/regobs/v0.9.4/OData.svc/IceLayerKDV?$filter=Langkey%20eq%201%20&$format=json
+    :param IceLayerTID:
+    :return:
+
+    List of layertypes availabel in regObs:
+    http://api.nve.no/hydrology/regobs/v0.9.4/OData.svc/IceLayerKDV?$filter=Langkey%20eq%201%20&$format=json
+
+    '''
+    #
     if IceLayerTID == 1:
         return 'black_ice'
     elif IceLayerTID == 3:
         return 'slush_ice'
     elif IceLayerTID == 5:
         return 'slush'
-    elif IceLayerTID == 13: # "Sørpeis i nedbrytning" in regObs
+    elif IceLayerTID == 11:     # 'Stålis i nedbrytning' in regObs
+        return 'black_ice'
+    elif IceLayerTID == 13:     # 'Sørpeis i nedbrytning' in regObs
+        return 'slush_ice'
+    elif IceLayerTID == 14:     # 'Stavis (våris)' in regObs
         return 'slush_ice'
     else:
         return 'Unknown type {0}'.format(IceLayerTID)
 
 
-
 def getTIDfromName(xKDV, LangKeyTID, name):
+    '''
+
+    :param xKDV:
+    :param LangKeyTID:
+    :param name:
+    :return:
+    '''
     url = 'http://api.nve.no/hydrology/regobs/{1}/OData.svc/{0}?$filter=Langkey%20eq%20{2}%20&$format=json'.format(xKDV, apiVersion, LangKeyTID)
     xKDV = getKDV(url)
 
@@ -262,12 +373,13 @@ def getKDV(url):
     return xDict
 
 
-
 if __name__ == "__main__":
 
-    LocationName = 'Hakkloa nord 372 moh'
+    #LocationName = 'Hakkloa nord 372 moh'
     LocationName = 'Otrøvatnet v/Nystuen 971 moh'
-    fromDate = '2013-10-01'
+    #LocationName = 'Semsvannet v/Lo 145 moh'
+
+    fromDate = '2012-10-01'
     toDate = '2014-07-01'
 
     IceCoverKDV = getKDV('http://api.nve.no/hydrology/regobs/v0.9.4/OData.svc/IceCoverKDV?$filter=Langkey%20eq%201%20&$format=json')
@@ -275,7 +387,7 @@ if __name__ == "__main__":
     ic = getIceCover(LocationName, fromDate, toDate)
     first = getFirstIceCover(LocationName, fromDate, toDate)
     last = getLastIceCover(LocationName, fromDate, toDate)
-
     ith = getIceThickness(LocationName, fromDate, toDate)
+    all = getAllSeasonIce(LocationName, fromDate, toDate)
 
     b = 1

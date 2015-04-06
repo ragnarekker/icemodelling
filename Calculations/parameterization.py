@@ -5,8 +5,8 @@ __author__ = 'ragnarekker'
 import datetime
 
 
+#######    Works on arrays
 
-## Works on arrays
 def makeSnowChangeFromSnowTotal(snowTotal):
     '''
     Method takes a list of total snowdeapth and returns the dayly change (derivative).
@@ -44,16 +44,26 @@ def makeTempChangeFromTemp(temp):
 
 
 
-## Works on single timesteps
-# needs comments
+#######    Works on single timesteps
+
 def tempFromTempAndClouds(temp, cloudcover):
+    '''
+    This method takes shifts temperature according to cloudcover. In theory clear nights will have a net
+    global radialtion outgouing from the surface. Here it is assumed:
+    * a clear night adds to the energybalace with the equivalent of -2degC
+
+    :param temp:        temprature [float] from met-station or equal
+    :param cloudcover:  cloudcover as number from 0 to 1 [float] on site where temperature i measured
+    :return:            temperature [float] radiation-corrected based on snowevents
+    '''
 
     temp = temp + 2*(cloudcover - 1)
-
     return temp
 
 def tempFromTempAndSnow(temp, new_snow):
     """
+    This method is a special case of the tempFromTempAndClouds method.
+
     This method takes shifts temperature according to snow events. In theory clear nights will have a net
     global radialtion outgouing from the surface. Here it is assumed:
     * a clear night adds to the energybalace with the equivalent of -2degC
@@ -107,7 +117,7 @@ def unixTime2Normal(unixDatetime):
     return dato
 
 
-
+########
 # Needs comments
 def __getGammafilter(a, lamda, negativeDays, hardness):
     """

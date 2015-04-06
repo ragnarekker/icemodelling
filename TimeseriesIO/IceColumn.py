@@ -3,111 +3,152 @@ __author__ = 'ragnarekker'
 
 # http://learntofish.wordpress.com/2011/12/06/tutorial-object-oriented-programming-in-python-part-2/
 # http://www.python-course.eu/object_oriented_programming.php
-#
-#
 
 import math
 import datetime
 
 from Calculations import parameterization
 
-
 class IceColumn:
 
-    # parameters to be initialized in constructor
-    date = 0                        # date not initiallized
-    column = 0                      # icecolumn with [layer thickness, layer type].
-    water_line = -1                 # distance from bottom of ice column to the water surface. Negative number meens not initiallized
-    draft_height = -1
-
-    # constants that follow ice ans snow types.
-    # They are not protected so they can be updated outside the class
-
-    # LayerTypes given as enums. Values 0-9 are liquids, 10-19 are ice, 20-29 are snow
-    enum_new_snow = 20
-    enum_snow = 21
-    enum_drained_snow = 22
-    enum_slush = 2
-    enum_slush_ice = 11
-    enum_black_ice = 10
-    enum_water = 1
-    enum_NA = -1
-
-    # Material temperatures [degC]
-    temp_f = 0                      # freezing temp
-
-    # Desities [kg m-3]
-    rho_snow_max = 450.             # maximum snow density (kg m-3)
-    rho_new_snow = 250.             # new-snow density (kg m-3)
-    rho_snow = 350.                 # average snowdensity.
-    rho_drained_snow = rho_snow
-    rho_slush = 0.920*10**3         # from Vehvilainen (2008) and again Saloranta (2000)
-    rho_slush_ice = 0.875*10**3     # from Vehvilainen (2008) and again Saloranta (2000)
-    rho_black_ice = 0.917*10**3     # ice (incl. snow ice) density [kg m-3]
-    rho_water = 1000.               # density of freshwater (kg m-3)
-    rho_NA = -1.                    # value to return if desity is not available.
-
-    # ice heat conduction coefficient/thermal conductivity [W K-1 m-1]
-    k_snow_max = 0.25               # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
-    k_new_snow = 0.05               # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
-    k_snow = 0.11                   # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
-    k_drained_snow = k_snow
-    k_slush = 0.561                 # from Vehvilainen (2008) and again Saloranta (2000)
-    k_black_ice = 2.24              # from Vehvilainen (2008) and again Saloranta (2000)
-    k_slush_ice = 0.5 * k_black_ice # from Vehvilainen (2008) and again Saloranta (2000)
-    k_water = 0.58                  # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
-    k_NA = -1
-
-    # Latent heat of fusion [J kg-1]
-    L_black_ice = 333500            # latent heat of freezing water to black ice
-    L_slush_ice = 0.5 * L_black_ice # freezing slush to slushice
-
-    alfa_black_ice = 35             # albedo in % from http://en.wikipedia.org/wiki/Albedo
-    alfa_snow_new = 85              # albedo in % from http://en.wikipedia.org/wiki/Albedo
-    alfa_snow_old = 45              # albedo in % from http://en.wikipedia.org/wiki/Albedo
-
-    # The meltingcoeficients for the degreeday formula [m s-1 degC-1]
-    meltingcoeff_snow = -0.10 /(60*60*24) / 5           # 10cm melting pr day at 5degC
-    meltingcoeff_slush_ice = -0.04 /(60*60*24) / 5      #  4cm melting pr day at 5degC
-    meltingcoeff_slush = meltingcoeff_slush_ice * 2     #  slush is partlymelted
-    meltingcoeff_black_ice = -0.02 /(60*60*24) / 5      #  2cm melting pr day at 5degC
-
-    # The more quaziscientific constants
-    snow_pull_on_water = 0.05          # The length watrer is pulled upp into the snow by capillary fources [m]
-    min_slush_change = 0.05         # If slushlevelchange is lower than this value the no new slushlevel is made
-    snow_to_slush_ratio = 0.33          # when snow becomes slush when water is pulled up it also is compressed
-
-    # Constructor-like-thingy
-    # an empty column is initiallized as iceColumn(dateobject, 0)
     def __init__(self, date_inn, column_inn):
-        self.date = date_inn
+        '''
+        This initializes the object
+        An empty column is initiallized as iceColumn(dateobject, 0)
+        Column_inn includes new snow layer on index 0.
+
+        :param date_inn:        [datetime]
+        :param column_inn:      list[float, string] as [[height, layertype], [height, layertype], ...]
+        :return:
+        '''
+
+        self.set_constants()
+
+        self.date = date_inn                 # date
+        self.column = 0                      # icecolumn with [layer thickness, layer type].
+        self.water_line = -1                 # distance from bottom of ice column to the water surface. Negative number meens not initiallized
+        self.draft_height = -1               # This is ice, slushice and slush layers. I.e. not snow layers
+        self.metadata = []                   # Metadata given as dictionary [{key, value}, {key,value}, ... ]
+
+        ### initialize waterline better
+        ### calculate old height of draft better with use of density? and the old snow layers?
+
         if column_inn == 0:         # the case of no ice
             self.column = list()
             self.water_line = -1
+            self.draft_height = -1
         else:
             self.column = column_inn
             self.water_line = -1
+            self.draft_height = -1
 
-            ### initialize waterline better
-            ### calculate old height of draft better with use of density? and the old snow layers?
+    def set_constants(self):
+        '''
+        Listed constants that assosiated with ice and snow types. These are defaults.
+        The constants follow the object and can intentionally be updated for every icecolumn.
 
-    # Adds a new layer at a given index in icecolumn. Subsequent layers are added after the new layer.
+        :return:
+        '''
+
+        #Constants that assosiated with ice and snow types.
+
+        # LayerTypes given as enums. Values 0-9 are liquids, 10-19 are ice, 20-29 are snow
+        self.enum_new_snow = 20
+        self.enum_snow = 21
+        self.enum_drained_snow = 22
+        self.enum_slush = 2
+        self.enum_slush_ice = 11
+        self.enum_black_ice = 10
+        self.enum_water = 1
+        self.enum_NA = -1
+
+        # Material temperatures [degC]
+        self.temp_f = 0                      # freezing temp
+
+        # Desities [kg m-3]
+        self.rho_snow_max = 450.             # maximum snow density (kg m-3)
+        self.rho_new_snow = 250.             # new-snow density (kg m-3)
+        self.rho_snow = 350.                 # average snowdensity.
+        self.rho_drained_snow = self.rho_snow
+        self.rho_slush = 0.920*10**3         # from Vehvilainen (2008) and again Saloranta (2000)
+        self.rho_slush_ice = 0.875*10**3     # from Vehvilainen (2008) and again Saloranta (2000)
+        self.rho_black_ice = 0.917*10**3     # ice (incl. snow ice) density [kg m-3]
+        self.rho_water = 1000.               # density of freshwater (kg m-3)
+        self.rho_NA = -1.                    # value to return if desity is not available.
+
+        # ice heat conduction coefficient/thermal conductivity [W K-1 m-1]
+        self.k_snow_max = 0.25               # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
+        self.k_new_snow = 0.05               # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
+        self.k_snow = 0.11                   # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
+        self.k_drained_snow = self.k_snow
+        self.k_slush = 0.561                 # from Vehvilainen (2008) and again Saloranta (2000)
+        self.k_black_ice = 2.24              # from Vehvilainen (2008) and again Saloranta (2000)
+        self.k_slush_ice = 0.5 * self.k_black_ice # from Vehvilainen (2008) and again Saloranta (2000)
+        self.k_water = 0.58                  # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
+        self.k_NA = -1
+
+        # Latent heat of fusion [J kg-1]
+        self.L_black_ice = 333500                   # latent heat of freezing water to black ice
+        self.L_slush_ice = 0.5 * self.L_black_ice   # freezing slush to slushice
+
+        self.alfa_black_ice = 35             # albedo in % from http://en.wikipedia.org/wiki/Albedo
+        self.alfa_snow_new = 85              # albedo in % from http://en.wikipedia.org/wiki/Albedo
+        self.alfa_snow_old = 45              # albedo in % from http://en.wikipedia.org/wiki/Albedo
+
+        # The meltingcoeficients for the degreeday formula [m s-1 degC-1]
+        self.meltingcoeff_snow = -0.10 /(60*60*24) / 5              # 10cm melting pr day at 5degC
+        self.meltingcoeff_slush_ice = -0.04 /(60*60*24) / 5         #  4cm melting pr day at 5degC
+        self.meltingcoeff_slush = self.meltingcoeff_slush_ice * 2   #  slush is partlymelted
+        self.meltingcoeff_black_ice = -0.02 /(60*60*24) / 5         #  2cm melting pr day at 5degC
+
+        # The more quaziscientific constants
+        self.snow_pull_on_water = 0.05       # The length watrer is pulled upp into the snow by capillary fources [m]
+        self.min_slush_change = 0.05         # If slushlevelchange is lower than this value the no new slushlevel is made
+        self.snow_to_slush_ratio = 0.33      # when snow becomes slush when water is pulled up it also is compressed
+
+    def add_metadata(self, key, value):
+        self.metadata.append({key:value})
+
+    def set_water_line(self, water_line_inn):
+        self.water_line = water_line_inn
+
     def addLayerAtIndex(self, index, height, layertype):
+        '''
+        Adds a new layer at a given index in icecolumn. Subsequent layers are added after the new layer.
+
+        :param index:
+        :param height:          Should be float but variable is parsed to float so string is acceted
+        :param layertype:
+        :return:                no return
+        '''
+
+        if height == None:  # no height means 0 height
+            height = 0
+        height = float(height) # cast to int
         if index == -1:
             self.column.append([height, layertype])
         else:
             self.column.insert(index, [height, layertype])
 
-    # Removes a layer at a given index
     def removeLayerAtIndex(self, index):
+        # Removes a layer at a given index
         self.column.pop(index)
 
-    # Step the date forward the timedelta of "timestep"
     def timestepForward(self, timestep):
+        '''
+        Step the date forward the timedelta of "timestep"
+        :param timestep:
+        :return:
+        '''
         self.date = self.date + datetime.timedelta(seconds = timestep)
 
-    # Cleans up the icecolumn a bit. Removes layers of zero height if they occur and merges layers of equal type if the exist
     def mergeAndRemoveExcessLayers(self):
+        '''
+        Cleans up the icecolumn a bit. Removes layers of zero height if they occur and merges layers of equal type
+        if the exist
+
+        :return:
+        '''
 
         # If no colum there is nothing to merge
         if len(self.column) != 0:
@@ -137,8 +178,12 @@ class IceColumn:
                 if i >= len(self.column):
                     condition = 1
 
-    # Updates slushlevel by balancing bouyency of icelayers with weight of snow
     def updateSlushLevel(self):
+        '''
+        Updates slushlevel by balancing bouyency of icelayers with weight of snow
+
+        :return:
+        '''
 
         self.updateDraftHeight()
         self.updateWaterLine()
@@ -206,27 +251,41 @@ class IceColumn:
         self.mergeAndRemoveExcessLayers()
         self.updateWaterLine()     # due to the snow pulling water up in the snow the waterline is shifted since before uppdatig the slushlevel
 
-    # method updates the iceColumns draft height variable. This is ice, slushice and slush layers. I.e. not snow layers
     def updateDraftHeight(self):
+        '''
+        Method updates the iceColumns draft height variable.
+        The draft height given by summing ice, slushice and slush layers. I.e. not snow layers.
+        '''
 
-        # the draft height given by summing ice, slushice and slush layers. I.e. not snow layers
         thickness_ice = 0
         for i in range(len(self.column)):
             if self.getEnum(self.column[i][1]) < 20:       # material types >= 20 are snow
                 thickness_ice = thickness_ice + self.column[i][0]
         self.draft_height = thickness_ice
 
-    # method updates the iceColumns water line variable. This is the distance from the botom of the ice to the waterline.
     def updateWaterLine(self):
-        # the height of the draft submerged under the water line given by arkimedes law
+        '''
+        Method updates the iceColumns water line variable. This is the distance from the bottom
+        of the ice to the waterline. The height of the draft submerged under the water line given by arkimedes law
+        :return:
+        '''
+
         h_draft = 0
         for i in range(len(self.column)):
             h_draft = h_draft + self.column[i][0]*self.getRho(self.column[i][1])     # height*density = [kg/m2]
         h_draft = h_draft/self.rho_water        # [kg/m2]*[m3/kg]
         self.water_line = h_draft
 
-    # merges the snowlayers and compresses the snow. This method updates the snow denity in the object and the conductivity of the snow in the object
     def mergeSnowlayersAndCompress(self, temp):
+        '''
+         Merges the snowlayers and compresses the snow. This method updates the snow denity in the object and the
+         conductivity of the snow in the object.
+
+         Snow compactation may be referenced in article in literature folder or evernote.
+
+        :param temp: [float] Temperature in celcuis used in the compactation routine.
+        :return:
+        '''
 
         # If no layers, compacation of snow is not needed
         if len(self.column) > 0:
@@ -271,8 +330,8 @@ class IceColumn:
             h_snow_new = self.column[0][0] / self.rho_snow * rho_snow_old    # Asume a inverse linear correlation between density and the height (preservation og mass?)
             self.column[0][0] = h_snow_new
 
-    # returns the conductivity for a given snow or ice type
     def getConductivity(self, type):
+        # returns the conductivity for a given snow or ice type
 
         if type == 'new_snow': return self.k_new_snow
         elif type == 'snow': return self.k_snow
@@ -283,8 +342,8 @@ class IceColumn:
         elif type == 'water': return self.k_water
         else: return self.k_NA
 
-    # returns the density for a given snow or ice type
     def getRho(self, type):
+        # returns the density for a given snow or ice type
 
         if type == 'new_snow': return self.rho_new_snow
         elif type == 'snow': return self.rho_snow
@@ -295,8 +354,8 @@ class IceColumn:
         elif type == 'water': return self.rho_water
         else: return self.rho_NA
 
-    # returns the density for a given snow or ice type
     def getEnum(self, type):
+        # returns the enum used for a given snow or ice type
 
         if type == 'new_snow': return self.enum_new_snow
         elif type == 'snow': return self.enum_snow
@@ -307,8 +366,8 @@ class IceColumn:
         elif type == 'water': return self.enum_water
         else: return self.enum_NA
 
-    # returns the density for a given snow or ice type
     def getColour(self, type):
+        # returns the color used for plotting a given snow or ice type
 
         if type == 'new_snow': return "0.9"
         elif type == 'snow': return "0.8"
@@ -319,8 +378,8 @@ class IceColumn:
         elif type == 'water': return "red"
         else: return "yellow"
 
-# some tests of the functions in the IceColumn.py file
 def tests():
+    # some tests of the functions in the IceColumn.py file
 
     date = datetime.datetime.strptime("2011-10-05", "%Y-%m-%d")
     icecol = IceColumn(date, 0)
