@@ -62,6 +62,12 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, output):
         'json':         returns NULL but saves a .json file til the working folder.
 
 
+    ElementID's used:
+        fws:            new snow last 24hrs
+        sd:             snow depth
+        tm:             temperature avarage 24hrs
+
+
     Example URL for getting grid data
         http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart
         &ver=1.0

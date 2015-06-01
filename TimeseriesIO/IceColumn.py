@@ -340,6 +340,7 @@ class IceColumn:
         elif type == 'slush_ice': return self.k_slush_ice
         elif type == 'black_ice': return self.k_black_ice
         elif type == 'water': return self.k_water
+        elif type == 'unknown': return self.k_slush_ice
         else: return self.k_NA
 
     def getRho(self, type):
@@ -352,6 +353,7 @@ class IceColumn:
         elif type == 'slush_ice': return self.rho_slush_ice
         elif type == 'black_ice': return self.rho_black_ice
         elif type == 'water': return self.rho_water
+        elif type == 'unknown': return self.rho_slush_ice
         else: return self.rho_NA
 
     def getEnum(self, type):
@@ -364,6 +366,7 @@ class IceColumn:
         elif type == 'slush_ice': return self.enum_slush_ice
         elif type == 'black_ice': return self.enum_black_ice
         elif type == 'water': return self.enum_water
+        elif type == 'unknown': return self.enum_slush_ice
         else: return self.enum_NA
 
     def getColour(self, type):
@@ -376,6 +379,7 @@ class IceColumn:
         elif type == 'slush_ice': return "0.4"
         elif type == 'black_ice': return "0.1"
         elif type == 'water': return "red"
+        elif type == 'unknown': return "orange"
         else: return "yellow"
 
 def tests():

@@ -255,6 +255,7 @@ if __name__ == "__main__":
     # CC = getMetData(19710, 'NNM',  '2011-10-01', '2012-07-01', 0, 'list')
     # rr = getMetData(19710, 'RR',  '2011-10-01', '2012-06-01', 0, 'list')
     # elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
-    elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
+    # elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
+    elementsOnEvenes = getElementsFromTimeserieTypeStation(84970, 0, 'list')
 
     a = 0

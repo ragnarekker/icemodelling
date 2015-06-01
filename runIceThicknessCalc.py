@@ -10,11 +10,11 @@ from TimeseriesIO import getMetData, readWeather, plotIcecover, stripMetadata, g
 from Calculations.parameterization import *
 
 
-#plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
-#data_path = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\TimeseriesData\\"
+plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
+data_path = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\TimeseriesData\\"
 
-plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
-data_path = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/TimeseriesData/"
+#plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
+#data_path = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/TimeseriesData/"
 
 def calculateIceCover(*args):
 
@@ -145,6 +145,70 @@ def runHakkloa(startDate, endDate):
     plot_filename = '{0}Hakkloa {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
 
+def runSkoddebergvatnet(startDate, endDate):
+
+    LocationName = 'Skoddebergvatnet - nord 101 moh'
+    # Skoddebergvatnet - sør 101 moh
+    from_date = datetime.datetime.strptime(startDate, "%Y-%m-%d")
+    to_date = datetime.datetime.strptime(endDate, "%Y-%m-%d")
+
+    #cs_temp = makeDailyAvarage(getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
+    cs_temp = makeDailyAvarage(getGriddata(593273, 7612469, 'tm', from_date, to_date, 'list'))
+    cs_sno = makeDailyAvarage(getGriddata(593273, 7612469, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = makeDailyAvarage(getGriddata(593273, 7612469, 'sd', from_date, to_date, 'list'))
+    wsCC = getMetData(87640, 'NNM', startDate, endDate, 0, 'list')  # Harstad Stadion
+
+    temp, date = stripMetadata(cs_temp, True)
+    sno = stripMetadata(cs_sno, False)
+    snotot = stripMetadata(cs_snotot, False)
+    cc = stripMetadata(wsCC, False)
+
+    observed_ice = getAllSeasonIce(LocationName, startDate, endDate)
+
+    if len(observed_ice) == 0:
+        ice_cover = calculateIceCover(IceColumn.IceColumn(date[0], []), date, temp, sno, cc)
+    else:
+        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+
+    plot_filename = '{0}Skoddebergvatnet {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
+    plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
+
+def runGiljastolsvatnet(startDate, endDate):
+
+    LocationName = 'Giljastølsvatnet 412 moh'
+
+    # Giljastølsvatnet 412 moh
+    # Giljastølvatnet sør 412 moh
+    from_date = datetime.datetime.strptime(startDate, "%Y-%m-%d")
+    to_date = datetime.datetime.strptime(endDate, "%Y-%m-%d")
+
+    #cs_temp = makeDailyAvarage(getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
+    cs_temp = makeDailyAvarage(getGriddata(593273, 7612469, 'tm', from_date, to_date, 'list'))
+    cs_sno = makeDailyAvarage(getGriddata(593273, 7612469, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = makeDailyAvarage(getGriddata(593273, 7612469, 'sd', from_date, to_date, 'list'))
+    wsCC = getMetData(87640, 'NNM', startDate, endDate, 0, 'list')  # Harstad Stadion
+
+    temp, date = stripMetadata(cs_temp, True)
+    sno = stripMetadata(cs_sno, False)
+    snotot = stripMetadata(cs_snotot, False)
+    cc = stripMetadata(wsCC, False)
+
+    observed_ice = getAllSeasonIce(LocationName, startDate, endDate)
+    ### mulighet for å velge data fra flere obslocations
+
+    if len(observed_ice) == 0:
+        ice_cover = calculateIceCover(IceColumn.IceColumn(date[0], []), date, temp, sno, cc)
+    else:
+        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+
+    plot_filename = '{0}Skoddebergvatnet {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
+    plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
+
+
+# Baklidammen 200 moh
+
+
+
 if __name__ == "__main__":
 
     #runSemsvann('2011-11-01', '2012-05-01')
@@ -154,14 +218,22 @@ if __name__ == "__main__":
 
     #runOrovannNVE('2011-11-15', '2012-06-20')
     #runOrovannMET('2011-11-15', '2012-06-20')
-    runOrovannMET('2012-11-15', '2013-06-20')
-    runOrovannMET('2013-11-15', '2014-06-20')
+    #runOrovannMET('2012-11-15', '2013-06-20')
+    #runOrovannMET('2013-11-15', '2014-06-20')
     #runOrovannMET('2014-11-15', '2015-03-27')
 
-    '''
-    runHakkloa('2011-11-01', '2012-06-01')
-    runHakkloa('2012-11-01', '2013-06-01')
-    runHakkloa('2013-11-01', '2014-06-01')
-    runHakkloa('2014-11-01', '2015-03-27')
-    '''
 
+    #runHakkloa('2011-11-01', '2012-06-01')
+    #runHakkloa('2012-11-01', '2013-06-01')
+    #runHakkloa('2013-11-01', '2014-06-01')
+    #runHakkloa('2014-11-01', '2015-03-27')
+
+    #runSkoddebergvatnet('2006-11-01', '2007-06-01')
+    #runSkoddebergvatnet('2007-11-01', '2008-06-01')
+    #runSkoddebergvatnet('2008-11-01', '2009-06-01')
+    #runSkoddebergvatnet('2009-11-01', '2010-06-01')
+    #runSkoddebergvatnet('2010-11-01', '2011-06-01')
+    #runSkoddebergvatnet('2011-11-01', '2012-06-01')
+    #runSkoddebergvatnet('2012-11-01', '2013-06-01')
+    #runSkoddebergvatnet('2013-11-01', '2014-06-01')
+    #runSkoddebergvatnet('2014-11-01', '2015-06-01')

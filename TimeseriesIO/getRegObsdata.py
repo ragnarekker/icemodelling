@@ -204,6 +204,8 @@ def getIceThickness(LocationName, fromDate, toDate):
         date = parameterization.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
         RegID = ic['RegID']
         layers = __IceThicknessLayers(RegID)
+        if len(layers) == 0:
+            layers = [[float(ic['IceThicknessSum']), 'unknown']]
 
         ice_column = COL.IceColumn(date, layers)
         ice_column.add_metadata('RegID', RegID)
@@ -259,10 +261,10 @@ def getAllSeasonIce(LocationName, fromDate, toDate):
 def __IceThicknessLayers(RegID):
     '''
     This method returns the ice layes of a given registration (RegID) in regObs. it reads only what is below the first
-    solid icelayer. Thus snow and slushsh on the ice is not covered here and is added seperately in the public method
-    for retreiving the full ice column.
+    solid ice layer. Thus snow and slush on the ice is not covered here and is added separately in the public method
+    for retrieving the full ice column.
 
-    This method is intended as a internal method for getRegObdata.py
+    This method is an internal method for getRegObdata.py
 
     :param RegID:
     :return:
@@ -292,16 +294,16 @@ def __IceThicknessLayers(RegID):
         layer = [float(thickness), layer_name]
         layers.append(layer)
 
-    # Blackice at bottom
-    reversed_layes = []
+    # Black ice at bottom
+    reversed_layers = []
     for l in layers:
-        reversed_layes.append(l)
+        reversed_layers.append(l)
 
-    return reversed_layes
+    return reversed_layers
 
 def __get_ice_type(IceLayerTID):
     '''
-    Method retunes a ice type available in the IceColumn class given the regObs type IceLayerTID
+    Method returns a ice type available in the IceColumn class given the regObs type IceLayerTID
 
     :param IceLayerTID:
     :return:

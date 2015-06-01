@@ -168,9 +168,9 @@ class weatherElement():
     LocationID:     The location number. Preferably a int, but for NVE stations it may be a sting.
     Date:           Datetime object of the date of the weather element.
     ElementID:      The element ID. TAM og SA for met but may be numbers from NVE.
-    Value:          The value of the veatherelement. Preferably in SI units.
+    Value:          The value of the weather element. Preferably in SI units.
 
-    Secial cases:
+    Special cases:
     ElementID = SA: Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres
                     som ".", -3 = "umulig å måle". This variable is also calulated from [cm] to [m]
     ElementID = RR: Precipitations has -1 for what seems to be noe precipitation. Are removed.
@@ -183,8 +183,10 @@ class weatherElement():
         self.LocationID = elementLocationID
         self.Date = elementDate
         self.ElementID = elementID
+        self.Metadata = [{'OriginalValue':elementValue}]
+        if elementValue == None:
+            elementValue = 0
         self.Value = float(elementValue)
-        self.Metadata = [{'OriginalValue':self.Value}]
 
         # Snow is different
         if elementID == 'SA':
@@ -193,7 +195,7 @@ class weatherElement():
             else:
                 self.Value = elementValue/100.
 
-        # Rain seems to have a special treatment aswell
+        # Rain seems to have a special treatment as well
         if elementID == 'RR':
             if elementValue < 0.:
                 self.Value = 0.
