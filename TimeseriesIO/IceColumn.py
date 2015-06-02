@@ -253,35 +253,41 @@ class IceColumn:
 
     def updateDraftHeight(self):
         '''
-        Method updates the iceColumns draft height variable.
-        The draft height given by summing ice, slushice and slush layers. I.e. not snow layers.
+        Method updates the iceColumns draft height variable. The draft height given by summing ice, slush ice and
+        slush layers. I.e. not snow layers and not the surface slush layer
         '''
 
         thickness_ice = 0
-        for i in range(len(self.column)):
-            if self.getEnum(self.column[i][1]) < 20:       # material types >= 20 are snow
-                thickness_ice = thickness_ice + self.column[i][0]
+
+        for l in self.column:
+            if thickness_ice == 0 and self.getEnum(l[1]) > 20:      # material types >= 20 are snow
+                continue
+            elif thickness_ice == 0 and self.getEnum(l[1]) == 2:    # slush over the ice does not count
+                continue
+            else:
+                thickness_ice = thickness_ice + l[0]
+
         self.draft_height = thickness_ice
 
     def updateWaterLine(self):
         '''
-        Method updates the iceColumns water line variable. This is the distance from the bottom
-        of the ice to the waterline. The height of the draft submerged under the water line given by arkimedes law
+        Method updates the iceColumns water line variable. This is the distance from the bottom of the ice to the
+        waterline. The height of the draft submerged under the water line given by arkimedes law
         :return:
         '''
 
         h_draft = 0
-        for i in range(len(self.column)):
-            h_draft = h_draft + self.column[i][0]*self.getRho(self.column[i][1])     # height*density = [kg/m2]
+        for l in self.column:
+            h_draft = h_draft + l[0]*self.getRho(l[1])     # height*density = [kg/m2]
         h_draft = h_draft/self.rho_water        # [kg/m2]*[m3/kg]
         self.water_line = h_draft
 
     def mergeSnowlayersAndCompress(self, temp):
         '''
-         Merges the snowlayers and compresses the snow. This method updates the snow denity in the object and the
-         conductivity of the snow in the object.
+        Merges the snow layers and compresses the snow. This method updates the snow density in the object and the
+        conductivity of the snow in the object.
 
-         Snow compactation may be referenced in article in literature folder or evernote.
+        Snow compactation may be referenced in article in literature folder or evernote.
 
         :param temp: [float] Temperature in celcuis used in the compactation routine.
         :return:
@@ -289,7 +295,7 @@ class IceColumn:
 
         # If no layers, compacation of snow is not needed
         if len(self.column) > 0:
-            # declare the new snow layer (index = 0) as normal snowlayer
+            # declare the new snow layer (index = 0) as normal snow layer
             if self.column[0][1] == 'new_snow':
                 self.column[0][1] = 'snow'
                 if len(self.column) > 1:

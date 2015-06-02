@@ -175,39 +175,92 @@ def runSkoddebergvatnet(startDate, endDate):
 
 def runGiljastolsvatnet(startDate, endDate):
 
-    LocationName = 'Giljastølsvatnet 412 moh'
+    LocationNames = ['Giljastølsvatnet 412 moh', 'Giljastølvatnet sør 412 moh']
+    x = -1904
+    y = 6553573
 
-    # Giljastølsvatnet 412 moh
-    # Giljastølvatnet sør 412 moh
     from_date = datetime.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = datetime.datetime.strptime(endDate, "%Y-%m-%d")
 
     #cs_temp = makeDailyAvarage(getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
-    cs_temp = makeDailyAvarage(getGriddata(593273, 7612469, 'tm', from_date, to_date, 'list'))
-    cs_sno = makeDailyAvarage(getGriddata(593273, 7612469, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = makeDailyAvarage(getGriddata(593273, 7612469, 'sd', from_date, to_date, 'list'))
-    wsCC = getMetData(87640, 'NNM', startDate, endDate, 0, 'list')  # Harstad Stadion
+    cs_temp = makeDailyAvarage(getGriddata(x, y, 'tm', from_date, to_date, 'list'))
+    cs_sno = makeDailyAvarage(getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = makeDailyAvarage(getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    wsCC = getMetData(43010, 'NNM', startDate, endDate, 0, 'list')  # Eik - Hove. Ligger lenger sør men er litt inn i landet.
+    #wsCC = getMetData(43010, 'NNM', startDate, endDate, 0, 'list') # Sola (44560) er et alternativ
 
     temp, date = stripMetadata(cs_temp, True)
     sno = stripMetadata(cs_sno, False)
     snotot = stripMetadata(cs_snotot, False)
     cc = stripMetadata(wsCC, False)
 
-    observed_ice = getAllSeasonIce(LocationName, startDate, endDate)
-    ### mulighet for å velge data fra flere obslocations
+    observed_ice = getAllSeasonIce(LocationNames, startDate, endDate)
 
     if len(observed_ice) == 0:
         ice_cover = calculateIceCover(IceColumn.IceColumn(date[0], []), date, temp, sno, cc)
     else:
         ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
-    plot_filename = '{0}Skoddebergvatnet {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
+    plot_filename = '{0}Giljastolsvatnet {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
 
+def runBaklidammen(startDate, endDate):
 
-# Baklidammen 200 moh
+    LocationNames = ['Baklidammen 200 moh']
+    x = 266550
+    y = 7040812
 
+    from_date = datetime.datetime.strptime(startDate, "%Y-%m-%d")
+    to_date = datetime.datetime.strptime(endDate, "%Y-%m-%d")
 
+    cs_temp = makeDailyAvarage(getGriddata(x, y, 'tm', from_date, to_date, 'list'))
+    cs_sno = makeDailyAvarage(getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = makeDailyAvarage(getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    wsCC = getMetData(68860, 'NNM', startDate, endDate, 0, 'list')  # TRONDHEIM - VOLL
+
+    temp, date = stripMetadata(cs_temp, True)
+    sno = stripMetadata(cs_sno, False)
+    snotot = stripMetadata(cs_snotot, False)
+    cc = stripMetadata(wsCC, False)
+
+    observed_ice = getAllSeasonIce(LocationNames, startDate, endDate)
+
+    if len(observed_ice) == 0:
+        ice_cover = calculateIceCover(IceColumn.IceColumn(date[0], []), date, temp, sno, cc)
+    else:
+        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+
+    plot_filename = '{0}Baklidammen {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
+    plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
+
+def runStorvannetHammerfest(startDate, endDate):
+
+    LocationNames = ['Storvannet, 7 moh']
+    x = 821340
+    y = 7862497
+
+    from_date = datetime.datetime.strptime(startDate, "%Y-%m-%d")
+    to_date = datetime.datetime.strptime(endDate, "%Y-%m-%d")
+
+    cs_temp = makeDailyAvarage(getGriddata(x, y, 'tm', from_date, to_date, 'list'))
+    cs_sno = makeDailyAvarage(getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = makeDailyAvarage(getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    wsCC = getMetData(95350, 'NNM', startDate, endDate, 0, 'list')  # BANAK - østover innerst i fjorden
+
+    temp, date = stripMetadata(cs_temp, True)
+    sno = stripMetadata(cs_sno, False)
+    snotot = stripMetadata(cs_snotot, False)
+    cc = stripMetadata(wsCC, False)
+
+    observed_ice = getAllSeasonIce(LocationNames, startDate, endDate)
+
+    if len(observed_ice) == 0:
+        ice_cover = calculateIceCover(IceColumn.IceColumn(date[0], []), date, temp, sno, cc)
+    else:
+        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+
+    plot_filename = '{0}StorvannetHammerfest {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
+    plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
 
 if __name__ == "__main__":
 
@@ -221,7 +274,6 @@ if __name__ == "__main__":
     #runOrovannMET('2012-11-15', '2013-06-20')
     #runOrovannMET('2013-11-15', '2014-06-20')
     #runOrovannMET('2014-11-15', '2015-03-27')
-
 
     #runHakkloa('2011-11-01', '2012-06-01')
     #runHakkloa('2012-11-01', '2013-06-01')
@@ -237,3 +289,32 @@ if __name__ == "__main__":
     #runSkoddebergvatnet('2012-11-01', '2013-06-01')
     #runSkoddebergvatnet('2013-11-01', '2014-06-01')
     #runSkoddebergvatnet('2014-11-01', '2015-06-01')
+
+    #runGiljastolsvatnet('2012-11-01', '2013-06-01')
+    #runGiljastolsvatnet('2013-11-01', '2014-06-01')
+    #runGiljastolsvatnet('2014-11-01', '2015-06-01')
+
+    #runBaklidammen('2006-11-01', '2007-06-01')
+    runBaklidammen('2007-11-01', '2008-06-01')
+    #runBaklidammen('2008-11-01', '2009-06-01')
+    #runBaklidammen('2009-11-01', '2010-06-01')
+    #runBaklidammen('2010-11-01', '2011-06-01')
+    #runBaklidammen('2011-11-01', '2012-06-01')
+    #runBaklidammen('2012-11-01', '2013-06-01')
+    #runBaklidammen('2013-11-01', '2014-06-01')
+    #runBaklidammen('2014-11-01', '2015-06-01')
+    #runBaklidammen('2014-11-01', '2015-06-01')
+
+    #runStorvannetHammerfest('2008-11-01', '2009-06-01')
+    #runStorvannetHammerfest('2009-11-01', '2010-06-01')
+    #runStorvannetHammerfest('2010-11-01', '2011-06-01')
+    #runStorvannetHammerfest('2011-11-01', '2012-06-01')
+    #runStorvannetHammerfest('2012-11-01', '2013-06-01')
+    #runStorvannetHammerfest('2013-11-01', '2014-06-01')
+    #runStorvannetHammerfest('2014-11-01', '2015-06-01')
+
+    # cleanupp otrøvann
+    # plott CC i plott
+    # figurtext med hva som brukes og plottes
+    # set environment fil som kmunve har i senorge koden sin
+    # cleanup in COL.updateDraftHeight and COL.updateWaterline
