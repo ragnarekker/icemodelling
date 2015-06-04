@@ -41,8 +41,8 @@ def getIceThickness(*args):
         if dh_snow != 0.:
             ic.addLayerAtIndex(0, dh_snow, 'new_snow')
 
-        # Update the slushlevel given new snow and that measurements can be made without ice being in equlibrium with bouancy
-        ic.updateSlushLevel()
+        # Update the slush level given new snow and that measurements can be made without ice being in equlibrium with bouancy
+        ic.update_slush_level()
 
     # if air temperature is FREEZING
     if temp < ic.temp_f:
@@ -134,7 +134,8 @@ def getIceThickness(*args):
 
     ic.mergeAndRemoveExcessLayers()
     ic.mergeSnowlayersAndCompress(temp)
-    ic.updateWaterLine()
+    ic.update_draft_thickness()
+    ic.update_water_line()
 
     return ic
 

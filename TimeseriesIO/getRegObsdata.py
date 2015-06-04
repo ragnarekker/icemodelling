@@ -228,11 +228,22 @@ def getIceThickness(LocationName, fromDate, toDate):
 
             ice_column.addLayerAtIndex(0, ic['SlushSnow'], 'slush')
             ice_column.addLayerAtIndex(0, ic['SnowDepth'], 'snow')
-            ice_column.updateDraftHeight()
+
+            ice_column.mergeAndRemoveExcessLayers()
+            ice_column.update_draft_thickness()
+            ice_column.update_top_layer_is_slush()
+
             iha = ic['IceHeightAfter']
-            if iha == None:
-                iha = 0
-            ice_column.water_line = ice_column.draft_height - float(iha)
+
+            # if ice height after is not given I make an estimate so that I know where to put it in the plot
+            if iha is None:
+                ice_column.update_water_line()
+                ice_column.add_metadata('IceHeightAfter', 'Modeled')
+                iha = ice_column.draft_thickness - ice_column.water_line
+                if ice_column.top_layer_is_slush:
+                    iha = iha + ice_column.snow_pull_on_water
+
+            ice_column.water_line = ice_column.draft_thickness - float(iha)
 
             ice_columns.append(ice_column)
 

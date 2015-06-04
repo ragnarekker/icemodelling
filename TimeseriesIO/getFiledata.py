@@ -107,7 +107,7 @@ def importColumns(filepath_inn):
     # This must be set on each object because Ive not been able to find a way to initialize it properly yet
     for column in columns:
         if column.water_line == -1:
-            column.updateWaterLine()
+            column.update_water_line()
 
     return columns
 

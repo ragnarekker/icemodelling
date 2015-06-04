@@ -32,64 +32,68 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
     plt.title('{0} - {1} days plotted.'.format(filename, len(icecover)))
 
     # a variable for the lowest point on the icecover. It is used for setting the lower left y-limit .
-    lowestPoint = 0.
+    lowest_point = 0.
 
     # Plot icecover
-    for column in icecover:
+    for ic in icecover:
 
         # some idea of progres on the plotting
-        if column.date.day == 1:
-            print((column.date).strftime('%Y%m%d'))
+        if ic.date.day == 1:
+            print((ic.date).strftime('%Y%m%d'))
 
         # make data for plotting. [icelayers.. [fro, too, icetype]].
         columncoordinates = []
-        too = -column.water_line  # water line is on xaxis
+        too = -ic.water_line  # water line is on xaxis
 
-        for i in range(len(column.column)-1, -1, -1):
-            layer = column.column[i]
+        for i in range(len(ic.column)-1, -1, -1):
+            layer = ic.column[i]
             fro = too
             too = too + layer[0]
             columncoordinates.append([fro, too, layer[1]])
 
-            if fro < lowestPoint:
-                lowestPoint = fro
+            if fro < lowest_point:
+                lowest_point = fro
 
             # add coordinates to a vline plot
-            plt.vlines(column.date, fro, too, lw=modelledLineWeight, color=column.getColour(layer[1]))
+            plt.vlines(ic.date, fro, too, lw=modelledLineWeight, color=ic.getColour(layer[1]))
 
         allColumnCoordinates.append(columncoordinates)
 
 
-    # plot observed icecolumns
-    for column in observed_ice:
+    # plot observed ice columns
+    for ic in observed_ice:
 
-        if len(column.column) == 0:
+        if len(ic.column) == 0:
             height = 0.05
-            plt.vlines(column.date, -height, height, lw=4, color='white')
-            plt.vlines(column.date, -height, height, lw=2, color='red')
+            plt.vlines(ic.date, -height, height, lw=4, color='white')
+            plt.vlines(ic.date, -height, height, lw=2, color='red')
         else:
-            # some idea of progres on the plotting
+            # some idea of progress on the plotting
             print("Plotting observations.")
 
-            # make data for plotting. [icelayers.. [fro, too, icetype]].
-            too = -column.water_line  # water line is on xaxis
+            # make data for plotting. [ice layers.. [fro, too, icetype]].
+            too = -ic.water_line  # water line is on xaxis
 
-            for i in range(len(column.column)-1, -1, -1):
-                layer = column.column[i]
+            for i in range(len(ic.column)-1, -1, -1):
+                layer = ic.column[i]
                 fro = too
                 too = too + layer[0]
 
-                if fro < lowestPoint:
-                    lowestPoint = fro
+                if fro < lowest_point:
+                    lowest_point = fro
 
                 padding = 0.
+                padding_color = 'white'
+                # outline the observations in orange if I have modelled the ice height after observation.
+                if ic.metadata.get('IceHeightAfter') == 'Modeled':
+                    padding_color = 'orange'
                 # add coordinates to a vline plot
-                plt.vlines(column.date, fro-padding, too+padding, lw=6, color= "white")
-                plt.vlines(column.date, fro, too, lw=4, color=column.getColour(layer[1]))
+                plt.vlines(ic.date, fro-padding, too+padding, lw=6, color=padding_color)
+                plt.vlines(ic.date, fro, too, lw=4, color=ic.getColour(layer[1]))
 
     # the limits of the leftside y-axis is defined relative the lowest point in the icecover
     # and the highest point of the observed snowcover.
-    plt.ylim(lowestPoint*1.1, max(snotot)*1.05)
+    plt.ylim(lowest_point*1.1, max(snotot)*1.05)
 
     # Plot temperatures on a separate y axis
     plt.twinx()
