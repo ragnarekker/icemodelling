@@ -1,0 +1,50 @@
+(dp0
+I0
+S'Ikke gitt'
+p1
+sI1
+S'Isfritt paa maalestedet'
+p2
+sI2
+S'Delvis islagt paa maalestedet'
+p3
+sI3
+S'Helt islagt paa maalestedet'
+p4
+sI40
+S'Isgang i elv'
+p5
+sI41
+S'Drivende sarr paa elv'
+p6
+sI10
+S'Isloesning langs land'
+p7
+sI11
+S'Islegging langs land'
+p8
+sI80
+S'Ingen is denne vinteren'
+p9
+sI81
+S'Svaert lite is, men ukjent naar'
+p10
+sI82
+S'Ukjent, trolig kort vinter'
+p11
+sI83
+S'Ukjent, trolig normal vinter'
+p12
+sI20
+S'Hele sjoeen isfri'
+p13
+sI21
+S'Hele sjoeen islagt'
+p14
+sI99
+S'Ukjent'
+p15
+sI84
+S'Ukjent, trolig lang vinter'
+p16
+s.

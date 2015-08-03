@@ -4,7 +4,7 @@ __author__ = 'ragnarekker'
 import requests
 from lxml import etree
 import datetime
-from timeseriesClasses import weatherElement, okta2unit
+from WeatherElement import WeatherElement, okta2unit
 import xml.etree.ElementTree as ET      # used in the incomplete methods
 
 # Incomplete
@@ -165,7 +165,7 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
         :return:                A list of weatherElements or files are made to working directory.
 
     Output options:
-        'list':         returns a list of weatherElement objects.
+        'list':         returns a list of WeatherElement objects.
         'xml':          returns NULL but saves a .xml file to the working folder.
         'csv':          returns NULL but saves a .csv file to the working folder. The separation value are tab
 
@@ -232,7 +232,7 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
                 elementID = weatherElementItem.find('id').text.encode('utf-8')
 
                 if output == 'list':
-                    weatherElementList.append(weatherElement(elementLocatonID, elementDate, elementID, elementValue))
+                    weatherElementList.append(WeatherElement(elementLocatonID, elementDate, elementID, elementValue))
 
                 elif output == 'csv':
                     f.write('{0}\t{1}\t{2}\t{3}\n'.format(elementLocatonID, elementDate, elementID, elementValue))

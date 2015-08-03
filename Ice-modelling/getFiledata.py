@@ -68,7 +68,7 @@ def importColumns(filepath_inn):
 
     '''
     import copy
-    from TimeseriesIO import IceColumn
+    import IceColumn
 
     # Read file
     innfile = open(filepath_inn)

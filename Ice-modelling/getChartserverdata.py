@@ -4,8 +4,9 @@ __author__ = 'ragnarekker'
 import datetime
 
 import requests
-from Calculations import parameterization
-from timeseriesClasses import weatherElement, makeDailyAvarage, cm2m
+
+import calculateParameterization as pz
+from WeatherElement import WeatherElement, makeDailyAvarage, cm2m
 
 # URL to the chartserver/ShowData service
 baseURL = "http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart&ver=1.0&vfmt=json"
@@ -19,7 +20,7 @@ def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
     :param stationID [string]:              Station ID in hydra. Ex: stationID  = '6.24.4'
     :param elementID [string]:              Element ID in hydra. Ex: elementID = '17.1'
     :param methodReference [dictionary]:    Referance added to the metadata. Ex: {'MethodName': 'Chartserver - getStationdata'}
-    :return [list[weatherElement]]:         List of weatherElement objects.
+    :return [list[WeatherElement]]:         List of WeatherElement objects.
     """
     datareq = requests.get(url).json()
 
@@ -31,9 +32,9 @@ def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
     for sp in seriesPoints:
 
         value = sp[u'Value']
-        date = parameterization.unixTime2Normal(int(sp[u'Key'][6:-2]))
+        date = pz.unixTime2Normal(int(sp[u'Key'][6:-2]))
 
-        we = weatherElement(stationID, date, elementID, value)
+        we = WeatherElement(stationID, date, elementID, value)
         we.Metadata.append(methodReference)
         we.Metadata.append({'URL':url})
         we.Metadata.append({'LegendText':legendText})
@@ -55,10 +56,10 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, output):
     :param fromDate:    {datetime} method returns [fromDate ,toDate>
     :param toDate:      {datetime} method returns [fromDate ,toDate>
     :param output:      {string} How to present the output.
-    :return:            {list} List of weatherElement objects with 24h resolution.
+    :return:            {list} List of WeatherElement objects with 24h resolution.
 
     Output options:
-        'list':         returns a list of weatherElement objects.
+        'list':         returns a list of WeatherElement objects.
         'json':         returns NULL but saves a .json file til the working folder.
 
 
@@ -109,10 +110,10 @@ def getYrdata(stationID, elementID, fromDate, toDate, output):
     :param fromDate:    {datetime} method returns data including fromDate
     :param toDate:      {datetime} method returns data including toDate
     :param output:      {string} How to present the output.
-    :return:            List of weatherElement objects with 24h resolution.
+    :return:            List of WeatherElement objects with 24h resolution.
 
     Output options:
-        'list':         returns a list of weatherElement objects.
+        'list':         returns a list of WeatherElement objects.
         'json':         returns NULL but saves a .json file til the working folder.
 
     URL for getting stationdata from Hakkloa 6.24.4.17.1
@@ -165,10 +166,10 @@ def getStationdata(stationID, elementID, fromDate, toDate, output):
     :param fromDate:    {datetime} method returns [fromDate ,toDate]
     :param toDate:      {datetime} method returns [fromDate ,toDate]
     :param output:      {string} How to present the output.
-    :return:            {list} List of weatherElement objects with 24h resolution.
+    :return:            {list} List of WeatherElement objects with 24h resolution.
 
     Output options:
-        'list':         returns a list of weatherElement objects.
+        'list':         returns a list of WeatherElement objects.
         'json':         returns NULL but saves a .json file til the working folder.
 
     URL for getting stationdata from Hakkloa 6.24.4.17.1

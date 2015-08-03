@@ -1,72 +1,18 @@
 __author__ = 'ragnarekker'
 # -*- coding: utf-8 -*-
 
-import requests
 import datetime
-from Calculations import parameterization
+import types
+import requests
+import os
+
 import IceCover as COV
 import IceColumn as COL
-import types
+import fEncoding as fe
+import makePickle as mp
 
-apiVersion = "v0.9.9"
-
-def __removeNorwegianLetters(nameInn):
-    """
-
-    :param nameInn:
-    :return:
-    """
-    name = nameInn
-    if u'å' in name:
-        name = name.replace(u'å', 'aa').encode('ascii', 'ignore')
-    elif u'ø' in name:
-        name = name.replace(u'ø', 'oe').encode('ascii', 'ignore')
-    elif u'æ' in name:
-        name = name.replace(u'æ', 'ae').encode('ascii', 'ignore')
-    else:
-        name = name.encode('ascii', 'ignore')
-    return name
-
-def __addNorwegianLetters(nameInn):
-    """
-
-    :param nameInn:
-    :return:
-    """
-
-    name = nameInn
-    if u'ae' in name:
-        name = name.replace(u'ae', 'æ'.decode('utf8', 'ignore'))
-    if u'oe' in name:
-        name = name.replace(u'oe', 'ø'.decode('utf8', 'ignore'))
-    if u'aa' in name:
-        name = name.replace(u'aa', 'å'.decode('utf8', 'ignore'))
-
-    return name
-
-def __changeUnicodeToUTF8Hex(nameInn):
-    """
-
-    :param nameInn:
-    :return:
-    """
-
-    name = nameInn
-    if 'å' in name:
-        name = name.replace('å', '%C3%A5').encode('ascii', 'ignore')
-    elif 'ø' in name:
-        name = name.replace('ø', '%C3%B8').encode('ascii', 'ignore')
-    elif 'æ' in name:
-        name = name.replace('æ', '%C3%A6').encode('ascii', 'ignore')
-    elif 'Å' in name:
-        name = name.replace('Å', '%C3%85').encode('ascii', 'ignore')
-    elif 'Ø' in name:
-        name = name.replace('Ø', '%C3%98').encode('ascii', 'ignore')
-    elif 'Æ' in name:
-        name = name.replace('Æ', '%C3%86').encode('ascii', 'ignore')
-    else:
-        name = name.encode('ascii', 'ignore')
-    return name
+import calculateParameterization as pz
+from setEnvironment import api_version, kdv_elements_folder
 
 
 def getIceCover(LocationName, fromDate, toDate):
@@ -94,7 +40,7 @@ def getIceCover(LocationName, fromDate, toDate):
 
     else:
         view = 'IceCoverObsV'
-        OdataLocationName = __changeUnicodeToUTF8Hex(LocationName)
+        OdataLocationName = fe.change_unicode_to_utf8hex(LocationName)
 
         oDataQuery = "DtObsTime gt datetime'{0}' and " \
                      "DtObsTime lt datetime'{1}' and " \
@@ -102,13 +48,13 @@ def getIceCover(LocationName, fromDate, toDate):
                      "LangKey eq 1".format(fromDate, toDate, OdataLocationName)
 
         # get data for current view and dates
-        url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".decode('utf8').format(apiVersion, oDataQuery, view)
+        url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".decode('utf8').format(api_version, oDataQuery, view)
         data = requests.get(url).json()
         datalist = data['d']['results']
 
 
         for ic in datalist:
-            iceCoverDate = parameterization.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
+            iceCoverDate = pz.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
             iceCoverName = ic['IceCoverName']
             iceCoverBefore = ic['IceCoverBeforeName']
             cover = COV.IceCover(iceCoverDate, iceCoverName, iceCoverBefore, LocationName)
@@ -116,6 +62,7 @@ def getIceCover(LocationName, fromDate, toDate):
             iceCoverList.append(cover)
 
     return iceCoverList
+
 
 def getFirstIceCover(LocationName, fromDate, toDate):
     '''
@@ -153,6 +100,7 @@ def getFirstIceCover(LocationName, fromDate, toDate):
 
     return COV.IceCover(from_date, "Ikke gitt", 'Ikke gitt', LocationName)
 
+
 def getLastIceCover(LocationName, fromDate, toDate):
     '''
     Method gives the observation confirming ice is gone for the season from a lake.
@@ -186,6 +134,7 @@ def getLastIceCover(LocationName, fromDate, toDate):
 
     return noIceCover
 
+
 def getIceThickness(LocationName, fromDate, toDate):
     '''
     Method returns a list of ice thickness between two dates for a given location in regObs.
@@ -203,7 +152,7 @@ def getIceThickness(LocationName, fromDate, toDate):
             ice_columns = ice_columns + getIceThickness(l, fromDate, toDate)
     else:
         view = 'IceThicknessV'
-        OdataLocationName = __changeUnicodeToUTF8Hex(LocationName)  # Crazyshitencoding
+        OdataLocationName = fe.change_unicode_to_utf8hex(LocationName)  # Crazyshitencoding
 
         oDataQuery = "DtObsTime gt datetime'{0}' and " \
                      "DtObsTime lt datetime'{1}' and " \
@@ -211,12 +160,12 @@ def getIceThickness(LocationName, fromDate, toDate):
                      "LangKey eq 1".format(fromDate, toDate, OdataLocationName)
 
         # get data for current view and dates
-        url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".decode('utf8').format(apiVersion, oDataQuery, view)
+        url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".decode('utf8').format(api_version, oDataQuery, view)
         data = requests.get(url).json()
         datalist = data['d']['results']
 
         for ic in datalist:
-            date = parameterization.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
+            date = pz.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
             RegID = ic['RegID']
             layers = __IceThicknessLayers(RegID)
             if len(layers) == 0:
@@ -248,6 +197,7 @@ def getIceThickness(LocationName, fromDate, toDate):
             ice_columns.append(ice_column)
 
     return ice_columns
+
 
 def getAllSeasonIce(LocationName, fromDate, toDate):
     '''
@@ -304,7 +254,7 @@ def __IceThicknessLayers(RegID):
 
     url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{1}?" \
           "$filter=RegID eq {2} and LangKey eq 1&$format=json"\
-        .format(apiVersion, view, RegID)
+        .format(api_version, view, RegID)
     data = requests.get(url).json()
     datalist = data['d']['results']
 
@@ -326,6 +276,7 @@ def __IceThicknessLayers(RegID):
         reversed_layers.append(l)
 
     return reversed_layers
+
 
 def __get_ice_type(IceLayerTID):
     '''
@@ -363,42 +314,68 @@ def getTIDfromName(xKDV, LangKeyTID, name):
     :param name:
     :return:
     '''
-    url = 'http://api.nve.no/hydrology/regobs/{1}/OData.svc/{0}?$filter=Langkey%20eq%20{2}%20&$format=json'.format(xKDV, apiVersion, LangKeyTID)
-    xKDV = getKDV(url)
+    #url = 'http://api.nve.no/hydrology/regobs/{1}/OData.svc/{0}?$filter=Langkey%20eq%20{2}%20&$format=json'.format(xKDV, api_version, LangKeyTID)
+    xKDV = getKDV(xKDV)
 
     TID = -1
 
     for xTID, xName in xKDV.iteritems():
-        if xName == __removeNorwegianLetters(name):
+        if xName == fe.remove_norwegian_letters(name):
             TID = xTID
 
     return TID
 
-def getKDV(url):
+
+def getKDV(xKDV):
     '''
     Imports a xKDV view from regObs and returns a dictionary with <key, value> = <ID, Name>
-    :param url:
-    :return:
+    An xKDV is requested from the regObs api if a pickle file newer than a week exists.
 
-    Eg: 'http://api.nve.no/hydrology/regobs/v0.9.4/OData.svc/IceCoverKDV?$filter=Langkey%20eq%201%20&$format=json'
-    returns values for IceCoverKDV in norwegian.
+    :param xKDV:    [string]    xKDV view
+    :return dict:   {}          xKDV as a dictionary
+
+    Ex of use: aval_cause_kdv = get_kdv('AvalCauseKDV')
+    Ex of url for returning values for IceCoverKDV in norwegian:
+    http://api.nve.no/hydrology/regobs/v0.9.4/OData.svc/ForecastRegionKDV?$filter=Langkey%20eq%201%20&$format=json
+
     '''
 
 
-    # print("Getting KDV from URL:{0}".format(url))
+    kdv_file = '{0}{1}.pickle'.format(kdv_elements_folder, xKDV)
+    dict = {}
 
-    xKDV = requests.get(url).json()
-    xDict = {}
-    for a in xKDV['d']['results']:
-        try:
-            if 'AvalCauseKDV' in url and a['ID'] > 9 and a['ID'] < 25:      # this table gets special treatment
-                xDict[a["ID"]] = __removeNorwegianLetters(a["Description"])
-            else:
-                xDict[a["ID"]] = __removeNorwegianLetters(a["Name"])
-        except (RuntimeError, TypeError, NameError):
-            pass
+    if os.path.exists(kdv_file):
 
-    return xDict
+        ### Should be useful to test if the file is old and if so make a new one
+        # max_file_age = 3
+        # file_date = time.ctime(os.path.getctime(kdv_file))
+        # date_limit = datetime.datetime.now() - datetime.timedelta(days=max_file_age)
+        ###
+
+        #print("Getting KDV from pickle:{0}".format(kdv_file))
+        dict = mp.unpickle_anything(kdv_file)
+
+    else:
+        url = 'http://api.nve.no/hydrology/regobs/{0}/OData.svc/{1}?$filter=Langkey%20eq%201%20&$format=json'\
+            .format(api_version, xKDV)
+
+        print("Getting KDV from URL:{0}".format(url))
+
+        kdv = requests.get(url).json()
+
+        for a in kdv['d']['results']:
+            try:
+                if 'AvalCauseKDV' in url and a['ID'] > 9 and a['ID'] < 26:      # this table gets special treatment
+                    dict[a["ID"]] = fe.remove_norwegian_letters(a["Description"])
+                else:
+                    dict[a["ID"]] = fe.remove_norwegian_letters(a["Name"])
+            except (RuntimeError, TypeError, NameError):
+                pass
+
+            mp.pickle_anything(dict, kdv_file)
+
+    return dict
+
 
 
 if __name__ == "__main__":

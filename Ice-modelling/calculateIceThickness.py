@@ -2,9 +2,9 @@ __author__  =  'raek'
 # -*- coding: utf-8 -*-
 
 import math
-
 import numpy
-from Calculations import parameterization
+import calculateParameterization as cpz
+
 
 def getIceThickness(*args):
 
@@ -25,10 +25,10 @@ def getIceThickness(*args):
 
     if len(args) == 4:
         temp = temp
-        # temp = parameterization.tempFromTempAndSnow(temp, dh_snow)
+        # temp = cpz.tempFromTempAndSnow(temp, dh_snow)
     elif len(args) == 5:
         cc = args[4]
-        temp = parameterization.tempFromTempAndClouds(temp, cc)
+        temp = cpz.tempFromTempAndClouds(temp, cc)
     else:
         print('Unknown number of arguments.')
 
@@ -138,6 +138,7 @@ def getIceThickness(*args):
     ic.update_water_line()
 
     return ic
+
 
 def addLayerConductanceToTotal(U_total, k, h):
     # Adds a layers conductance to a total conductance

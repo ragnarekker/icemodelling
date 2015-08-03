@@ -1,21 +1,20 @@
-from Calculations import __getGammafilter
-
 __author__ = 'ragnarekker'
 # -*- coding: utf-8 -*-
 
-from Calculations.parameterization import *
-from TimeseriesIO import getMetData, stripMetadata
-import pylab as plt
-import numpy as np
 import copy
 import sqlite3 as db
 import datetime
 
-plot_folder = "/Users/ragnarekker/Documents/GitHub/Ice-modelling/Plots/"
-databaseLocation = '/Users/ragnarekker/Documents/GitHub/Ice-modelling/Databases/cloudMakingResults.sqlite'
+import pylab as plt
+import numpy as np
 
-#plot_folder = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Plots\\"
-#databaseLocation = "C:\\Users\\raek\\Documents\\GitHub\\Ice-modelling\\Databases\\cloudMakingResults.sqlite"
+from calculateParameterization import *
+from getWSklima import getMetData
+from WeatherElement import stripMetadata
+
+from setEnvironment import plot_folder, database_location
+
+
 
 def ccFromPrecAndTemp2(stnr, startDate, endDate):
 
@@ -230,7 +229,7 @@ def doAREMCAnalyssis(stnr, startDate, endDate):
     wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
     wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
 
-    temp, date = stripMetadata(wsTemp, getDates=True)
+    temp, date = stripMetadata(wsTemp, get_dates=True)
     prec = stripMetadata(wsPrec, False)
     clouds = stripMetadata(wsCC, False)
 
@@ -268,7 +267,7 @@ def doAREMCAnalyssis(stnr, startDate, endDate):
                                         # What is the root mean square of estimatet vs observed clouds?
                                         rms = np.sqrt(((np.array(estClouds) - np.array(cloudsShifted)) ** 2).mean())
 
-                                        __writeRMC2database(databaseLocation, a, b, c, d, e, f, g, h, i, rms, loggdate, stnr, period)
+                                        __writeRMC2database(database_location, a, b, c, d, e, f, g, h, i, rms, loggdate, stnr, period)
 
                                         doneSimulations = doneSimulations + 1
                                         print('beregning {0} av {1}'.format(doneSimulations, estimateSimulations))
@@ -353,7 +352,7 @@ def correlateCloudsAndTemp(stnr, startDate, endDate):
                             crossCorr = np.correlate(dTempExpression, ccwithoffset)
 
                             a = 1
-                            __writeCorrelation2database(databaseLocation,  cs, to, dto, depdT, depT, omc, crossCorr[0], loggdate, period, stnr)
+                            __writeCorrelation2database(database_location,  cs, to, dto, depdT, depT, omc, crossCorr[0], loggdate, period, stnr)
 
                             doneSimulations = doneSimulations + 1
                             print('beregning {0} av {1}'.format(doneSimulations, estimateSimulations))
@@ -385,7 +384,7 @@ def testCloudMaker(stnr, startDate, endDate, method):
     wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
     wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
 
-    temp, date = stripMetadata(wsTemp, getDates=True)
+    temp, date = stripMetadata(wsTemp, get_dates=True)
     prec = stripMetadata(wsPrec, False)
     clouds = stripMetadata(wsCC, False)
 
@@ -492,7 +491,7 @@ def makeSomeScatterPlots(stnr, startDate, endDate):
     wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
     wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
 
-    temp, date = stripMetadata(wsTemp, getDates=True)
+    temp, date = stripMetadata(wsTemp, get_dates=True)
     prec = stripMetadata(wsPrec, False)
     clouds = stripMetadata(wsCC, False)
 

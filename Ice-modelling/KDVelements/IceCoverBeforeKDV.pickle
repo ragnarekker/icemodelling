@@ -1,0 +1,38 @@
+(dp0
+I0
+S'Ikke gitt'
+p1
+sI1
+S'Isfritt, naa foerste is maalested'
+p2
+sI2
+S'Isfritt, naa foerste is ved land'
+p3
+sI3
+S'Isfritt, ogsaa isfritt naa'
+p4
+sI4
+S'Gradvis islegging'
+p5
+sI5
+S'Gradvis isloesning'
+p6
+sI6
+S'Brudd - Gradvis isloesning'
+p7
+sI10
+S'Forrige obs gjelder til i gaar'
+p8
+sI99
+S'Brudd - Ukjent foer naa'
+p9
+sI90
+S'Isfritt i gaar - ukjent fra naar'
+p10
+sI91
+S'Delvis islagt - ukjent fra naar'
+p11
+sI92
+S'Islagt - ukjent fra naar'
+p12
+s.

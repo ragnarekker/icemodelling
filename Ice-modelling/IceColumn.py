@@ -6,8 +6,8 @@ __author__ = 'ragnarekker'
 
 import math
 import datetime
+import calculateParameterization as pz
 
-from Calculations import parameterization
 
 class IceColumn:
 
@@ -341,7 +341,7 @@ class IceColumn:
 
                 rho_snow_old = self.rho_snow
                 rho_snow_new = rho_snow_old + delta_rho_snow
-                k_snow_new = parameterization.k_snow_from_rho_snow(rho_snow_new)
+                k_snow_new = pz.k_snow_from_rho_snow(rho_snow_new)
 
             # Else we have meltingconditions and the snow conductivuty and density is sett to max
             else:

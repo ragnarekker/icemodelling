@@ -2,8 +2,9 @@ __author__ = 'raek'
 
 import datetime
 
-from Testfiles.functionsIO import *
 import matplotlib.pyplot as plt3
+
+from Testfiles.functionsIO import *
 
 #import matplotlib.pyplot as plt2
 
