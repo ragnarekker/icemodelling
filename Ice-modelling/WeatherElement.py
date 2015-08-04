@@ -3,6 +3,7 @@ __author__ = 'raek'
 
 import datetime
 
+
 def stripMetadata(weather_element_list, get_dates):
     """
     Method takes inn a list of WeatherElement objects and strips away all metadata. A list of values is returned and if
@@ -33,6 +34,7 @@ def stripMetadata(weather_element_list, get_dates):
 
         return valueList
 
+
 def okta2unit(cloud_cover_in_okta_list):
     """
     Cloudcover from met.no is given in units of okta. Numbers 1-8. This method converts that list to values of units
@@ -57,6 +59,7 @@ def okta2unit(cloud_cover_in_okta_list):
 
     return cloudCoverInUnitsList
 
+
 def cm2m(weather_element_list):
     """
 
@@ -71,6 +74,7 @@ def cm2m(weather_element_list):
         weatherElementListSI.append(we)
 
     return weatherElementListSI
+
 
 def makeDailyAvarage(weather_element_list):
     """
@@ -139,6 +143,7 @@ def makeDailyAvarage(weather_element_list):
 
     return newWeatherElementList
 
+
 def avarageValue(weather_element_list, lower_index, upper_index):
     """
     The method will return the avarage value of a list or part of a list with weatherElements
@@ -159,6 +164,7 @@ def avarageValue(weather_element_list, lower_index, upper_index):
     avgToReturn = avgToReturn/(upper_index-lower_index)
 
     return avgToReturn
+
 
 class WeatherElement():
 

@@ -30,10 +30,12 @@ class IceColumn:
         self.draft_thickness = -1       # This is ice, slushice and slush layers. I.e. not snow layers
         self.metadata = {}              # Metadata given as dictionary {key:value , key:value, ... }
         self.top_layer_is_slush = None  # [Bool] True if top layer is slush. False if not.
-        self.column_average_temperature = [0,0,0,0,0,0]  # average temp as average og atm and 0 weighted over last fiew days
+        self.column_average_temperature = 0
+        self.last_days_temp_atm = [0,0,0,0,0]   # index zero is current and 1 is yesturday etc.
 
         ### initialize waterline better
         ### calculate old height of draft better with use of density? and the old snow layers?
+        ### inttroduce layer.type, layer.height, layer.temp
 
         if column_inn == 0:         # the case of no ice
             self.column = list()
@@ -43,6 +45,7 @@ class IceColumn:
             self.column = column_inn
             self.water_line = -1
             self.draft_thickness = -1
+
 
     def set_constants(self):
         '''
@@ -106,11 +109,14 @@ class IceColumn:
         self.min_slush_change = 0.05         # If slushlevelchange is lower than this value the no new slushlevel is made
         self.snow_to_slush_ratio = 0.33      # when snow becomes slush when water is pulled up it also is compressed
 
+
     def add_metadata(self, key, value):
         self.metadata[key] = value
 
+
     def set_water_line(self, water_line_inn):
         self.water_line = water_line_inn
+
 
     def addLayerAtIndex(self, index, height, layertype):
         '''
@@ -130,9 +136,11 @@ class IceColumn:
             else:
                 self.column.insert(index, [height, layertype])
 
+
     def removeLayerAtIndex(self, index):
         # Removes a layer at a given index
         self.column.pop(index)
+
 
     def timestepForward(self, timestep):
         '''
@@ -141,6 +149,7 @@ class IceColumn:
         :return:
         '''
         self.date = self.date + datetime.timedelta(seconds = timestep)
+
 
     def mergeAndRemoveExcessLayers(self):
         '''
@@ -207,40 +216,73 @@ class IceColumn:
 
 
     def update_column_average_temperature(self, temp_atm):
-        '''INCOMPLETE
-        Avg temperature of the column for Longwave purposes
-        Se update_column_temperatures for attempt to get the layer temps esitmated.
+        '''Average temperature of the column. The teory is:
 
-        Should do: Layers as class: layer.type, layer.temp, layer.thick
+                temp_avg = ( sum_n(temp_atm * weight_n) / sum_n(weight_n) )/2
 
-        Column temp cant be above 0
-        weight should reflect thickness
+        We devide by 2 from the asumption that there is a linear temperature gradient in the column and
+        at thte botonm it is water at 0C.
+
+        Method takes into account column thickness to how quick its temperature shifts according to
+        the atmospheric temperature.
+
+        I do calculations in Kelvin so that days with 0C in are taken into account.
+
         :param temp_atm:
         :return:
 
         '''
+
         absolute_zero = -273.15  # 0K is -273.15C
+        max_h_thin_layer = 0.3      # in meter
+        medium_weights = [5,2]
+        max_h_medium_layer = 1.     # in meter
+        thick_weighs = [5,3,2,1]
 
-        self.column_average_temperature.insert(1, temp_atm)
-        self.column_average_temperature.pop(-1)
+        # first index is avg temp. The next indexes are todays temperature, yesturdays temp, etc.
+        self.last_days_temp_atm.insert(0, temp_atm)
+        self.last_days_temp_atm.pop(-1)
 
-        avgTemp = 0
+        # effect of temperature o column is depending on column thickness
+        total_thick = 0
+        for l in self.column:
+            total_thick = total_thick + l[0]
 
-        weight = [5,2,1]
-        weight_sum = sum(weight)
+        avg_temp = 0
 
-        for i in range(0, len(weight), 1):
-            w_i = weight[i]
-            temp_i = self.column_average_temperature[i+1] - absolute_zero
-            avgTemp = avgTemp + temp_i * w_i
+        # Thinlayer case
+        if total_thick < max_h_thin_layer:
+            avg_temp = temp_atm - absolute_zero
 
-        avgTemp = avgTemp/weight_sum
+        # Medium layer case
+        elif (total_thick >= max_h_thin_layer) and (total_thick < max_h_medium_layer):
+            weight = medium_weights
+            weight_sum = sum(weight)
+            for i in range(0, len(weight), 1):
+                w_i = weight[i]
+                temp_i = self.last_days_temp_atm[i] - absolute_zero
+                avg_temp = avg_temp + temp_i * w_i
+            avg_temp = avg_temp/weight_sum
 
-        avg_temp_out = (avgTemp + absolute_zero)/2
-        self.column_average_temperature[0] = avg_temp_out
+        # Thick layer case
+        else:
+            weight = thick_weighs
+            weight_sum = sum(weight)
+            for i in range(0, len(weight), 1):
+                w_i = weight[i]
+                temp_i = self.last_days_temp_atm[i] - absolute_zero
+                avg_temp = avg_temp + temp_i * w_i
+            avg_temp = avg_temp/weight_sum
+
+        # avg_temp is also effected by water temp (0C)
+        avg_temp_out = (avg_temp + absolute_zero)/2
+
+        # snow and ice isnt above 0C
+        if avg_temp_out > 0.: avg_temp_out = 0.
+
+        self.column_average_temperature = avg_temp_out
 
         return
-
 
 
     def update_slush_level(self):
@@ -316,6 +358,7 @@ class IceColumn:
         self.mergeAndRemoveExcessLayers()
         self.update_water_line()     # due to the snow pulling water up in the snow the waterline is shifted since before uppdatig the slushlevel
 
+
     def update_draft_thickness(self):
         '''
         Method updates the iceColumns draft_thickness variable. The draft height given by summing ice, slush ice and
@@ -334,6 +377,7 @@ class IceColumn:
 
         self.draft_thickness = draft_thickness
 
+
     def update_water_line(self):
         '''
         Method updates the iceColumns water line variable. This is the distance from the bottom of the ice to the
@@ -347,6 +391,7 @@ class IceColumn:
             column_mass = column_mass + l[0]*self.getRho(l[1])     # height*density = [kg/m2]
         water_line = column_mass/self.rho_water        # [kg/m2]*[m3/kg]
         self.water_line = water_line
+
 
     def update_top_layer_is_slush(self):
         '''
@@ -365,6 +410,7 @@ class IceColumn:
             else:
                 self.top_layer_is_slush = False
                 return False
+
 
     def mergeSnowlayersAndCompress(self, temp_atm):
         '''
@@ -420,6 +466,7 @@ class IceColumn:
             h_snow_new = self.column[0][0] / self.rho_snow * rho_snow_old    # Asume a inverse linear correlation between density and the height (preservation og mass?)
             self.column[0][0] = h_snow_new
 
+
     def getConductivity(self, type):
         # returns the conductivity for a given snow or ice type
 
@@ -432,6 +479,7 @@ class IceColumn:
         elif type == 'water': return self.k_water
         elif type == 'unknown': return self.k_slush_ice
         else: return self.k_slush_ice
+
 
     def getRho(self, type):
         # returns the density for a given snow or ice type
@@ -446,6 +494,7 @@ class IceColumn:
         elif type == 'unknown': return self.rho_slush_ice
         else: return self.rho_slush_ice
 
+
     def getEnum(self, type):
         # returns the enum used for a given snow or ice type
 
@@ -459,6 +508,7 @@ class IceColumn:
         elif type == 'unknown': return self.enum_slush_ice
         else: return self.enum_NA
 
+
     def getColour(self, type):
         # returns the color used for plotting a given snow or ice type
 
@@ -471,6 +521,7 @@ class IceColumn:
         elif type == 'water': return "red"
         elif type == 'unknown': return "orange"
         else: return "yellow"
+
 
 def tests():
     # some tests of the functions in the IceColumn.py file

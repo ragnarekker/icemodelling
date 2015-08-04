@@ -7,7 +7,7 @@ import datetime as dt
 
 import calculateIceThickness as itc
 import calculateParameterization as pz
-import IceColumn as ic
+import IceColumn as col
 import WeatherElement as we
 import getRegObsdata as gro
 import getFiledata as gfd
@@ -86,7 +86,7 @@ def runOrovannMET(startDate, endDate):
     observed_ice = gro.getAllSeasonIce(location_name, startDate, endDate)
 
     if len(observed_ice) == 0:
-        icecover = calculateIceCover(ic.IceColumn(date[0], []), date, temp, sno)
+        icecover = calculateIceCover(col.IceColumn(date[0], []), date, temp, sno)
     else:
         icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno)
 
@@ -116,7 +116,7 @@ def runSemsvann(startDate, endDate):
     #observed_ice = importColumns(observed_ice_filename)
     observed_ice = gro.getAllSeasonIce(LocationName, startDate, endDate)
     if len(observed_ice) == 0:
-        icecover = calculateIceCover(ic.IceColumn(date[0], []), date, temp, sno, cc)
+        icecover = calculateIceCover(col.IceColumn(date[0], []), date, temp, sno, cc)
     else:
         icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
@@ -143,7 +143,7 @@ def runHakkloa(startDate, endDate):
     observed_ice = gro.getAllSeasonIce(LocationName, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ic.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCover(col.IceColumn(date[0], []), date, temp, sno, cc)
     else:
         ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
@@ -172,7 +172,7 @@ def runSkoddebergvatnet(startDate, endDate):
     observed_ice = gro.getAllSeasonIce(LocationName, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ic.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCover(col.IceColumn(date[0], []), date, temp, sno, cc)
     else:
         ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
@@ -204,7 +204,7 @@ def runGiljastolsvatnet(startDate, endDate):
     observed_ice = gro.getAllSeasonIce(LocationNames, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ic.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCover(col.IceColumn(date[0], []), date, temp, sno, cc)
     else:
         ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
@@ -234,7 +234,7 @@ def runBaklidammen(startDate, endDate):
     observed_ice = gro.getAllSeasonIce(LocationNames, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ic.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCover(col.IceColumn(date[0], []), date, temp, sno, cc)
     else:
         ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
@@ -264,7 +264,7 @@ def runStorvannetHammerfest(startDate, endDate):
     observed_ice = gro.getAllSeasonIce(LocationNames, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ic.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCover(col.IceColumn(date[0], []), date, temp, sno, cc)
     else:
         ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
