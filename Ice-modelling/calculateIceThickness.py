@@ -25,23 +25,22 @@ def getIceThickness(*args):
 
     if len(args) == 4:
         temp = temp
-        # temp = cpz.tempFromTempAndSnow(temp, dh_snow)
+        # temp = cpz.temperature_from_temperature_and_snow(temp, dh_snow)
     elif len(args) == 5:
         cc = args[4]
-        temp = cpz.tempFromTempAndClouds(temp, cc)
+        temp = cpz.temperature_from_temperature_and_clouds(temp, cc)
     else:
         print('Unknown number of arguments.')
 
 
-    ic.timestepForward(timestep)      # after the calculation we are one day further down the winter
 
+    # add new snow on top if we have ice and snow
     if len(ic.column) != 0:
 
-        # add new snow on top if we have ice
         if dh_snow != 0.:
             ic.addLayerAtIndex(0, dh_snow, 'new_snow')
 
-        # Update the slush level given new snow and that measurements can be made without ice being in equlibrium with bouancy
+        # Update the slush level/bouancy given new snow
         ic.update_slush_level()
 
     # if air temperature is FREEZING
@@ -136,6 +135,8 @@ def getIceThickness(*args):
     ic.mergeSnowlayersAndCompress(temp)
     ic.update_draft_thickness()
     ic.update_water_line()
+    ic.update_column_average_temperature(temp)
+    ic.timestepForward(timestep)      # after the calculation we are one day further down the winter
 
     return ic
 

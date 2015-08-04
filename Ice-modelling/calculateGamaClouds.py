@@ -237,7 +237,7 @@ def ccFromTemp(*args):
     temp = args[0]
 
     # make array of tempchnge from yesterday to today
-    dtemp = pz.makeTempChangeFromTemp(temp)
+    dtemp = pz.delta_temperature_from_temperature(temp)
 
     return ccFromTempChange(dtemp, args[1])
 

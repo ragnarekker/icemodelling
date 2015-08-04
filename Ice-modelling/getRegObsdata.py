@@ -54,7 +54,7 @@ def getIceCover(LocationName, fromDate, toDate):
 
 
         for ic in datalist:
-            iceCoverDate = pz.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
+            iceCoverDate = pz.normal_time_from_unix_time(int(ic['DtObsTime'][6:-2]))
             iceCoverName = ic['IceCoverName']
             iceCoverBefore = ic['IceCoverBeforeName']
             cover = COV.IceCover(iceCoverDate, iceCoverName, iceCoverBefore, LocationName)
@@ -165,7 +165,7 @@ def getIceThickness(LocationName, fromDate, toDate):
         datalist = data['d']['results']
 
         for ic in datalist:
-            date = pz.unixTime2Normal(int(ic['DtObsTime'][6:-2]))
+            date = pz.normal_time_from_unix_time(int(ic['DtObsTime'][6:-2]))
             RegID = ic['RegID']
             layers = __IceThicknessLayers(RegID)
             if len(layers) == 0:

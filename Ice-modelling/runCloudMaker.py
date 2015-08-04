@@ -22,7 +22,7 @@ def ccFromPrecAndTemp2(stnr, startDate, endDate):
     ws_temp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
     temp = stripMetadata(ws_temp, False)
 
-    dTemp = makeTempChangeFromTemp(temp)
+    dTemp = delta_temperature_from_temperature(temp)
     dTemp_abs_raw = map(abs, dTemp)
     sign_dTemp = __getSign(dTemp, 0)
 
@@ -302,7 +302,7 @@ def correlateCloudsAndTemp(stnr, startDate, endDate):
     clouds = stripMetadata(wsCC, False)
 
     oneMinusClouds = [1-cc for cc in clouds]
-    dTemp = makeTempChangeFromTemp(temp)
+    dTemp = delta_temperature_from_temperature(temp)
     abs_dTemp = map(abs, dTemp)
     #sum = [cc + mcc for cc, mcc in zip(clouds,oneMinusClouds)]
 
@@ -373,7 +373,7 @@ def testCloudMaker(stnr, startDate, endDate, method):
 
     Availabe methods to test:
         ccFromPrecAndTemp
-        ccFromPrec
+        clouds_from_precipitation
         ccGammaSmoothing
         ccFromTemp
 
@@ -391,12 +391,12 @@ def testCloudMaker(stnr, startDate, endDate, method):
     dayShift = 1
     clouds = __shiftClouds(clouds, dayShift)
 
-    if method == 'ccFromPrec':
-        estClouds = ccFromPrec(prec)
+    if method == 'clouds_from_precipitation':
+        estClouds = clouds_from_precipitation(prec)
         gammaFigtext = 'No gamma smoothing and dayshift = {0}'.format(dayShift)
     elif method == 'ccGammaSmoothing':
         gammaPrec = [2.8, 2., 0.3, 0.4]
-        estClouds = ccFromPrec(prec)
+        estClouds = clouds_from_precipitation(prec)
         estClouds = ccGammaSmoothing(estClouds, gammaPrec)
         gammaFigtext = "gamma smoothing prec = {0} and dayshift = {1}".format(gammaPrec, dayShift)
     elif method == 'ccFromTemp':
@@ -409,7 +409,7 @@ def testCloudMaker(stnr, startDate, endDate, method):
         estClouds = ccFromPrecAndTemp(prec, temp, gammaPrec, gammaTemp)
         gammaFigtext = "prec = {0} and temp = {1} and dayshift = {2}".format(gammaPrec, gammaTemp, dayShift)
     elif method == 'ccFromAverage':
-        estClouds = ccFromAvaragePrecDays(prec)
+        estClouds = clouds_average_from_precipitation(prec)
         gammaFigtext = 'Cloudcover from avarage and dayshift = {0}'.format(dayShift)
     elif method == 'ccFromPrecAndTemp2':
         estClouds = ccFromPrecAndTemp2(stnr, startDate, endDate)
@@ -495,7 +495,7 @@ def makeSomeScatterPlots(stnr, startDate, endDate):
     prec = stripMetadata(wsPrec, False)
     clouds = stripMetadata(wsCC, False)
 
-    dTemp = makeTempChangeFromTemp(temp)
+    dTemp = delta_temperature_from_temperature(temp)
     abs_dTemp = map(abs, dTemp)
 
     method = 'dTemp_with_limit_vs_clouds'
@@ -612,7 +612,7 @@ def makeSomeScatterPlots(stnr, startDate, endDate):
 if __name__ == "__main__":
 
     #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrecAndTemp')
-    #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrec')
+    #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'clouds_from_precipitation')
     #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccGammaSmoothing')
     #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromTemp')
     #testCloudMaker(19710, '2011-10-01', '2012-06-01', 'ccFromPrecAndTemp2')

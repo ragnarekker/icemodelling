@@ -32,7 +32,7 @@ def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
     for sp in seriesPoints:
 
         value = sp[u'Value']
-        date = pz.unixTime2Normal(int(sp[u'Key'][6:-2]))
+        date = pz.normal_time_from_unix_time(int(sp[u'Key'][6:-2]))
 
         we = WeatherElement(stationID, date, elementID, value)
         we.Metadata.append(methodReference)

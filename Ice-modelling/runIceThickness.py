@@ -79,7 +79,7 @@ def runOrovannMET(startDate, endDate):
     for e in wsSno:
         snotot.append(e.Value)
 
-    sno = pz.makeSnowChangeFromSnowTotal(snotot)
+    sno = pz.delta_snow_from_total_snow(snotot)
 
     #observed_ice_filename = '{0}Otroevann observasjoner {1}-{2}.csv'.format(data_path, startDate.year, endDate.year)
     #observed_ice = importColumns(observed_ice_filename)
@@ -110,7 +110,7 @@ def runSemsvann(startDate, endDate):
     snotot = we.stripMetadata(wsSno, False)
     cc = we.stripMetadata(wsCC, False)
 
-    sno = pz.makeSnowChangeFromSnowTotal(snotot)
+    sno = pz.delta_snow_from_total_snow(snotot)
 
     #observed_ice_filename = '{0}Semsvann observasjoner {1}-{2}.csv'.format(data_path, startDate[0:4], endDate[0:4])
     #observed_ice = importColumns(observed_ice_filename)
@@ -278,19 +278,19 @@ if __name__ == "__main__":
     #runSemsvann('2012-11-01', '2013-06-01')
     #runSemsvann('2013-11-01', '2014-04-15')
     #runSemsvann('2014-11-01', '2015-05-15')
-
+    '''
     #runOrovannNVE('2011-11-15', '2012-06-20')
     runOrovannMET('2011-11-15', '2012-06-20')
     runOrovannMET('2012-11-15', '2013-06-20')
     runOrovannMET('2013-11-15', '2014-06-20')
     runOrovannMET('2014-11-15', '2015-03-27')
-
     '''
+
     runHakkloa('2011-11-01', '2012-06-01')
     runHakkloa('2012-11-01', '2013-06-01')
     runHakkloa('2013-11-01', '2014-06-01')
     runHakkloa('2014-11-01', '2015-06-01')
-    '''
+
     runSkoddebergvatnet('2006-11-01', '2007-06-01')
     runSkoddebergvatnet('2007-11-01', '2008-06-01')
     runSkoddebergvatnet('2008-11-01', '2009-06-01')

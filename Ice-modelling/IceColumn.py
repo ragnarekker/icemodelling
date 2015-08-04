@@ -18,18 +18,19 @@ class IceColumn:
         Column_inn includes new snow layer on index 0.
 
         :param date_inn:        [datetime]
-        :param column_inn:      list[float, string] as [[height, layertype], [height, layertype], ...]
+        :param column_inn:      list[float, string, float] as [[height, layertype, float], [height, layertype, float], ...]
         :return:
         '''
 
         self.set_constants()
 
-        self.date = date_inn                 # date
-        self.column = 0                      # icecolumn with [layer thickness, layer type].
-        self.water_line = -1                 # distance from bottom of ice column to the water surface. Negative number meens not initiallized
-        self.draft_thickness = -1            # This is ice, slushice and slush layers. I.e. not snow layers
-        self.metadata = {}                   # Metadata given as dictionary {key:value , key:value, ... }
-        self.top_layer_is_slush = None
+        self.date = date_inn            # Date
+        self.column = 0                 # Ice column with [layer thickness [m], layer type, layer temperature[C]].
+        self.water_line = -1            # Distance from bottom of ice column to the water surface. Negative number meens not initiallized
+        self.draft_thickness = -1       # This is ice, slushice and slush layers. I.e. not snow layers
+        self.metadata = {}              # Metadata given as dictionary {key:value , key:value, ... }
+        self.top_layer_is_slush = None  # [Bool] True if top layer is slush. False if not.
+        self.column_average_temperature = [0,0,0,0,0,0]  # average temp as average og atm and 0 weighted over last fiew days
 
         ### initialize waterline better
         ### calculate old height of draft better with use of density? and the old snow layers?
@@ -155,7 +156,6 @@ class IceColumn:
             # Goes through the ice column to find layers of zero height and removes them
             i = 0
             condition = True        # The condition for looping through the column.
-
             while condition:
                 if self.column[i][0] == 0.:
                     self.column.pop(i)
@@ -163,6 +163,7 @@ class IceColumn:
                 i = i + 1
                 if i >= len(self.column):
                     condition = False
+
 
             # Find neighbouring layers of equal type and merges them
             last_checked_layer_type = 'NA'
@@ -177,6 +178,70 @@ class IceColumn:
                 i = i + 1
                 if i >= len(self.column):
                     condition = False
+
+
+    def update_column_temperatures(self, temp_atm):
+        '''INCOMPLETE
+        Temperatures are given as a wheighted (lamda_n) sum of the last N days.
+
+        temp_i = sum_N(temp_(i-1) * lamda_n)
+
+        Lambda_n is dependant of layer thickness. As refferance I estimate a snow/icepack of 1 meter to
+        reach equlibrium after 3 days with the same temperature.
+
+        Columntemperatures should hold the condition that bottom layer is 0C and that material conductivities shold
+        reflect the temperature gradient.
+
+        :param temp_atm:
+        :return:
+        '''
+
+        N = 3
+
+        for layer in self.column:
+            if len(layer) < 3:
+                layer.append(0.)
+            weight = 1/ layer[0] / N
+            layer[2] = (layer[2] * weight + temp_atm)/2
+            a = 1
+
+
+    def update_column_average_temperature(self, temp_atm):
+        '''INCOMPLETE
+        Avg temperature of the column for Longwave purposes
+        Se update_column_temperatures for attempt to get the layer temps esitmated.
+
+        Should do: Layers as class: layer.type, layer.temp, layer.thick
+
+        Column temp cant be above 0
+        weight should reflect thickness
+        :param temp_atm:
+        :return:
+
+        '''
+        absolute_zero = -273.15  # 0K is -273.15C
+
+        self.column_average_temperature.insert(1, temp_atm)
+        self.column_average_temperature.pop(-1)
+
+        avgTemp = 0
+
+        weight = [5,2,1]
+        weight_sum = sum(weight)
+
+        for i in range(0, len(weight), 1):
+            w_i = weight[i]
+            temp_i = self.column_average_temperature[i+1] - absolute_zero
+            avgTemp = avgTemp + temp_i * w_i
+
+        avgTemp = avgTemp/weight_sum
+
+        avg_temp_out = (avgTemp + absolute_zero)/2
+        self.column_average_temperature[0] = avg_temp_out
+
+        return
+
+
 
     def update_slush_level(self):
         '''
@@ -301,14 +366,14 @@ class IceColumn:
                 self.top_layer_is_slush = False
                 return False
 
-    def mergeSnowlayersAndCompress(self, temp):
+    def mergeSnowlayersAndCompress(self, temp_atm):
         '''
         Merges the snow layers and compresses the snow. This method updates the snow density in the object and the
         conductivity of the snow in the object.
 
         Snow compactation may be referenced in article in literature folder or evernote.
 
-        :param temp: [float] Temperature in celcuis used in the compactation routine.
+        :param temp_atm: [float] Temperature in celcuis used in the compactation routine.
         :return:
         '''
 
@@ -329,7 +394,7 @@ class IceColumn:
             self.mergeAndRemoveExcessLayers()
 
             # we use a formula for compactation only if air temperature is below freezing and there is snow on top
-            if temp < self.temp_f and self.column[0][1] == 'snow':
+            if temp_atm < self.temp_f and self.column[0][1] == 'snow':
 
                 # ice & snow parameter values
                 C1=7.0*1e-3*12      #snow compaction coefficient #1
@@ -337,7 +402,7 @@ class IceColumn:
                 C3=-0.04            #snow compaction coefficient #3
 
                 # this is one strange fromula. Would be good to change it with something more familiar..
-                delta_rho_snow = self.rho_snow**2 * C1 * self.column[0][0] * math.exp(C2*self.rho_snow) * math.exp(C3*temp)
+                delta_rho_snow = self.rho_snow**2 * C1 * self.column[0][0] * math.exp(C2*self.rho_snow) * math.exp(C3*temp_atm)
 
                 rho_snow_old = self.rho_snow
                 rho_snow_new = rho_snow_old + delta_rho_snow
