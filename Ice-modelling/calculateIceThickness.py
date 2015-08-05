@@ -4,6 +4,8 @@ __author__  =  'raek'
 import math
 import numpy
 import calculateParameterization as cpz
+import IceLayer as il
+import constants as const
 
 
 def getIceThickness(*args):
@@ -32,15 +34,17 @@ def getIceThickness(*args):
     else:
         print('Unknown number of arguments.')
 
-
+     # step the date forward on time step. We do it initially because the variable is also used and subtracted
+     # in the folowing calculations.
+    ic.timestepForward(timestep)
 
     # add new snow on top if we have ice and snow
     if len(ic.column) != 0:
 
         if dh_snow != 0.:
-            ic.addLayerAtIndex(0, dh_snow, 'new_snow')
+            ic.addLayerAtIndex(0, il.IceLayer(dh_snow, 'new_snow'))
 
-        # Update the slush level/bouancy given new snow
+        # Update the slush level/buoyancy given new snow
         ic.update_slush_level()
 
     # if air temperature is FREEZING
@@ -48,48 +52,48 @@ def getIceThickness(*args):
 
         # If no ice, freeze water to ice
         if len(ic.column) == 0:
-            dh = math.sqrt(numpy.absolute(2 * ic.k_black_ice / ic.rho_black_ice / ic.L_black_ice * temp * timestep))
-            ic.addLayerAtIndex(0, dh, 'black_ice')
+            dh = math.sqrt(numpy.absolute(2 * const.k_black_ice / ic.rho_black_ice / ic.L_black_ice * temp * timestep))
+            ic.addLayerAtIndex(0, il.IceLayer(dh, 'black_ice'))
             timestep = 0
         else:
 
-            # Decleration of total conductance of layes above freezing layer
+            # Declaration of total conductance of layers above freezing layer
             U_total = 0.
             i = 0
             while timestep > 0 and i <= len(ic.column)-1:
 
                 # If the layer is a solid it only adds to the total isolation. Unless it is the last..
-                if (ic.getEnum(ic.column[i][1])) > 9:
-                    U_total = addLayerConductanceToTotal(U_total, ic.getConductivity(ic.column[i][1]), ic.column[i][0])
+                if (ic.getEnum(ic.column[i].type)) > 9:
+                    U_total = addLayerConductanceToTotal(U_total, ic.column[i].conductivity, ic.column[i].height)
 
                     # If the layer is the last layer of solids and thus at the bottom, we get freezing at the bottom
                     if i == len(ic.column)-1:
 
                         # The heat flux equation gives how much water will freeze
                         dh = - temp * U_total * timestep / ic.rho_water / ic.L_black_ice
-                        ic.addLayerAtIndex(i+1, dh, 'black_ice')
+                        ic.addLayerAtIndex(i+1, il.IceLayer(dh, 'black_ice'))
                         timestep = 0
 
                 # Else the layer is a slushlayer above or in the icecolumn and it will freeze fully or partially
                 else:
                     timestep_used = 0
-                    if i == 0: # there is slush surface whith no layers with conductance above
-                        dh = math.sqrt(numpy.absolute(2 * ic.k_slush_ice / ic.rho_slush_ice / ic.L_slush_ice * temp * timestep))    # formula X?
-                        timestep_used = ic.column[i][0]**2 * ic.rho_slush_ice * ic.L_slush_ice / 2 /  -temp / ic.k_slush_ice        # formula X sortet for time
+                    if i == 0: # there is slush surface with no layers with conductance above
+                        dh = math.sqrt(numpy.absolute(2 * const.k_slush_ice / ic.rho_slush_ice / ic.L_slush_ice * temp * timestep))    # formula X?
+                        timestep_used = ic.column[i].height**2 * ic.rho_slush_ice * ic.L_slush_ice / 2 /  -temp / const.k_slush_ice             # formula X sortet for time
                     else:
-                        dh = - temp * U_total * timestep / ic.getRho(ic.column[i][1]) / ic.L_slush_ice                              # The heat flux equation gives how much slush will freeze
-                        timestep_used = ic.column[i][0] * ic.rho_slush_ice * ic.L_slush_ice / -temp / U_total                       # The heat flux equation sorted for time
+                        dh = - temp * U_total * timestep / ic.getRho(ic.column[i].type) / ic.L_slush_ice                              # The heat flux equation gives how much slush will freeze
+                        timestep_used = ic.column[i].height * ic.rho_slush_ice * ic.L_slush_ice / -temp / U_total                       # The heat flux equation sorted for time
 
                     # If a layer totaly freezes during the timeperiod, the rest of the time will be used to freeze a layer further down
-                    if ic.column[i][0] < dh:
-                        ic.column[i][1] = 'slush_ice'
+                    if ic.column[i].height < dh:
+                        ic.column[i].type = 'slush_ice'
                         timestep = timestep - timestep_used
-                        U_total = addLayerConductanceToTotal(U_total, ic.getConductivity(ic.column[i][1]), ic.column[i][0])
+                        U_total = addLayerConductanceToTotal(U_total, ic.column[i].conductivity, ic.column[i].height)
 
                     # Else all energy is used to freeze the layer only partially
                     else:
-                        ic.column[i][0] = ic.column[i][0] - dh
-                        ic.addLayerAtIndex(i, dh, 'slush_ice')
+                        ic.column[i].height = ic.column[i].height - dh
+                        ic.addLayerAtIndex(i, il.IceLayer(dh, 'slush_ice'))
                         timestep = 0
 
                 # Go to next icelayer
@@ -102,16 +106,16 @@ def getIceThickness(*args):
     # melting only effects the topp layer (index = 0)
         meltingcoeff = -1
         while timestep > 0 and len(ic.column) > 0:
-            if ic.column[0][1] == 'water':
+            if ic.column[0].type == 'water':
                 ic.removeLayerAtIndex(0)
             else:
-                if ic.getEnum(ic.column[0][1]) >= 20: # snow
+                if ic.getEnum(ic.column[0].type) >= 20: # snow
                     meltingcoeff = ic.meltingcoeff_snow
-                elif ic.column[0][1] == 'slush_ice':
+                elif ic.column[0].type == 'slush_ice':
                     meltingcoeff = ic.meltingcoeff_slush_ice
-                elif ic.column[0][1] == 'slush':
+                elif ic.column[0].type == 'slush':
                     meltingcoeff = ic.meltingcoeff_slush
-                elif ic.column[0][1] == 'black_ice':
+                elif ic.column[0].type == 'black_ice':
                     meltingcoeff = ic.meltingcoeff_black_ice
                 else:
                     print("Melting: Unknown layertype")
@@ -121,14 +125,14 @@ def getIceThickness(*args):
 
                 # if layer is thinner than total melting the layer is removed and the rest of melting occurs
                 # in the layer below for the reminder of time. melting (dh) and time are proportional in the degreeday equation
-                if ic.column[0][0] < -dh:
-                    timestep_used = ic.column[0][0] / -dh * timestep
+                if ic.column[0].height < -dh:
+                    timestep_used = ic.column[0].height / -dh * timestep
                     ic.removeLayerAtIndex(0)
                     timestep = timestep - timestep_used
 
                 # the layer is only partly melted during this timestep
                 else:
-                    ic.column[0][0] = ic.column[0][0] + dh
+                    ic.column[0].height = ic.column[0].height + dh
                     timestep = 0
 
     ic.mergeAndRemoveExcessLayers()
@@ -136,7 +140,6 @@ def getIceThickness(*args):
     ic.update_draft_thickness()
     ic.update_water_line()
     ic.update_column_average_temperature(temp)
-    ic.timestepForward(timestep)      # after the calculation we are one day further down the winter
 
     return ic
 

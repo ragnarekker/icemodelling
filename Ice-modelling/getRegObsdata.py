@@ -6,8 +6,9 @@ import types
 import requests
 import os
 
-import IceCover as COV
-import IceColumn as COL
+import IceCover as cov
+import IceColumn as col
+import IceLayer as il
 import fEncoding as fe
 import makePickle as mp
 
@@ -57,7 +58,7 @@ def getIceCover(LocationName, fromDate, toDate):
             iceCoverDate = pz.normal_time_from_unix_time(int(ic['DtObsTime'][6:-2]))
             iceCoverName = ic['IceCoverName']
             iceCoverBefore = ic['IceCoverBeforeName']
-            cover = COV.IceCover(iceCoverDate, iceCoverName, iceCoverBefore, LocationName)
+            cover = cov.IceCover(iceCoverDate, iceCoverName, iceCoverBefore, LocationName)
             cover.set_regid(int(ic['RegID']))
             iceCoverList.append(cover)
 
@@ -98,7 +99,7 @@ def getFirstIceCover(LocationName, fromDate, toDate):
     # datetime objects in icecover datatype
     from_date = datetime.datetime.strptime(fromDate, "%Y-%m-%d")
 
-    return COV.IceCover(from_date, "Ikke gitt", 'Ikke gitt', LocationName)
+    return cov.IceCover(from_date, "Ikke gitt", 'Ikke gitt', LocationName)
 
 
 def getLastIceCover(LocationName, fromDate, toDate):
@@ -122,7 +123,7 @@ def getLastIceCover(LocationName, fromDate, toDate):
 
     # make "empty" ice cover object on last date. If there is no ice cover observation confirming that ice has gone,
     # this wil be returned.
-    noIceCover = COV.IceCover(to_date, "Ikke gitt", 'Ikke gitt', LocationName)
+    noIceCover = cov.IceCover(to_date, "Ikke gitt", 'Ikke gitt', LocationName)
 
     for ic in iceCoverSeason:
         # if "Isfritt på målestedet" (TID=1) or "Hele sjøen isfri" (TID=20). That is, if we have an older "no icecover" case
@@ -139,7 +140,7 @@ def getIceThickness(LocationName, fromDate, toDate):
     '''
     Method returns a list of ice thickness between two dates for a given location in regObs.
 
-    :param LocationName:    [string/list] name as given in regObs in ObsLocation table
+    :param LocationName:    [string/list] name as given in regObs in ObsLocation table. Multiploe locations posible
     :param fromDate:        [string] The from date as 'YYYY-MM-DD'
     :param toDate:          [string] The to date as 'YYYY-MM-DD'
     :return:
@@ -169,14 +170,14 @@ def getIceThickness(LocationName, fromDate, toDate):
             RegID = ic['RegID']
             layers = __IceThicknessLayers(RegID)
             if len(layers) == 0:
-                layers = [[float(ic['IceThicknessSum']), 'unknown']]
+                layers = [ il.IceLayer(float(ic['IceThicknessSum']), 'unknown') ]
 
-            ice_column = COL.IceColumn(date, layers)
+            ice_column = col.IceColumn(date, layers)
             ice_column.add_metadata('RegID', RegID)
             ice_column.add_metadata('LocatonName', LocationName)
 
-            ice_column.addLayerAtIndex(0, ic['SlushSnow'], 'slush')
-            ice_column.addLayerAtIndex(0, ic['SnowDepth'], 'snow')
+            ice_column.addLayerAtIndex(0, il.IceLayer(ic['SlushSnow'], 'slush'))
+            ice_column.addLayerAtIndex(0, il.IceLayer(ic['SnowDepth'], 'snow'))
 
             ice_column.mergeAndRemoveExcessLayers()
             ice_column.update_draft_thickness()
@@ -219,11 +220,11 @@ def getAllSeasonIce(LocationName, fromDate, toDate):
     start_column = []
     end_column = []
 
-    fc = COL.IceColumn(first.date, 0)
+    fc = col.IceColumn(first.date, 0)
     fc.add_metadata('RegID', first.RegID)
     start_column.append(fc)
 
-    lc = COL.IceColumn(last.date, 0)
+    lc = col.IceColumn(last.date, 0)
     lc.add_metadata('RegID', first.RegID)
     end_column.append(lc)
 
@@ -267,7 +268,7 @@ def __IceThicknessLayers(RegID):
         layer_name = __get_ice_type(layer_type)
 
         thickness = l['IceLayerThickness']
-        layer = [float(thickness), layer_name]
+        layer = il.IceLayer(float(thickness), layer_name)
         layers.append(layer)
 
     # Black ice at bottom

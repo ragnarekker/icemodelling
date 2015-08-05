@@ -48,14 +48,14 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
         for i in range(len(ic.column)-1, -1, -1):
             layer = ic.column[i]
             fro = too
-            too = too + layer[0]
-            columncoordinates.append([fro, too, layer[1]])
+            too = too + layer.height
+            columncoordinates.append([fro, too, layer.type])
 
             if fro < lowest_point:
                 lowest_point = fro
 
             # add coordinates to a vline plot
-            plt.vlines(ic.date, fro, too, lw=modelledLineWeight, color=ic.getColour(layer[1]))
+            plt.vlines(ic.date, fro, too, lw=modelledLineWeight, color=layer.colour()) #ic.getColour(layer.type))
 
         allColumnCoordinates.append(columncoordinates)
 
@@ -77,7 +77,7 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
             for i in range(len(ic.column)-1, -1, -1):
                 layer = ic.column[i]
                 fro = too
-                too = too + layer[0]
+                too = too + layer.height
 
                 if fro < lowest_point:
                     lowest_point = fro
@@ -89,7 +89,7 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
                     padding_color = 'orange'
                 # add coordinates to a vline plot
                 plt.vlines(ic.date, fro-padding, too+padding, lw=6, color=padding_color)
-                plt.vlines(ic.date, fro, too, lw=4, color=ic.getColour(layer[1]))
+                plt.vlines(ic.date, fro, too, lw=4, color=layer.colour())
 
     # the limits of the leftside y-axis is defined relative the lowest point in the icecover
     # and the highest point of the observed snowcover.

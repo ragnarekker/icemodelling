@@ -273,24 +273,24 @@ def runStorvannetHammerfest(startDate, endDate):
 
 
 if __name__ == "__main__":
-    '''
-    #runSemsvann('2011-11-01', '2012-05-01')
-    #runSemsvann('2012-11-01', '2013-06-01')
-    #runSemsvann('2013-11-01', '2014-04-15')
-    #runSemsvann('2014-11-01', '2015-05-15')
+
+    runSemsvann('2011-11-01', '2012-05-01')
+    runSemsvann('2012-11-01', '2013-06-01')
+    runSemsvann('2013-11-01', '2014-04-15')
+    runSemsvann('2014-11-01', '2015-05-15')
     '''
     #runOrovannNVE('2011-11-15', '2012-06-20')
     runOrovannMET('2011-11-15', '2012-06-20')
     runOrovannMET('2012-11-15', '2013-06-20')
     runOrovannMET('2013-11-15', '2014-06-20')
-    runOrovannMET('2014-11-15', '2015-03-27')
-    '''
+    runOrovannMET('2014-11-15', '2015-06-20')
+
 
     runHakkloa('2011-11-01', '2012-06-01')
     runHakkloa('2012-11-01', '2013-06-01')
     runHakkloa('2013-11-01', '2014-06-01')
     runHakkloa('2014-11-01', '2015-06-01')
-
+    '''
     runSkoddebergvatnet('2006-11-01', '2007-06-01')
     runSkoddebergvatnet('2007-11-01', '2008-06-01')
     runSkoddebergvatnet('2008-11-01', '2009-06-01')
@@ -322,8 +322,11 @@ if __name__ == "__main__":
     runStorvannetHammerfest('2012-11-01', '2013-06-01')
     runStorvannetHammerfest('2013-11-01', '2014-06-01')
     runStorvannetHammerfest('2014-11-01', '2015-06-01')
-    '''
-    # cleanupp otrøvann
+
+    # flere konstanter ut fra IceThick til IceLayer og constants.py
+    # eb parametrisering
+    # modell med 2 uker fram
+    # cleanup otrøvann
     # plott CC i plott
     # figurtext med hva som brukes og plottes
-    # set environment fil som kmunve har i senorge koden sin
+    #

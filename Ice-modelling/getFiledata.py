@@ -4,6 +4,7 @@ __author__ = 'raek'
 import datetime
 
 
+
 def readWeather(from_date, to_date, filename):
 
     date = []
@@ -68,7 +69,8 @@ def importColumns(filepath_inn):
 
     '''
     import copy
-    import IceColumn
+    import IceColumn as col
+    import IceLayer as il
 
     # Read file
     innfile = open(filepath_inn)
@@ -79,7 +81,7 @@ def importColumns(filepath_inn):
     separator = ';'
 
     # This column is only for initiation and is removed from columns before returned
-    column = IceColumn.IceColumn(datetime.datetime(1,1,1), 0)
+    column = col.IceColumn(datetime.datetime(1,1,1), 0)
     columns = []
 
     for row in inndata:
@@ -91,11 +93,11 @@ def importColumns(filepath_inn):
             if row[1] == 'date':
                 columns.append(copy.deepcopy(column))
                 date = datetime.datetime.strptime(row[0], "%Y-%m-%d")
-                column = IceColumn.IceColumn(date, 0)
+                column = col.IceColumn(date, 0)
             elif row[1] == 'water_line':
                 column.water_line = float(row[0])
             else:
-                column.addLayerAtIndex(-1, float(row[0]), row[1])
+                column.addLayerAtIndex(-1, il.IceLayer(float(row[0]), row[1]))
 
     # the last object is not added in the loop
     columns.append(column)
