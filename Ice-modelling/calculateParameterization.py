@@ -3,6 +3,7 @@ __author__ = 'ragnarekker'
 
 import datetime
 import types
+import constants as const
 
 
 #######    Works on arrays
@@ -63,20 +64,20 @@ def clouds_average_from_precipitation(prec):
     return clouds_out
 
 
-#######    Works on single timesteps
+#######    Works on single times teps
 
-def temperature_from_temperature_and_clouds(temp, cloudcover):
+def temperature_from_temperature_and_clouds(temp, cloud_cover):
     '''
-    This method takes shifts temperature according to cloudcover. In theory clear nights will have a net
-    global radialtion outgouing from the surface. Here it is assumed:
-    * a clear night adds to the energybalace with the equivalent of -2degC
+    This method takes shifts temperature according to cloud_cover. In theory clear nights will have a net
+    out going global radiation from the surface. Here it is assumed:
+    * a clear night adds to the energy balance with the equivalent of -2degC
 
     :param temp:        temperature [float] from met-station or equal
-    :param cloudcover:  cloudcover as number from 0 to 1 [float] on site where temperature i measured
+    :param cloud_cover:  cloud_cover as number from 0 to 1 [float] on site where temperature i measured
     :return temp:       temperature [float] radiation-corrected based on snowevents
     '''
 
-    temp = temp + 2*(cloudcover - 1)
+    temp = temp + 2*(cloud_cover - 1)
     return temp
 
 
@@ -193,7 +194,7 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
         clouds_out = [average]*len(clouds)
 
 
-    # Again, if prec_inn isnt a list, return only a float.
+    # Again, if prec_inn isn't a list, return only a float.
     if not isinstance(prec_inn, types.ListType):
         clouds_out = clouds_out[0]
 
@@ -242,20 +243,17 @@ def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickne
                 L_t:            [kJm^(-2)] is the terrestrial long wave radiation
     '''
 
-    # Import emissivities and Stefan-Boltzmann constant
-    from constants import eps_snow, eps_ice, eps_water, sigma_pr_second
-
     cloud_cover = clouds_from_precipitation(prec, method='Binary')
     eps_atm = (0.72+0.005*temp_atm)*(1-0.84*cloud_cover)+0.84*cloud_cover    # Atmospheric emissivity from Campbell and Norman, 1998. Emissivity er dimasnjonsløs
-    eps_surface = eps_snow                      # By default we assume snow cover
-    sigma = sigma_pr_second * timespan_in_sec   # Stefan-Boltzmann constant over the requested time span
+    eps_surface = const.eps_snow                      # By default we assume snow cover
+    sigma = const.sigma_pr_second * timespan_in_sec   # Stefan-Boltzmann constant over the requested time span
 
     if snow_depth == 0:
-        eps_surface = eps_ice           # No snow gives ice emissivity
+        eps_surface = const.eps_ice           # No snow gives ice emissivity
 
     if ice_thickness == 0:
         temp_surface == 0               # water at 0degC
-        eps_surface = eps_water         # watermisivity is the same as snow emisitivity
+        eps_surface = const.eps_water         # water emissivity is the same as snow emidsitivity
 
     L_a = eps_atm * sigma * (temp_atm + 273.2)^4            # temp_atm skal være i Celsisus. Atmosfærisk innstsåling
     L_t = eps_surface * sigma * (temp_surface + 273.2)^4    # terrestrisk utstråling emmisivity for snø er 0.97, er ogsÂ brukt for bar bakke, se Dingman p.583

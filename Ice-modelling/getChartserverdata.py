@@ -6,7 +6,7 @@ import datetime
 import requests
 
 import calculateParameterization as pz
-from WeatherElement import WeatherElement, makeDailyAvarage, cm2m
+from weather import WeatherElement, makeDailyAvarage, cm2m
 
 # URL to the chartserver/ShowData service
 baseURL = "http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart&ver=1.0&vfmt=json"

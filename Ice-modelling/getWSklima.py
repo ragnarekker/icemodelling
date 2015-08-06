@@ -4,7 +4,7 @@ __author__ = 'ragnarekker'
 import requests
 from lxml import etree
 import datetime
-from WeatherElement import WeatherElement, okta2unit
+from weather import WeatherElement, okta2unit
 import xml.etree.ElementTree as ET      # used in the incomplete methods
 
 # Incomplete

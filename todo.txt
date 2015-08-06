@@ -1,0 +1,11 @@
+
+
+* hvis øverste laget er sørpe og det oppgis overvann så kan noe av sørpoen antas å være overvann. Se plot Giljastolsvannet 14/15 og http://www.regobs.no/Registration/55838
+* eb parametrisering
+* introduce a EB driving force for dH
+* plot for eb parametrinsering
+* modell med 2 uker fram
+* plot CC i plot
+* figurtext med hva som brukes og plottes
+* introduce avg temprature pr layer
+* comment cloudcover functions*

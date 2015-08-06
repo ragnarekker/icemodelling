@@ -91,8 +91,8 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
                 plt.vlines(ic.date, fro-padding, too+padding, lw=6, color=padding_color)
                 plt.vlines(ic.date, fro, too, lw=4, color=layer.colour())
 
-    # the limits of the leftside y-axis is defined relative the lowest point in the icecover
-    # and the highest point of the observed snowcover.
+    # the limits of the left side y-axis is defined relative the lowest point in the ice cover
+    # and the highest point of the observed snow cover.
     plt.ylim(lowest_point*1.1, max(snotot)*1.05)
 
     # Plot temperatures on a separate y axis

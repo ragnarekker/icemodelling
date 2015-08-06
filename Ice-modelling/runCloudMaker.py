@@ -10,7 +10,7 @@ import numpy as np
 
 from calculateParameterization import *
 from getWSklima import getMetData
-from WeatherElement import stripMetadata
+from weather import stripMetadata
 
 from setEnvironment import plot_folder, database_location
 
