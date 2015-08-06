@@ -52,7 +52,7 @@ def getIceThickness(*args):
 
         # If no ice, freeze water to ice
         if len(ic.column) == 0:
-            dh = math.sqrt(numpy.absolute(2 * const.k_black_ice / ic.rho_black_ice / ic.L_black_ice * temp * timestep))
+            dh = math.sqrt(numpy.absolute(2 * const.k_black_ice / const.rho_black_ice / const.L_black_ice * temp * timestep))
             ic.addLayerAtIndex(0, il.IceLayer(dh, 'black_ice'))
             timestep = 0
         else:
@@ -70,19 +70,19 @@ def getIceThickness(*args):
                     if i == len(ic.column)-1:
 
                         # The heat flux equation gives how much water will freeze
-                        dh = - temp * U_total * timestep / ic.rho_water / ic.L_black_ice
+                        dh = - temp * U_total * timestep / const.rho_water / const.L_black_ice
                         ic.addLayerAtIndex(i+1, il.IceLayer(dh, 'black_ice'))
                         timestep = 0
 
-                # Else the layer is a slushlayer above or in the icecolumn and it will freeze fully or partially
+                # Else the layer is a slush layer above or in the ice column and it will freeze fully or partially
                 else:
                     timestep_used = 0
                     if i == 0: # there is slush surface with no layers with conductance above
-                        dh = math.sqrt(numpy.absolute(2 * const.k_slush_ice / ic.rho_slush_ice / ic.L_slush_ice * temp * timestep))    # formula X?
-                        timestep_used = ic.column[i].height**2 * ic.rho_slush_ice * ic.L_slush_ice / 2 /  -temp / const.k_slush_ice             # formula X sortet for time
+                        dh = math.sqrt(numpy.absolute(2 * const.k_slush_ice / const.rho_slush_ice / const.L_slush_ice * temp * timestep))    # formula X?
+                        timestep_used = ic.column[i].height**2 * const.rho_slush_ice * const.L_slush_ice / 2 / -temp / const.k_slush_ice             # formula X sortet for time
                     else:
-                        dh = - temp * U_total * timestep / ic.getRho(ic.column[i].type) / ic.L_slush_ice                              # The heat flux equation gives how much slush will freeze
-                        timestep_used = ic.column[i].height * ic.rho_slush_ice * ic.L_slush_ice / -temp / U_total                       # The heat flux equation sorted for time
+                        dh = - temp * U_total * timestep / ic.getRho(ic.column[i].type) / const.L_slush_ice                              # The heat flux equation gives how much slush will freeze
+                        timestep_used = ic.column[i].height * const.rho_slush_ice * const.L_slush_ice / -temp / U_total                       # The heat flux equation sorted for time
 
                     # If a layer totaly freezes during the timeperiod, the rest of the time will be used to freeze a layer further down
                     if ic.column[i].height < dh:

@@ -68,23 +68,6 @@ class IceColumn:
         self.enum_water = 1
         self.enum_NA = -1
 
-        # Material temperatures [degC]
-        self.temp_f = 0                      # freezing temp
-
-        # Desities [kg m-3]
-        self.rho_snow_max = 450.             # maximum snow density (kg m-3)
-        self.rho_new_snow = 250.             # new-snow density (kg m-3)
-        self.rho_snow = 350.                 # average snowdensity.
-        self.rho_drained_snow = self.rho_snow
-        self.rho_slush = 0.920*10**3         # from Vehvilainen (2008) and again Saloranta (2000)
-        self.rho_slush_ice = 0.875*10**3     # from Vehvilainen (2008) and again Saloranta (2000)
-        self.rho_black_ice = 0.917*10**3     # ice (incl. snow ice) density [kg m-3]
-        self.rho_water = 1000.               # density of freshwater (kg m-3)
-
-        # Latent heat of fusion [J kg-1]
-        self.L_black_ice = 333500                   # latent heat of freezing water to black ice
-        self.L_slush_ice = 0.5 * self.L_black_ice   # freezing slush to slushice
-
         self.alfa_black_ice = 35             # albedo in % from http://en.wikipedia.org/wiki/Albedo
         self.alfa_snow_new = 85              # albedo in % from http://en.wikipedia.org/wiki/Albedo
         self.alfa_snow_old = 45              # albedo in % from http://en.wikipedia.org/wiki/Albedo
@@ -169,9 +152,28 @@ class IceColumn:
             condition = True
             while condition:
                 if self.column[i].type == last_checked_layer_type:
-                    self.column[i-1].height = self.column[i-1].height + self.column[i].height
+
+                    # avarage the temperatures
                     if (self.column[i-1].temperature != None) and (self.column[i].temperature != None):
-                        self.column[i-1].temperature = (self.column[i-1].temperature + self.column[i].temperature)/2
+                        self.column[i-1].temperature = (self.column[i-1].height * self.column[i-1].temperature
+                                                      + self.column[ i ].height * self.column[ i ].temperature) \
+                                                     / (self.column[i-1].height + self.column[ i ].height)
+
+                    # avarage densities
+                    if (self.column[i-1].density != None) and (self.column[i].density != None):
+                        self.column[i-1].density = (self.column[i-1].height * self.column[i-1].density
+                                                  + self.column[ i ].height * self.column[ i ].density) \
+                                                 / (self.column[i-1].height + self.column[ i ].height)
+
+                    # avarage thermal conductivities
+                    if (self.column[i-1].conductivity != None) and (self.column[i].conductivity != None):
+                        self.column[i-1].conductivity = (self.column[i-1].height * self.column[i-1].conductivity
+                                                       + self.column[ i ].height * self.column[ i ].conductivity) \
+                                                      / (self.column[i-1].height + self.column[ i ].height)
+
+                    self.column[i-1].metadata = self.column[i-1].metadata + self.column[i].metadata
+                    self.column[i-1].height = self.column[i-1].height + self.column[i].height
+
                     self.column.pop(i)
                     i = i - 1   # the current layer was removed so the index must be moved back one step
                 last_checked_layer_type = self.column[i].type
@@ -414,66 +416,44 @@ class IceColumn:
         :return:
         '''
 
-        # If no layers, compacation of snow is not needed
+        # If no layers, compaction of snow is not needed
         if len(self.column) > 0:
             # declare the new snow layer (index = 0) as normal snow layer
             if self.column[0].type == 'new_snow':
                 self.column[0].type = 'snow'
-                if len(self.column) > 1:
-                    # If more snow layers merge the snowlayer to one with the old snowlayer beneeth (index = 1)
-                    if self.column[1].type == 'snow':
-                        # New density becomes avarage og snow densities
-                        self.rho_snow = ( self.column[0].height*self.rho_new_snow + self.column[1].height*self.rho_snow ) / (self.column[0].height + self.column[1].height)
-                    # Else the new density is that of new snow
-                    else:
-                        self.rho_snow = self.rho_new_snow
 
             self.mergeAndRemoveExcessLayers()
 
-            # if no snow, no compactation
+            # if no snow, no compaction
             if self.column[0].type == 'snow':
-                # we use a formula for compactation only if air temperature is below freezing and there is snow on top
-                if temp_atm < self.temp_f:
+                # we use a formula for compaction only if air temperature is below freezing and there is snow on top
+                if temp_atm < const.temp_f:
 
                     # ice & snow parameter values
-                    C1=7.0*1e-3*12      #snow compaction coefficient #1
-                    C2=-21.0*1e-3       #snow compaction coefficient #2
-                    C3=-0.04            #snow compaction coefficient #3
+                    C1=7.0*1e-3*12      # snow compaction coefficient #1
+                    C2=-21.0*1e-3       # snow compaction coefficient #2
+                    C3=-0.04            # snow compaction coefficient #3
 
                     # this is one strange fromula. Would be good to change it with something more familiar..
-                    delta_rho_snow = self.rho_snow**2 * C1 * self.column[0].height * math.exp(C2*self.rho_snow) * math.exp(C3*temp_atm)
+                    delta_rho_snow = self.column[0].density**2 * C1 * self.column[0].height * math.exp(C2*self.column[0].density) * math.exp(C3*temp_atm)
 
-                    rho_snow_old = self.rho_snow
+                    rho_snow_old = self.column[0].density
                     rho_snow_new = rho_snow_old + delta_rho_snow
                     k_snow_new = pz.k_snow_from_rho_snow(rho_snow_new)
 
-                # Else we have melting conditions and the snow conductivuty and density is sett to max
+                # Else we have melting conditions and the snow conductivity and density is sett to max
                 else:
-                    rho_snow_old = self.rho_snow
-                    rho_snow_new = self.rho_snow_max
+                    rho_snow_old = self.column[0].density
+                    rho_snow_new = const.rho_snow_max
                     k_snow_new = const.k_snow_max
 
-                self.rho_snow = min([rho_snow_new, self.rho_snow_max])
+                self.column[0].density = min([rho_snow_new, const.rho_snow_max])
                 self.column[0].conductivity = min([k_snow_new, const.k_snow_max])
 
-                h_snow_new = self.column[0].height / self.rho_snow * rho_snow_old    # Asume a inverse linear correlation between density and the height (preservation og mass?)
+                h_snow_new = self.column[0].height / self.column[0].density * rho_snow_old    # Asume a inverse linear correlation between density and the height (preservation og mass?)
                 self.column[0].height = h_snow_new
 
         return
-
-
-    def getRho(self, type):
-        # returns the density for a given snow or ice type
-
-        if type == 'new_snow': return self.rho_new_snow
-        elif type == 'snow': return self.rho_snow
-        elif type == 'drained_snow': return self.rho_drained_snow
-        elif type == 'slush': return self.rho_slush
-        elif type == 'slush_ice': return self.rho_slush_ice
-        elif type == 'black_ice': return self.rho_black_ice
-        elif type == 'water': return self.rho_water
-        elif type == 'unknown': return self.rho_slush_ice
-        else: return self.rho_slush_ice
 
 
     def getEnum(self, type):
