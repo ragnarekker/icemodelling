@@ -3,6 +3,7 @@ __author__ = 'ragnarekker'
 
 import datetime
 import types
+import math
 import constants as const
 
 
@@ -209,7 +210,7 @@ def energy_balance_from_senorge():
     '''
     The daily energy budget of a column of snow is expressed as (Walter et al. 2005):
 
-    λ_F * ρ_w * ΔSWE = S + L_a - L_t + H + LE + G + R - CC
+    λ_F * ρ_w * ΔSWE = S + (L_a - L_t) + (H + LE) + G + R - CC
 
     Where λ_F is the latent heat of fusion (λ_F=335 kJ〖kg〗^(-1))
     ρ_w [1000kgm^(-3)] is the density of water
@@ -227,7 +228,7 @@ def short_wave_from_senorge():
     '''
     return
 
-def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickness, timespan_in_sec):
+def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickness, time_span_in_sec):
     '''
     Long wave radiation, both atmospheric and terrestrial, calculated from precipitation and temperature.
 
@@ -236,23 +237,25 @@ def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickne
 
     :param prec:                Precipitation (?)
     :param temp_atm:            Temperature (C)
-    :param timespan_in_sec:     Time resolution gives the Boltzmann constant
+    :param time_span_in_sec:     Time resolution gives the Boltzmann constant
     :param temp_surface:
     :param snow_depth:
-    :return     L_a:            [kJm^(-2)] is the atmospheric long wave radiation
-                L_t:            [kJm^(-2)] is the terrestrial long wave radiation
+    :return     L_a:            [kJm^(-2)] is the atmospheric long wave radiation over the given time span
+                L_t:            [kJm^(-2)] is the terrestrial long wave radiation over the given time span
+
+    Notes:      W = J / s
     '''
 
     cloud_cover = clouds_from_precipitation(prec, method='Binary')
     eps_atm = (0.72+0.005*temp_atm)*(1-0.84*cloud_cover)+0.84*cloud_cover    # Atmospheric emissivity from Campbell and Norman, 1998. Emissivity er dimasnjonsløs
     eps_surface = const.eps_snow                      # By default we assume snow cover
-    sigma = const.sigma_pr_second * timespan_in_sec   # Stefan-Boltzmann constant over the requested time span
+    sigma = const.sigma_pr_second * time_span_in_sec   # Stefan-Boltzmann constant over the requested time span
 
     if snow_depth == 0:
         eps_surface = const.eps_ice           # No snow gives ice emissivity
 
     if ice_thickness == 0:
-        temp_surface == 0               # water at 0degC
+        temp_surface == 0                     # water at 0degC
         eps_surface = const.eps_water         # water emissivity is the same as snow emidsitivity
 
     L_a = eps_atm * sigma * (temp_atm + 273.2)^4            # temp_atm skal være i Celsisus. Atmosfærisk innstsåling
@@ -261,41 +264,122 @@ def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickne
     return L_a, L_t                     # Gir verdier av riktig størrelsesorden og balanserer hverandre sånn passe
 
 
-def sensible_heat_from_senorge():
+def sensible_and_latent_heat_from_senorge(temp_atm, temp_surface, time_span_in_sec,
+                                          pressure_atm=None, wind=None):
     '''
-    H [kJm^(-2)] is the sensible heat exchange
+    Turbulent fluxes:
+    Theory for calculations found in Dingman, 2002, p. 197.
+
+    :param temp_atm:            døgnmiddeltemperatur/aktuell temperatur
+    :param temp_surface:        snøtemperatur
+    :param time_span_in_sec:    Tidsoppløsning i sekunder
+    :param wind:                Vind set constnstant if not given
+    :param pressure_atm:        atmopheric presure set constnstant if not given
+
+    :return:    H   [kJm^(-2)] Sensible heat exchange.
+                LE  [kJm^(-2)] Energy flux associated with the latent heats of vaporization and condensation at the surface.
 
     :return:
     '''
-    return
 
-def latent_heat_from_senorge():
-    '''
-    LE [kJm^(-2)] is the energy flux associated with the latent heats of vaporization and condensation at the surface
+    if not pressure_atm:
+        pressure_atm = const.pressure_atm
+    if not wind:
+        wind = const.avg_wind_const
 
-    :return:
-    '''
-    return
+    c_air = const.c_air         # specific heatcapacity air
+    rho_air = const.rho_air     # density of air
+    zu = 2                      # Høyde på vind målinger
+    zt = 2                      # Høyde på lufttemperatur målinger
+    zm = 0.001                  # ruhetsparameter for snø
+    d = 0                       # Zeroplane displecement for snow
+    zh = 0.0002                 # varme og damp ruhets
+    k =const.von_karmans_const  # von Karmans konstant
 
-def ground_heat_conduction():
-    '''
+    common = k**2/(  math.log( (zu-d)/zm ,10)  )**2
+
+    # Sensible heat exchange
+    H = c_air*rho_air*common*wind*(temp_atm-temp_surface) # Sensible heat. Positivt hvis temp_surface < temp_atm
+    H = H * time_span_in_sec
+
+    # Latent heat exchange
+    # e_a and e_s [kPa] are saturation vapor pressure in the atmosphere and at the surface respectively.
+    # Can be estimated as (Dingman, 2002, p. 586, see also Walter et al. 2005))
+    ea = 0.611 * math.exp( (17.3*temp_atm)/(temp_atm+273.3) )           # alltid positivt
+    es = 0.611 * math.exp( (17.3*temp_surface)/(temp_surface+273.3) )   # alltid positivt
+
+    # Where λ_F and λ_V are the latent heats involved in fusion and vaporization-condensation respectively
+    lambda_V = 2470     # kJkg-1 latent varme fra fordampning
+    lambda_F = 334      # kJkg-1 latent varme fra fusjon
+
+    LE = None       # Latent varme. Positivt hvis temp_surface < temp_atm
+    if temp_surface < 0.:
+        LE = (lambda_V+lambda_F)*0.622*(rho_air/pressure_atm)*common*wind*(ea-es)
+    if temp_surface == 0.:
+        LE = lambda_V * 0.622 * (rho_air/pressure_atm) * common * wind *(ea-es)
+    else:
+        print('Surface temperature above 0C not possible.')
+
+    LE = LE * time_span_in_sec
+
+    return H, LE
+
+def ground_heat_from_senorge(temp_span_in_sec):
+    """
     G [kJm^(-2)] is ground heat conduction to the bottom of the snowpack
-    '''
-    return
 
-def heat_by_precipitation_from_senorge():
-    '''
-    R [kJm^(-2)] is heat added by precipitation
-    '''
+    :param temp_span_in_sec:
+    :return:
+    """
 
-    return
+    # Ground heat
+    G = 173./86400               # [kJ / second]
+    G = G * temp_span_in_sec     # desired resolution
 
-def change_in_snowpack_heat_storage():
-    '''
-    CC [kJm^(-2)] is the change of snowpack heat storage
-    '''
+    return G
 
-    return
+
+def prec_heat_from_senorge(temp_atm, prec_rain):
+    """
+    Heat from liquid precipitation. We assume rainwater has the same temperature as air and that heat is added to the
+    snowpack when the rain’s temperature is lowered to zero degrees.
+
+    :param temp_atm:    [C] Air temperature.
+    :param prec_rain:   [m] Precipitation as liquid water.
+    :return R:          [kJm^-2] Heat added by precipitation
+    """
+
+
+    if prec_rain > 0.:
+        R = const.rho_water * const.c_water * prec_rain * temp_atm
+    else:
+        R = 0.
+
+    return R
+
+
+def cold_content_from_senorge(ice_column, temp_atm, prec_snow):
+    """
+    CC [kJm^(-2)] is the heat storage (cold content) of the snow and ice.
+
+    :param ice_column:  From previous time step. The column variable has layers with layer.density, layer.height and layer.temp.
+    :param prec_snow:   [m] Prec as snow from this time step (new snow)
+    :param temp_atm:    air temperature. We assume the new snow has this temp.
+    :return:
+    """
+
+    rho_water = const.rho_water     #  [kg/m3] density water
+
+    # Cold content of the snow and ice
+    # CC er kulde innhold som funksjon av massen og temperaturen i snøen og isen
+    # Formler under gjelder bare for snø...
+
+    c_snow = const.c_snow          # heat capacity of snow
+    CC = rho_water * c_snow * ( SWE + prec_snow ) * snittT     # kan kun bli negativ eller 0.
+
+
+    return  CC
+
 
 
 

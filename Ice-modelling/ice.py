@@ -211,8 +211,12 @@ class IceColumn:
 
         avg_temp = 0
 
-        # Thinlayer case
-        if total_thick < max_h_thin_layer:
+        # no sno or ice
+        if total_thick == 0:
+            avg_temp = 0 # feezing temp in water
+
+        # Thin layer case
+        elif total_thick < max_h_thin_layer:
             avg_temp = temp_atm - const.absolute_zero
 
         # Medium layer case
@@ -239,7 +243,8 @@ class IceColumn:
         avg_temp_out = (avg_temp + const.absolute_zero) / 2
 
         # snow and ice isnt above 0C
-        if avg_temp_out > 0.: avg_temp_out = 0.
+        if avg_temp_out > 0.:
+            avg_temp_out = 0.
 
         self.column_average_temperature = avg_temp_out
 
