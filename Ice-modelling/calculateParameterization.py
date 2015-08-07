@@ -9,6 +9,7 @@ import constants as const
 
 #######    Works on arrays
 
+
 def delta_snow_from_total_snow(snowTotal):
     ''' Method takes a list of total snow depth and returns the daily change (derivative).
 
@@ -67,6 +68,7 @@ def clouds_average_from_precipitation(prec):
 
 #######    Works on single times teps
 
+
 def temperature_from_temperature_and_clouds(temp, cloud_cover):
     '''
     This method takes shifts temperature according to cloud_cover. In theory clear nights will have a net
@@ -102,6 +104,24 @@ def temperature_from_temperature_and_snow(temp, new_snow):
         temp_temp = temp
 
     return temp_temp
+
+
+def rho_new_snow(temp):
+    """
+    Method found in THS archives. Must investigate...
+    :param temp:
+    :return:
+
+    """
+    new_snow_density = 0.05
+    temp = temp * 9.0/5.0 + 32.0      # Celsius to Fahrenhet
+
+    if(temp >0.0):
+        new_density = new_snow_density + (temp/100)^2
+    else:
+        new_density = new_snow_density
+
+    return new_density
 
 
 def k_snow_from_rho_snow(rho_snow):
@@ -141,6 +161,60 @@ def normal_time_from_unix_time(unixDatetime):
     dato = datetime.datetime.fromtimestamp(int(unixDatetimeInSeconds))
 
     return dato
+
+
+def lat_long_from_utm33(x, y, output="degrees"):
+    '''
+
+    konverterer til lat long.
+
+    '''
+
+    from math import pi, sin, cos, tan
+
+    utmx = x-500000
+    utmy = y
+    k0 = 0.9996
+    long0 = 15.0 * pi / 180         # 15 grader er Central meridian i sone 33  15*pi/180  gir radianer
+    M = utmy/k0                     # Meridional arc
+    a = 6378137                     # Eq, radius meters
+    b = 6356752.3141                # Polar radius meters
+    e = (1-(b**2/a**2))**0.5        # e = 0.08
+    e2 = (e*a/b)**2                 # e2 = 0.007
+    mu = M/(a*(1-(e**2/4)-3*(e**4/64)-5*(e**6/256)))
+    e1 = (1-(1-e**2)**0.5)/(1+(1-e**2)**0.5)
+    j1 = 3*(e1/2)-27*(e1**3/32)
+    j2 = 21*(e1**2/16)-55*(e1**4/32)
+    j3 = 151*(e1**3/96)
+    j4 = (1097*e1**4)/512
+    fp = mu+j1*sin(2*mu)+j2*sin(4*mu)+j3*sin(6*mu)+j4*sin(8*mu)
+    C1 = e2*cos(fp)**2
+    T1 = tan(fp)**2
+    R1 = a*(1-e**2)/(1-e**2*sin(fp)**2)**1.5
+    N1 = a/(1-e**2*sin(fp)**2)**0.5
+    D = utmx/(N1*k0)
+    Q1 = N1*tan(fp)/R1
+    Q2 = (D**2/2)
+    Q3 = (5+3*T1+10*C1-4*C1**2-9*e2)*D**4/24
+    Q4 = (61+90*T1+298*C1+45*T1**2-3*C1**2-252*e2)*D**6/720
+    Q5 = D
+    Q6 = (1+2*T1+C1)*D**3/6
+    Q7 = (5-2*C1+28*T1-3*C1**2+8*e2+24*T1**2)*D**5/120
+
+    phi = fp-Q1*(Q2-Q3+Q4)          # latitude radianer
+    thi = long0 +(Q5-Q6+Q7)/cos(fp) # longitude radianer
+    phi_lat = phi*180/pi            # latitude grader
+    thi_long = thi*180/pi           # longitude grader
+
+    if output == "both":
+        return phi, thi, phi_lat, thi_long
+
+    if output == "degrees":
+        return phi_lat, thi_long
+
+    if output == "radians":
+        return phi, thi
+
 
 ####### Works on both
 
@@ -215,18 +289,207 @@ def energy_balance_from_senorge():
     Where λ_F is the latent heat of fusion (λ_F=335 kJ〖kg〗^(-1))
     ρ_w [1000kgm^(-3)] is the density of water
     ΔSWE is the change in the snowpack’s water equivalent [m]
-
-
-    :return:
-
     '''
 
-def short_wave_from_senorge():
+    return
+
+
+def short_wave_from_senorge(x=130513, y=6802070, DN=180,thr=12,PS=10.):
+#def short_wave_from_senorge(x,y,DN,Ta,Aprim,taux,SWE,regn,thr,Timeresinsec,TSS,PS):
     '''
+
+    solrad_trans_albedo
     S [kJm^(-2)]is the net incident solar (short wave) radiation
+
+    :param x, y:    koordinat i UTM 33
+    :param DN:      Dagnummer
+    :param Ta:
+    :param Aprim:
+    :param taux:
+    :param SWE:
+    :param regn:
+    :param thr:
+    :param Timeresinsec:
+    :param TSS:
+    :param PS:
     :return:
+
+    # maximums temperatur
+    # minimums temperatur
+    # Døgnmiddel temperatur
+
+    # Albedo fra dagen før
+    # Sprim og Albedo er daglige bestemt for daglige verdier verdier Temoral oppløsning er bestemt av
+
+
+    :return:
+
+
+    '''
+    from math import sin, cos, tan, pi, e, fabs
+
+    deltaSWE = PS/1000.
+    thrx = thr
+    if thr == 0:
+        thrx = 24   # 1.2.2013
+
+    phi, thi, ddphi, ddthi = lat_long_from_utm33(x,y, output= "both")
+
+
+    thetaW = 0.4102*sin((2*pi/365)*(DN-80))#solar declination angleday angle, Walter 2005
+    print("sol.decl.angle={0} on daynumber={1}".format(thetaW, DN))
+
+    #theta <- vector("numeric", 365)
+    #theta2 <- vector("numeric", 365)
+    #for (DN in 1:365)theta[DN] <- 0.4092*cos((2*pi/365)*(DN-173))#solar declination angleday angle, Liston 1995
+    #for (DN in 1:365)theta2[DN] <- 0.4102*sin((2*pi/365)*(DN-80))#solar declination angleday angle
+
+    theta = 0.4092*cos((2*pi/365.25)*(DN-173)) #solar declination angleday angle, Liston 1995
+    print(theta)
+
+    theta2 = 2*pi/365.25*(DN-80)
+    print(theta2)
+
+    r = 149598000   # distance from the sun
+    R = 6378        # Radius of earth
+
+    #timezone = -4 * (fabs(thi)%%15) * thi/fabs(thi)      # ang lengdegrad ikke
+    epsilon = 0.4092    # rad(23.45)
+    '''
+    z.s <-r*sin(theta2)*sin(epsilon)
+    r.p <- sqrt(r^2-z.s^2)   #her
+    nevner <- (R-z.s*sin(phi))/(r.p*cos(phi))
+    if((nevner > -1) && (nevner < 1)):
+        {
+        # acos(mÂ ha inn verdier ,(mellom-1,1) hvis <-1 sÂ er det midnattsol > 1 er det m¯rketid.
+        t0 <-1440/(2*pi)*acos((R-z.s*sin(phi))/(r.p*cos(phi)))
+        that <- t0+5
+        n <-720-10*sin(4*pi*(DN-80)/365.25)+8*sin(2*pi*DN/365.25)
+        sr <-(n-that+timezone)/60 #soloppgang
+        ss <- (n+that+timezone)/60 #solnedgang
+        #sunhrs <- ss-sr# antall soltimer
+        #thr er tidsvariabel
+        #Trise <- -(1/0.2618)*cos(-tan(theta)*tan(phi))^-1
+        #Tset <- (1/0.2618)*cos(-tan(theta)*tan(phi))^-1
+        #Trise <-round(-sunhrs/2)
+        #Tset <- round(sunhrs/2)
+        }
+
+    if (nevner <= -1) #Midnattsol
+        {
+        sr <-0.0
+        ss <-24.0
+        }
+
+    if (nevner >= 1) #M¯skjetid
+        {
+        sr <-12.0
+        ss <-12.0
+        }
+
+
+    #thr <- 22
+    TTList <- vector("numeric",24) #vektor for Transmissivity
+    dingom <- vector("numeric",24) #vektor for Transmissivity
+
+    for (tid in 1:24)
+    {
+      if((tid > sr) && (tid < ss))
+      {
+      ifelse(regn > 0, Cl <- 1.0, Cl <-0.1) #Cloudcover 100 % if precipitation, zero otherwise Litt brutal, ganske mange skyete dager
+      #Noter at Cl = 0.1 hvis skyfritt, min justering
+
+      tom <-  -(12-(tid)) #gir antall timer fra solar noon, som gir tom=0.0
+      #print(tom)
+       cosarg <-0.2618 *tom #radianer pr time
+      #dingom<- vector("numeric", 365)
+       dingom[tid] <- acos(sin(phi)*sin(theta)+cos(phi)*cos(theta)*cos(cosarg))  #Dingmans zenith angle
+       TTList[tid] <- (0.6 + 0.2*sin((0.5*pi)-dingom[tid]))*(1.0-0.5*Cl) #Inspirert av G. Liston 1995 transmissivitet
+    #    TTList[tid] <- (0.6-0.2*sin(dingom[tid]))*(1.0-0.5*Cl) #Inspirert av G. Liston 1995 transmissivitet
+       #TTList[tid] <- (0.6-0.2*sin(dingom[tid]))*(1.0-0.5*Cl) #Inspirert av G. Liston 1995 transmissivitet
+      }
+      if((tid < sr) || (tid > ss))  #Hvis klokken er utenfor sunrise-sunset
+      {
+         TTList[tid] <-0.0 #Transmissivity Disse settes lik null hvis solen er under horisonten
+         dingom[tid] <-pi*0.5 #pi/2 minus zenith angle, initielt, ikke hel¯t sikker. Blir veldig lav med init dingom lik pi/2
+         #blir pÂ den annen side h¯y med init dingom lik 0 . Albedo ser ganske fornuftig ut
+      }
+    }
+    if(Timeresinsec == 86400)
+    {
+    Trans <- mean(TTList)
+    zen_ang <- mean(dingom)
+    }
+    if(Timeresinsec < 86400)#Midler transmissvitet og solvinkel For finere tidssoppl¯sning
+    {
+    interv <-as.integer(Timeresinsec/3600) #hvor mange timer
+    Trans <- mean(TTList[(thrx-interv+1):thrx])
+    zen_ang <- mean(dingom[(thrx-interv+1):thrx])
+    }
+    #th30 <- 0.4102*sin((2*pi/365)*((DN-30)-80))
+    #Sprim <-117.6*10^3 #[kJ/m^2*day]Sola constant
+    S0 <- (117.6*10^3)/86400 #kJ/m2*s
+
+    S0 <- S0*Timeresinsec #solar constant pr timeunit
+    print(paste("Solar constant=", S0,Timeresinsec))
+
+    #Albedo MÂ ta med dagens sn¯ for Â regne ut albeo, eller smelter den bare vekk
+    SD <- (1000/300)*(SWE+deltaSWE) #[m] bruker 300 kg/m3 som fast tetthet for utregning av albedo i UEB SDi [m]
+    #UEB albedo
+    albUEB <- AlbedoUEB(PS,SD,TSS,zen_ang,taux,Timeresinsec)
+    A_UEB <- albUEB$albedo
+    #print(paste("Albedo=",A,"SD=",SD,"taux=",round(taux,3)))
+    taux <- albUEB$taux
+
+    #Todd Walters albedo
+    print(paste("deltaSWE=",deltaSWE,"SWE=",SWE,"taux=",round(taux,3)))
+    albW <- AlbedoWalter(deltaSWE,SWE,Ta,Aprim,Timeresinsec,thrx)
+    A_Walter <- albW$albedo
+    Aprim <-albW$Aprim
+    #Abedo decay
+    #if((Timeresinsec ==86400) || (thrx==12))#Oppdatere albedoen
+    #{
+    # if (deltaSWE ==0.0)
+    # {
+    #   A <-0.35-(0.35-AX)*exp(-(0.177+log((AX-0.35)/(Aprim-0.35))^2.16))^0.46 #US Army corps of engineers (empirical)
+    #   Aprim <- A
+    # }
+    #Albedo new snow
+    #snow density
+    #deltaSWe i meter
+    # if(deltaSWE > 0.0)
+    # {
+    #   Srho <-50 +3.4*(Ta+15) #kg/m3, density new snow
+    #   A <- AX-(AX-Aprim)*exp(-((4*deltaSWE*Srho)/0.12))
+    #   Aprim <- A
+    # }
+    #}
+    #else #vi bruker forrige tidsskritts albedo
+    #{
+    # A <- Aprim
+    #}
+
+    #her velger jeg hvilken albedo variant
+    A <-A_UEB
+    #A <-A_Walter
+
+    #Solar radiation
+    S <-(1-A)*Trans*sin((pi/2)-zen_ang)*S0 #se likning Liston 1995, eq. 26 (NettoSWstrÂling)
+    Sinn <-Trans*sin((pi/2)-zen_ang)*S0
+
+    resultsolrad_trans_albedo<- NULL
+    resultsolrad_trans_albedo$S<- S
+    resultsolrad_trans_albedo$Sinn<- Sinn
+    resultsolrad_trans_albedo$A<- A
+    resultsolrad_trans_albedo$Aprim<- Aprim
+    resultsolrad_trans_albedo$taux<- taux
+    resultsolrad_trans_albedo
+    }
+
+
     '''
     return
+
 
 def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickness, time_span_in_sec):
     '''
@@ -248,7 +511,7 @@ def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickne
 
     cloud_cover = clouds_from_precipitation(prec, method='Binary')
     eps_atm = (0.72+0.005*temp_atm)*(1-0.84*cloud_cover)+0.84*cloud_cover    # Atmospheric emissivity from Campbell and Norman, 1998. Emissivity er dimasnjonsløs
-    eps_surface = const.eps_snow                      # By default we assume snow cover
+    eps_surface = const.eps_snow                       # By default we assume snow cover
     sigma = const.sigma_pr_second * time_span_in_sec   # Stefan-Boltzmann constant over the requested time span
 
     if snow_depth == 0:
@@ -324,6 +587,7 @@ def sensible_and_latent_heat_from_senorge(temp_atm, temp_surface, time_span_in_s
 
     return H, LE
 
+
 def ground_heat_from_senorge(temp_span_in_sec):
     """
     G [kJm^(-2)] is ground heat conduction to the bottom of the snowpack
@@ -360,34 +624,44 @@ def prec_heat_from_senorge(temp_atm, prec_rain):
 
 def cold_content_from_senorge(ice_column, temp_atm, prec_snow):
     """
-    CC [kJm^(-2)] is the heat storage (cold content) of the snow and ice.
+    Heat storage (cold content) of the snow and ice.
 
     :param ice_column:  From previous time step. The column variable has layers with layer.density, layer.height and layer.temp.
     :param prec_snow:   [m] Prec as snow from this time step (new snow)
-    :param temp_atm:    air temperature. We assume the new snow has this temp.
-    :return:
+    :param temp_atm:    [C] air temperature. We assume the new snow has this temp.
+
+    :return CC:         [kJm^-2]
+
+    Dimensions:     kg m^-3 * kJ kg^-1 K^-1 * m * K = kJm^-2
     """
 
-    rho_water = const.rho_water     #  [kg/m3] density water
+    CC = 0      # kan kun bli negativ eller 0.
 
-    # Cold content of the snow and ice
-    # CC er kulde innhold som funksjon av massen og temperaturen i snøen og isen
-    # Formler under gjelder bare for snø...
+    for layer in ice_column.column:
+        CC += layer.rho * layer.heat_capacity * layer.height * layer.temperature
 
-    c_snow = const.c_snow          # heat capacity of snow
-    CC = rho_water * c_snow * ( SWE + prec_snow ) * snittT     # kan kun bli negativ eller 0.
-
+    # Add also the new snow
+    CC += const.rho_new_snow * const.c_snow * prec_snow * temp_atm
 
     return  CC
 
 
+if __name__ == "__main__":
+
+    # Test koordinater i tana
+    x_tana = 988130
+    y_tana = 7844353
+    lat_tana, long_tana = lat_long_from_utm33(x_tana, y_tana)
 
 
+    # Test Filefjell
+    y_file = 6802070
+    x_file = 130513
+    lat_file, long_file = lat_long_from_utm33(x_file, y_file)
 
+    short_wave_from_senorge()
 
-
-
-
+    a = 1
 
 
 

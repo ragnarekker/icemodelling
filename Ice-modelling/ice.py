@@ -516,6 +516,19 @@ class IceLayer:
         else: return -1
 
 
+    def heat_capacity(self):
+        # returns heat capacity given the type of layer
+        if self.type == 'new_snow': return const.c_snow
+        elif self.type == 'snow': return const.c_snow
+        elif self.type == 'drained_snow': return const.c_snow
+        elif self.type == 'slush': return const.c_slush
+        elif self.type == 'slush_ice': return const.c_ice
+        elif self.type == 'black_ice': return const.c_ice
+        elif self.type == 'water': return const.c_water
+        elif self.type == 'unknown': return const.c_ice
+        else: return -1
+
+
 class IceCover:
 
     def __init__(self, date_inn, iceCoverName_inn, iceCoverBeforeName_inn, locationName_inn):

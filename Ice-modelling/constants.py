@@ -52,6 +52,7 @@ rho_black_ice = 0.917*10**3     # ice (incl. snow ice) density [kg m-3]
 rho_water = 1000.               # density of freshwater (kg m-3)
 rho_air = 1.29                  # kg/m3
 
+
 # Latent heat of fusion [J kg-1]
 L_black_ice = 333500            # latent heat of freezing water to black ice
 L_slush_ice = 0.5*L_black_ice   # freezing slush to slush ice
@@ -61,9 +62,8 @@ L_slush_ice = 0.5*L_black_ice   # freezing slush to slush ice
 c_air = 1.01                    # heat capacity of air
 c_water = 4.19                  # heat capacity of water
 c_snow = 2.102                  # heat capacity of snow from Dingman p. 189
-c_black_ice = c_snow            # at 0C. http://www.engineeringtoolbox.com/ice-thermal-properties-d_576.html
-c_slush_ice = c_snow            # Its frozen - the density is lower thus specific heat capacity may be the same
-c_slush = (c_water + c_black_ice)/2  # Assume slush is half/half water and ice
+c_ice = c_snow            # at 0C. http://www.engineeringtoolbox.com/ice-thermal-properties-d_576.html
+c_slush = (c_water + c_ice)/2  # Assume slush is half/half water and ice
 
 
 # Albedo in %
