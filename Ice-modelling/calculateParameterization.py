@@ -109,6 +109,10 @@ def temperature_from_temperature_and_snow(temp, new_snow):
 def rho_new_snow(temp):
     """
     Method found in THS archives. Must investigate...
+
+    Note, there is a different formula used in the albedo_walter() method:
+    rho_snow = 50 + 3.4*(temp_atm + 15)
+
     :param temp:
     :return:
 
@@ -116,8 +120,8 @@ def rho_new_snow(temp):
     new_snow_density = 0.05
     temp = temp * 9.0/5.0 + 32.0      # Celsius to Fahrenhet
 
-    if(temp >0.0):
-        new_density = new_snow_density + (temp/100)^2
+    if(temp > 0.):
+        new_density = new_snow_density + (temp/100)**2
     else:
         new_density = new_snow_density
 
@@ -277,11 +281,149 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
     return clouds_out
 
 
-
 #######    Works on single timesteps (Energy balance)
+
+
+
+def get_albedo_walter(prec_snow, snow_depth, snow_density, temp_atm, albedo_prim, time_span_in_sec, time_hour):
+    """
+    Calculates albedo according to Todd Walters paper (2005) in journal of hydrology.
+    It works for time intervals of 24hrs, 12, 6, 4 and 3hrs. That is, for albedo decay to work time_hour
+    has to be 12 once a day.
+
+    The method is derived for snow covered ground and is valid for use if snow_depth + prec_snow is
+    more than swe_minimum (15-20cm snow). Less snow is treated with an interpolation with bare ground albedo.
+
+    :param prec_snow:
+    :param snow_depth:
+    :param snow_density:
+    :param temp_atm:
+    :param albedo_prim:         primary albedo.
+    :param time_span_in_sec:
+    :param time_hour:
+    :return:    albedo_prim:    primary albedo decayed on time step.
+                albedo:         are equal in the cases where snow depth is above critical 15-20cm.
+
+    """
+    from math import exp, log
+
+    # Method uses snow water equivalents SWE
+    delta_swe = prec_snow / rho_new_snow(temp_atm)
+    swe = snow_depth / snow_density
+    swe += delta_swe
+
+    albedo_max = const.alfa_max     # maximum albedo
+    albedo_bare_ground = const.alfa_bare_ground
+    swe_minimum = 0.05                  # Aprox 15-20cm snow height.
+
+    A = None
+    if (time_span_in_sec == 86400) or (time_hour == 12):                   # Oppdatere albedoen 1 gang i døgnet
+
+        # case no new snow or melt. Apply albedo decay
+        if delta_swe <= 0.:
+            A = 0.35-(0.35-albedo_max)*exp(-(0.177+log((albedo_max-0.35)/(albedo_prim-0.35))**2.16))**0.46 #US Army corps of engineers (empirical)
+            albedo_prim = A
+
+        # Case new snow: Calculate snow density and albedo of the new snow.
+        if(delta_swe > 0.):
+            #rho_snow = 50 + 3.4*(temp_atm+15)       # [kg/m3] density new snow
+            rho_snow = rho_new_snow(temp_atm)
+            A = albedo_max-(albedo_max-albedo_prim)*exp(-((4*delta_swe*rho_snow)/0.12))
+            albedo_prim = A
+    else:
+        A = albedo_prim                             # vi bruker forrige tidsskritts albedo
+
+    albedo = A
+
+    if swe < swe_minimum:
+        R = (1-(swe/swe_minimum)) * exp(-(swe/(2*swe_minimum)))
+        albedo = R*albedo_bare_ground + (1-R)*albedo           # interpolerer albedo til bare ground albedo
+
+    return albedo_prim, albedo
+
+
+def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, age_factor_tau, time_span_in_sec):
+    """
+    Method estimates albedo as in the Utah energy balance Snow Accumulation and Melt Model (UEB).
+    Adaption from Dickinson et al. 1993 (BATS, NCAR).
+
+    :param prec_snow:
+    :param snow_depth:
+    :param temp_surface:
+    :param zenith_angle:        [Radians]
+    :param age_factor_tau:      [-] non-dimensional snow surface age that is incremented at each times step
+                                by a quantity designed to emulate the effect of the growth of surface
+                                grain sizes.
+    :param time_span_in_sec:
+    :return:
+
+    """
+    from math import exp, cos
+
+    # Albedo MÅ ta med dagens snø for å regne ut albeo, ellers smelter den bare vekk
+    snow_depth += prec_snow
+
+    # Constants from Tarboton and Luce, Utah energy balance Snow Accumulation and Melt Model UEB, 1996
+    albedo_bare_ground = const.alfa_black_ice     # Bare ground albedo means albedo of the ice beneath
+    C_v = 0.2           # sensitivity of albedo to snow surface aging (grain size growth)
+    C_ir = 0.5          # sensitivity of albedo to snow surface aging (grain size growth)
+    alfa_v0 = 0.95      # fresh snow diffuse reflectances in the visible
+    alfa_ir0 = 0.65     # fresh snow diffuse reflectances in the near infrared bands
+    tau_0 = 1000000
+    h_sd = 0.05         # Meter
+    b = 2               # Dickinson et al 1993
+
+    ##TEST VARIABLE som er input
+    #prec_snow <- 0.005         # meter snøfall
+    #temp_surface <- -3.2       # Snøoverflate temperatur
+    #zenith_angle <- 0.6        # zenith vinkel i radianer
+    #snow_depth <- 0.02         # snø i snømagasin (med prec_snow?)
+    #age_factor_tau <- 0.7      # lader fra forrige tidsskritt
+    #time_span_in_sec <- 10800  # 3 timer
+    ####
+
+    # The change in age_factor
+    r1 = exp(5000*((1/273.16)-(1/(temp_surface+273.16))))
+    r2 = min(r1**10, 1)
+    r3 = 0.03
+    d_tau = ((r1+r2+r3)/tau_0)*time_span_in_sec
+
+    # In case of new snow, the age factor becomes 0.
+    if prec_snow >= 0.01:
+        age_factor_tau = 0.
+
+    age_factor_tau += d_tau
+    F_age = age_factor_tau/(1+age_factor_tau)
+
+    # reflectance visible and near infra red light (< 0.7 micro-meters and > 0.7 micrometers)
+    alfa_vd = (1-C_v*F_age)*alfa_v0
+    alfa_ird = (1-C_ir*F_age)*alfa_ir0
+
+    f_omg = None
+    if cos(zenith_angle) < 0.5:
+        f_omg = (1/b)*(((b+1)/(1+2*b*cos(zenith_angle)))-1)
+    if cos(zenith_angle) > 0.5:
+        f_omg = 0.
+
+    alfa_v = alfa_vd + 0.4*f_omg*(1-alfa_vd)
+    alfa_ir = alfa_ird + 0.4*f_omg*(1-alfa_ird)
+
+    albedo_init = 0.5*alfa_v+0.5*alfa_ir        # vekter det mot visible < 0.7 mikro meter
+
+    radiation_extinction = (1-(snow_depth/h_sd))*exp(-(snow_depth/(2*h_sd)))
+
+    if snow_depth < h_sd:
+             # interpolerer albedo til bare ground albedo
+        albedo = radiation_extinction*albedo_bare_ground + (1-radiation_extinction)*albedo_init
+    else:
+        albedo = albedo_init
+
+    return age_factor_tau, albedo
+
 
 def energy_balance_from_senorge():
     '''
+
     The daily energy budget of a column of snow is expressed as (Walter et al. 2005):
 
     λ_F * ρ_w * ΔSWE = S + (L_a - L_t) + (H + LE) + G + R - CC
@@ -290,208 +432,168 @@ def energy_balance_from_senorge():
     ρ_w [1000kgm^(-3)] is the density of water
     ΔSWE is the change in the snowpack’s water equivalent [m]
     '''
+    """
+    cloud_cover = clouds_from_precipitation(prec, method='Binary')
+
+    S, Sinn, albedo, albedo_prim, age_factor_tau = \
+        get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, snow_density, prec_snow, time_hour,
+                       time_span_in_sec, temp_surface, age_factor_tau, albedo_prim, albedo_method="ueb")
+    """
+
 
     return
 
 
-def short_wave_from_senorge(x=130513, y=6802070, DN=180,thr=12,PS=10.):
-#def short_wave_from_senorge(x,y,DN,Ta,Aprim,taux,SWE,regn,thr,Timeresinsec,TSS,PS):
+def get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover,snow_depth, snow_density, prec_snow, time_hour,
+                   time_span_in_sec, temp_surface, age_factor_tau, albedo_prim, albedo_method="ueb"):
     '''
-
-    solrad_trans_albedo
     S [kJm^(-2)]is the net incident solar (short wave) radiation
+    Method calculates albedo in two different ways for comparison and testing. In the end one is chose based on
+    the method chosen.
 
-    :param x, y:    koordinat i UTM 33
-    :param DN:      Dagnummer
-    :param Ta:
-    :param Aprim:
-    :param taux:
-    :param SWE:
-    :param regn:
-    :param thr:
-    :param Timeresinsec:
-    :param TSS:
-    :param PS:
-    :return:
+    :param utm33_x, utm33_y:    koordinat i UTM 33
+    :param day_no:              Dagnummer
+    :param temp_atm:            [C] Air temperature
+    :param SWE:                 snø i snømagasin
+    :param prec_rain:           [m] precipitation as liquid
+    :param time_hour:           [0-23] Hour of the day the time_span_in_sec ends
+    :param time_span_in_sec:    [sec] Time resolution in sec
+    :param temp_surface:        [C] Snøoverflate temperatur
+    :param prec_snow:           [m] Meter snøfall
+    :param albedo_prim:         Primary albedo from last timestep. Used in the albedo_walters routine.
+    :param age_factor_tau:      [?] Age factor in the UEB albedo routine.
 
-    # maximums temperatur
-    # minimums temperatur
-    # Døgnmiddel temperatur
-
-    # Albedo fra dagen før
-    # Sprim og Albedo er daglige bestemt for daglige verdier verdier Temoral oppløsning er bestemt av
-
-
-    :return:
+    :return:    S, Sinn, albedo, albedo_prim, age_factor_tau
 
 
     '''
-    from math import sin, cos, tan, pi, e, fabs
+    from math import sin, cos, pi, fabs, sqrt, acos
 
-    deltaSWE = PS/1000.
-    thrx = thr
-    if thr == 0:
-        thrx = 24   # 1.2.2013
+    if time_hour == 0:
+        time_hour = 24
 
-    phi, thi, ddphi, ddthi = lat_long_from_utm33(x,y, output= "both")
+    phi, thi, ddphi, ddthi = lat_long_from_utm33(utm33_x,utm33_y, output= "both")
 
-
-    thetaW = 0.4102*sin((2*pi/365)*(DN-80))#solar declination angleday angle, Walter 2005
-    print("sol.decl.angle={0} on daynumber={1}".format(thetaW, DN))
+    thetaW = 0.4102*sin((2*pi/365)*(day_no-80))     # solar declination angleday angle, Walter 2005
+    print("sol.decl.angle={0} on daynumber={1}".format(thetaW, day_no))
 
     #theta <- vector("numeric", 365)
     #theta2 <- vector("numeric", 365)
-    #for (DN in 1:365)theta[DN] <- 0.4092*cos((2*pi/365)*(DN-173))#solar declination angleday angle, Liston 1995
-    #for (DN in 1:365)theta2[DN] <- 0.4102*sin((2*pi/365)*(DN-80))#solar declination angleday angle
+    #for (day_no in 1:365)theta[day_no] <- 0.4092*cos((2*pi/365)*(day_no-173))#solar declination angleday angle, Liston 1995
+    #for (day_no in 1:365)theta2[day_no] <- 0.4102*sin((2*pi/365)*(day_no-80))#solar declination angleday angle
 
-    theta = 0.4092*cos((2*pi/365.25)*(DN-173)) #solar declination angleday angle, Liston 1995
+    theta = 0.4092*cos((2*pi/365.25)*(day_no-173))  # solar declination angleday angle, Liston 1995
     print(theta)
 
-    theta2 = 2*pi/365.25*(DN-80)
+    theta2 = 2*pi/365.25*(day_no-80)
     print(theta2)
 
     r = 149598000   # distance from the sun
     R = 6378        # Radius of earth
 
-    #timezone = -4 * (fabs(thi)%%15) * thi/fabs(thi)      # ang lengdegrad ikke
+    timezone = -4 * (fabs(thi) % 15) * thi/fabs(thi)      # ang lengdegrad ikke
     epsilon = 0.4092    # rad(23.45)
-    '''
-    z.s <-r*sin(theta2)*sin(epsilon)
-    r.p <- sqrt(r^2-z.s^2)   #her
-    nevner <- (R-z.s*sin(phi))/(r.p*cos(phi))
-    if((nevner > -1) && (nevner < 1)):
-        {
+
+    z_s = r*sin(theta2)*sin(epsilon)
+    r_p = sqrt(r**2-z_s**2)
+    nevner = (R-z_s*sin(phi))/(r_p*cos(phi))
+
+    if(nevner > -1) and (nevner < 1):
+
         # acos(mÂ ha inn verdier ,(mellom-1,1) hvis <-1 sÂ er det midnattsol > 1 er det m¯rketid.
-        t0 <-1440/(2*pi)*acos((R-z.s*sin(phi))/(r.p*cos(phi)))
-        that <- t0+5
-        n <-720-10*sin(4*pi*(DN-80)/365.25)+8*sin(2*pi*DN/365.25)
-        sr <-(n-that+timezone)/60 #soloppgang
-        ss <- (n+that+timezone)/60 #solnedgang
-        #sunhrs <- ss-sr# antall soltimer
-        #thr er tidsvariabel
-        #Trise <- -(1/0.2618)*cos(-tan(theta)*tan(phi))^-1
-        #Tset <- (1/0.2618)*cos(-tan(theta)*tan(phi))^-1
-        #Trise <-round(-sunhrs/2)
-        #Tset <- round(sunhrs/2)
-        }
+        t0 = 1440/(2*pi)*acos((R-z_s*sin(phi))/(r_p*cos(phi)))
+        that = t0+5
+        n = 720-10*sin(4*pi*(day_no-80)/365.25)+8*sin(2*pi*day_no/365.25)
+        sr = (n-that+timezone)/60 #soloppgang
+        ss = (n+that+timezone)/60 #solnedgang
 
-    if (nevner <= -1) #Midnattsol
-        {
-        sr <-0.0
-        ss <-24.0
-        }
+        #sunhrs = ss-sr# antall soltimer
+        #time_hour er tidsvariabel
+        #Trise = -(1/0.2618)*cos(-tan(theta)*tan(phi))**-1
+        #Tset = (1/0.2618)*cos(-tan(theta)*tan(phi))**-1
+        #Trise = round(-sunhrs/2)
+        #Tset = round(sunhrs/2)
 
-    if (nevner >= 1) #M¯skjetid
-        {
-        sr <-12.0
-        ss <-12.0
-        }
+    if nevner <= -1:    # Midnattsol
+        sr = 0.
+        ss = 24.
 
+    if nevner >= 1:     # Mørketid
+        sr = 12.
+        ss = 12.
 
-    #thr <- 22
-    TTList <- vector("numeric",24) #vektor for Transmissivity
-    dingom <- vector("numeric",24) #vektor for Transmissivity
+    #time_hour <- 22
+    TTList = {}         # Values for transmissivity for every hr
+    dingom = {}         # Values for zenith angle (0 straight up)
 
-    for (tid in 1:24)
-    {
-      if((tid > sr) && (tid < ss))
-      {
-      ifelse(regn > 0, Cl <- 1.0, Cl <-0.1) #Cloudcover 100 % if precipitation, zero otherwise Litt brutal, ganske mange skyete dager
-      #Noter at Cl = 0.1 hvis skyfritt, min justering
+    for tid in range(1, 24, 1):
 
-      tom <-  -(12-(tid)) #gir antall timer fra solar noon, som gir tom=0.0
-      #print(tom)
-       cosarg <-0.2618 *tom #radianer pr time
-      #dingom<- vector("numeric", 365)
-       dingom[tid] <- acos(sin(phi)*sin(theta)+cos(phi)*cos(theta)*cos(cosarg))  #Dingmans zenith angle
-       TTList[tid] <- (0.6 + 0.2*sin((0.5*pi)-dingom[tid]))*(1.0-0.5*Cl) #Inspirert av G. Liston 1995 transmissivitet
-    #    TTList[tid] <- (0.6-0.2*sin(dingom[tid]))*(1.0-0.5*Cl) #Inspirert av G. Liston 1995 transmissivitet
-       #TTList[tid] <- (0.6-0.2*sin(dingom[tid]))*(1.0-0.5*Cl) #Inspirert av G. Liston 1995 transmissivitet
-      }
-      if((tid < sr) || (tid > ss))  #Hvis klokken er utenfor sunrise-sunset
-      {
-         TTList[tid] <-0.0 #Transmissivity Disse settes lik null hvis solen er under horisonten
-         dingom[tid] <-pi*0.5 #pi/2 minus zenith angle, initielt, ikke hel¯t sikker. Blir veldig lav med init dingom lik pi/2
-         #blir pÂ den annen side h¯y med init dingom lik 0 . Albedo ser ganske fornuftig ut
-      }
-    }
-    if(Timeresinsec == 86400)
-    {
-    Trans <- mean(TTList)
-    zen_ang <- mean(dingom)
-    }
-    if(Timeresinsec < 86400)#Midler transmissvitet og solvinkel For finere tidssoppl¯sning
-    {
-    interv <-as.integer(Timeresinsec/3600) #hvor mange timer
-    Trans <- mean(TTList[(thrx-interv+1):thrx])
-    zen_ang <- mean(dingom[(thrx-interv+1):thrx])
-    }
-    #th30 <- 0.4102*sin((2*pi/365)*((DN-30)-80))
-    #Sprim <-117.6*10^3 #[kJ/m^2*day]Sola constant
-    S0 <- (117.6*10^3)/86400 #kJ/m2*s
+        if (tid > sr) and (tid < ss):
 
-    S0 <- S0*Timeresinsec #solar constant pr timeunit
-    print(paste("Solar constant=", S0,Timeresinsec))
+            tom = tid-12    # Number of hours from solar noon. Solar noon is tom=0
+            cosarg = 0.2618 * tom   # Radians pr hour
 
-    #Albedo MÂ ta med dagens sn¯ for Â regne ut albeo, eller smelter den bare vekk
-    SD <- (1000/300)*(SWE+deltaSWE) #[m] bruker 300 kg/m3 som fast tetthet for utregning av albedo i UEB SDi [m]
-    #UEB albedo
-    albUEB <- AlbedoUEB(PS,SD,TSS,zen_ang,taux,Timeresinsec)
-    A_UEB <- albUEB$albedo
-    #print(paste("Albedo=",A,"SD=",SD,"taux=",round(taux,3)))
-    taux <- albUEB$taux
+            dingom[tid] = acos(sin(phi)*sin(theta)+cos(phi)*cos(theta)*cos(cosarg))  # Dingmans zenith angle
+            TTList[tid] = (0.6 + 0.2*sin((0.5*pi)-dingom[tid]))*(1.0-0.5*cloud_cover)         # Inspirert av G. Liston 1995 transmissivitet
 
-    #Todd Walters albedo
-    print(paste("deltaSWE=",deltaSWE,"SWE=",SWE,"taux=",round(taux,3)))
-    albW <- AlbedoWalter(deltaSWE,SWE,Ta,Aprim,Timeresinsec,thrx)
-    A_Walter <- albW$albedo
-    Aprim <-albW$Aprim
-    #Abedo decay
-    #if((Timeresinsec ==86400) || (thrx==12))#Oppdatere albedoen
-    #{
-    # if (deltaSWE ==0.0)
-    # {
-    #   A <-0.35-(0.35-AX)*exp(-(0.177+log((AX-0.35)/(Aprim-0.35))^2.16))^0.46 #US Army corps of engineers (empirical)
-    #   Aprim <- A
-    # }
-    #Albedo new snow
-    #snow density
-    #deltaSWe i meter
-    # if(deltaSWE > 0.0)
-    # {
-    #   Srho <-50 +3.4*(Ta+15) #kg/m3, density new snow
-    #   A <- AX-(AX-Aprim)*exp(-((4*deltaSWE*Srho)/0.12))
-    #   Aprim <- A
-    # }
-    #}
-    #else #vi bruker forrige tidsskritts albedo
-    #{
-    # A <- Aprim
-    #}
+            # TTList[tid] = (0.6-0.2*sin(dingom[tid]))*(1.0-0.5*cloud_cover) #Inspirert av G. Liston 1995 transmissivitet
+            # TTList[tid] = (0.6-0.2*sin(dingom[tid]))*(1.0-0.5*cloud_cover) #Inspirert av G. Liston 1995 transmissivitet
 
-    #her velger jeg hvilken albedo variant
-    A <-A_UEB
-    #A <-A_Walter
+        if (tid < sr) or (tid > ss):  # If time is outside sunrise-sunset
+
+            TTList[tid] = 0.       # Transmissivity = 0 when sun is below horizon.
+            dingom[tid] = pi/2     # Angle below horizin is set to be on the horizon.
+
+    # pi/2 minus zenith angle, initielt, ikke helt sikker. Blir veldig lav med init dingom lik pi/2
+    # blir på den annen side høy med init dingom lik 0. Albedo ser ganske fornuftig ut.
+
+    if time_span_in_sec == 86400:
+        Trans = TTList.values()                 # list
+        zenith_angle = dingom.values()          # list
+
+    elif time_span_in_sec < 86400:              # Midler transmissvitet og solvinkel For finere tidssoppløsning
+        interv = list(range(time_hour-int(time_span_in_sec/3600)+1, time_hour, 1))     # aktuelle timer
+        Trans = [TTList[i] for i in interv]     # selection of transmisions in intervall
+        zenith_angle = [dingom[i] for i in interv]
+
+    else:
+        print("Method doesnt work on time intervals greater than 24hrs")
+        Trans = None
+        zenith_angle = None
+
+    # Mean values
+    Trans = float( sum(Trans) / len(Trans) )
+    zenith_angle = float( sum(zenith_angle) / len(zenith_angle) )
+
+    S0 = (117.6*10**3)/86400    # [kJ/m2*s] Solar constant pr sec
+    S0 *= time_span_in_sec      # solar constant pr time step
+    print("Solar constant={0}, time resolution = {1}".format(S0, time_span_in_sec))
+
+    # UEB albedo
+    age_factor_tau, albedo_ueb \
+        = get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, age_factor_tau, time_span_in_sec)
+
+    # Todd Walters albedo
+    albedo_prim, albedo_walter \
+        = get_albedo_walter(prec_snow, snow_depth, snow_density, temp_atm, albedo_prim, time_span_in_sec, time_hour)
+
+    # At this point I choose which albedo variant to use in calculating short wave radiation
+    if albedo_method == "ueb":
+        albedo = albedo_ueb
+    elif albedo_method == "walter":
+        albedo = albedo_walter
+    else:
+        print("No valid albedo method selected.")
+        albedo = None
 
     #Solar radiation
-    S <-(1-A)*Trans*sin((pi/2)-zen_ang)*S0 #se likning Liston 1995, eq. 26 (NettoSWstrÂling)
-    Sinn <-Trans*sin((pi/2)-zen_ang)*S0
+    Sinn = Trans * sin((pi/2)-zenith_angle) * S0
+    S = (1-albedo) * Sinn           # se likning Liston 1995, eq. 26 (Nett SW-radiation)
 
-    resultsolrad_trans_albedo<- NULL
-    resultsolrad_trans_albedo$S<- S
-    resultsolrad_trans_albedo$Sinn<- Sinn
-    resultsolrad_trans_albedo$A<- A
-    resultsolrad_trans_albedo$Aprim<- Aprim
-    resultsolrad_trans_albedo$taux<- taux
-    resultsolrad_trans_albedo
-    }
+    return S, Sinn, albedo, albedo_prim, age_factor_tau
 
 
-    '''
-    return
-
-
-def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickness, time_span_in_sec):
+def get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, ice_thickness, time_span_in_sec):
     '''
     Long wave radiation, both atmospheric and terrestrial, calculated from precipitation and temperature.
 
@@ -509,7 +611,6 @@ def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickne
     Notes:      W = J / s
     '''
 
-    cloud_cover = clouds_from_precipitation(prec, method='Binary')
     eps_atm = (0.72+0.005*temp_atm)*(1-0.84*cloud_cover)+0.84*cloud_cover    # Atmospheric emissivity from Campbell and Norman, 1998. Emissivity er dimasnjonsløs
     eps_surface = const.eps_snow                       # By default we assume snow cover
     sigma = const.sigma_pr_second * time_span_in_sec   # Stefan-Boltzmann constant over the requested time span
@@ -521,14 +622,13 @@ def long_wave_from_senorge(prec, temp_atm, temp_surface, snow_depth, ice_thickne
         temp_surface == 0                     # water at 0degC
         eps_surface = const.eps_water         # water emissivity is the same as snow emidsitivity
 
-    L_a = eps_atm * sigma * (temp_atm + 273.2)^4            # temp_atm skal være i Celsisus. Atmosfærisk innstsåling
-    L_t = eps_surface * sigma * (temp_surface + 273.2)^4    # terrestrisk utstråling emmisivity for snø er 0.97, er ogsÂ brukt for bar bakke, se Dingman p.583
+    L_a = eps_atm * sigma * (temp_atm + 273.2)**4            # temp_atm skal være i Celsisus. Atmosfærisk innstsåling
+    L_t = eps_surface * sigma * (temp_surface + 273.2)**4    # terrestrisk utstråling emmisivity for snø er 0.97, er ogsÂ brukt for bar bakke, se Dingman p.583
 
     return L_a, L_t                     # Gir verdier av riktig størrelsesorden og balanserer hverandre sånn passe
 
 
-def sensible_and_latent_heat_from_senorge(temp_atm, temp_surface, time_span_in_sec,
-                                          pressure_atm=None, wind=None):
+def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, pressure_atm=None, wind=None):
     '''
     Turbulent fluxes:
     Theory for calculations found in Dingman, 2002, p. 197.
@@ -588,7 +688,7 @@ def sensible_and_latent_heat_from_senorge(temp_atm, temp_surface, time_span_in_s
     return H, LE
 
 
-def ground_heat_from_senorge(temp_span_in_sec):
+def get_ground_heat(temp_span_in_sec):
     """
     G [kJm^(-2)] is ground heat conduction to the bottom of the snowpack
 
@@ -603,7 +703,7 @@ def ground_heat_from_senorge(temp_span_in_sec):
     return G
 
 
-def prec_heat_from_senorge(temp_atm, prec_rain):
+def get_prec_heat(temp_atm, prec_rain):
     """
     Heat from liquid precipitation. We assume rainwater has the same temperature as air and that heat is added to the
     snowpack when the rain’s temperature is lowered to zero degrees.
@@ -622,7 +722,7 @@ def prec_heat_from_senorge(temp_atm, prec_rain):
     return R
 
 
-def cold_content_from_senorge(ice_column, temp_atm, prec_snow):
+def get_cold_content(ice_column, temp_atm, prec_snow):
     """
     Heat storage (cold content) of the snow and ice.
 
@@ -659,7 +759,10 @@ if __name__ == "__main__":
     x_file = 130513
     lat_file, long_file = lat_long_from_utm33(x_file, y_file)
 
-    short_wave_from_senorge()
+    get_short_wave(utm33_x=130513, utm33_y=6802070, day_no=10, temp_atm= -1.5, cloud_cover=0.5,
+                            snow_depth=1., snow_density=0.3, prec_snow=0.01,
+                            time_hour=0, time_span_in_sec=24*60*60, temp_surface=-2.,
+                            age_factor_tau=None, albedo_prim=0.30, albedo_method="ueb")
 
     a = 1
 

@@ -66,10 +66,12 @@ c_ice = c_snow            # at 0C. http://www.engineeringtoolbox.com/ice-thermal
 c_slush = (c_water + c_ice)/2  # Assume slush is half/half water and ice
 
 
-# Albedo in %
-alfa_black_ice = 35             # from http://en.wikipedia.org/wiki/Albedo
-alfa_snow_new = 85              # from http://en.wikipedia.org/wiki/Albedo
-alfa_snow_old = 45              # from http://en.wikipedia.org/wiki/Albedo
+# Albedo in values [0,1]
+alfa_black_ice = 0.35             # from http://en.wikipedia.org/wiki/Albedo
+alfa_snow_new = 0.85              # from http://en.wikipedia.org/wiki/Albedo
+alfa_snow_old = 0.45              # from http://en.wikipedia.org/wiki/Albedo
+alfa_max = 0.95
+alfa_bare_ground = 0.25           # Generic albedo for snow less ground (Campell, 1977)
 
 
 # The melting coefficients for the degree-day formula [m s-1 degC-1]
