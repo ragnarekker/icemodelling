@@ -151,6 +151,7 @@ def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output):
     elif output == 'list':
         return stationElementList
 
+
 def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
     '''
     The method uses the eklima webservice from met.no documented om eklims.met.no/wsklima

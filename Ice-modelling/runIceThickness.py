@@ -14,10 +14,11 @@ import getFiledata as gfd
 import getWSklima as gws
 import getChartserverdata as gcsd
 import makePlots as pts
+import constants as const
 from setEnvironment import data_path, plot_folder
 
 
-def calculateIceCover(inn_column, date, temp, sno, cloudcover=None):
+def calculateIceCoverSimple(inn_column, date, temp, sno, cloudcover=None):
 
     icecover = []
     timestep = 60*60*24     # fixed timestep of 24hrs given in seconds
@@ -28,13 +29,42 @@ def calculateIceCover(inn_column, date, temp, sno, cloudcover=None):
             i = i + 1
         else:
             if cloudcover != None:
-                out_column = itc.get_ice_thickness(inn_column, timestep, sno[i], temp[i], cloudcover[i])
+                out_column = itc.get_ice_thickness_from_conductivity(inn_column, timestep, sno[i], temp[i], cloudcover[i])
             else:
-                out_column = itc.get_ice_thickness(inn_column, timestep, sno[i], temp[i])
+                out_column = itc.get_ice_thickness_from_conductivity(inn_column, timestep, sno[i], temp[i])
             icecover.append(out_column)
             inn_column = copy.deepcopy(out_column)
 
     return icecover
+
+def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec_snow, cloud_cover):
+
+    icecover = []
+    time_span_in_sec = 60*60*24     # fixed timestep of 24hrs given in seconds
+    icecover.append(copy.deepcopy(inn_column))
+    energy_balance = []
+
+    age_factor_tau = 0.
+    albedo_prim = const.alfa_black_ice
+
+    for i in range(0, len(date), 1):
+
+        out_column = itc.get_ice_thickness_from_conductivity(inn_column, time_span_in_sec,
+                                                             prec_snow[i], temp_atm[i], cloud_cover[i])
+        eb = pz.get_energy_balance_from_senorge(utm33_x, utm33_y, inn_column,
+                            temp_atm[i], prec[i], prec_snow[i], age_factor_tau, albedo_prim,
+                            time_span_in_sec, cloud_cover=cloud_cover[i])
+
+        icecover.append(out_column)
+        energy_balance.append(eb)
+        inn_column = copy.deepcopy(out_column)
+
+        age_factor_tau = eb.age_factor_tau
+        albedo_prim = eb.albedo_prim
+
+
+
+    return icecover, energy_balance
 
 
 def runOrovannNVE(startDate, endDate):
@@ -51,7 +81,7 @@ def runOrovannNVE(startDate, endDate):
     #observed_ice = importColumns(observed_ice_filename)
     observed_ice = gro.get_all_season_ice(LocationName, startDate, endDate)
 
-    icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno)
+    icecover = calculateIceCoverSimple(copy.deepcopy(observed_ice[0]), date, temp, sno)
 
     plot_filename = '{0}Ortovann {1}-{2}.png'.format(plot_folder, startDate.year, endDate.year)
     pts.plotIcecover(icecover, observed_ice, date, temp, snotot, plot_filename)
@@ -80,9 +110,9 @@ def runOrovannMET(startDate, endDate):
     observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
 
     if len(observed_ice) == 0:
-        icecover = calculateIceCover(ice.IceColumn(date[0], []), date, temp, sno)
+        icecover = calculateIceCoverSimple(ice.IceColumn(date[0], []), date, temp, sno)
     else:
-        icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno)
+        icecover = calculateIceCoverSimple(copy.deepcopy(observed_ice[0]), date, temp, sno)
 
     # Need datetime objects from now on
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
@@ -90,6 +120,41 @@ def runOrovannMET(startDate, endDate):
 
     plot_filename = '{0}Ortovann MET {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
     pts.plotIcecover(icecover, observed_ice, date, temp, snotot, plot_filename)
+
+
+def runOrovannEB(startDate, endDate):
+
+    location_name = 'Otrøvatnet v/Nystuen 971 moh'
+    wsTemp = gws.getMetData(54710, 'TAM', startDate, endDate, 0, 'list')
+    wsSno  = gws.getMetData(54710, 'SA',  startDate, endDate, 0, 'list')
+    wsPrec = gws.getMetData(54710, 'RR',  startDate, endDate, 0, 'list')
+
+    utm33_y = 6802070
+    utm33_x = 130513
+
+    temp, date = we.stripMetadata(wsTemp, get_dates=True)
+    sno_tot = we.stripMetadata(wsSno)
+    prec_snow = pz.delta_snow_from_total_snow(sno_tot)
+    prec = we.stripMetadata(wsPrec)
+    cloud_cover = pz.clouds_average_from_precipitation(prec)
+
+    # available_elements = gws.getElementsFromTimeserieTypeStation(54710, 0, 'csv')
+    observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
+
+    if len(observed_ice) == 0:
+        ice_cover, energy_balance = calculateIceCoverEB(utm33_x, utm33_y, ice.IceColumn(date[0], []), date, temp,
+                                        prec, prec_snow, cloud_cover)
+    else:
+        ice_cover, energy_balance = calculateIceCoverEB(utm33_x, utm33_y, copy.deepcopy(observed_ice[0]), date, temp,
+                                        prec, prec_snow, cloud_cover)
+
+    # Need datetime objects from now on
+    from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
+    to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
+
+    plot_filename = '{0}Ortovann MET {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
+    pts.plotIcecover(ice_cover, observed_ice, date, temp, sno_tot, plot_filename)
+
 
 
 def runSemsvann(startDate, endDate):
@@ -110,9 +175,9 @@ def runSemsvann(startDate, endDate):
     #observed_ice = importColumns(observed_ice_filename)
     observed_ice = gro.get_all_season_ice(LocationName, startDate, endDate)
     if len(observed_ice) == 0:
-        icecover = calculateIceCover(ice.IceColumn(date[0], []), date, temp, sno, cc)
+        icecover = calculateIceCoverSimple(ice.IceColumn(date[0], []), date, temp, sno, cc)
     else:
-        icecover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+        icecover = calculateIceCoverSimple(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
     plot_filename = '{0}Semsvann {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     pts.plotIcecover(icecover, observed_ice, date, temp, snotot, plot_filename)
@@ -137,9 +202,9 @@ def runHakkloa(startDate, endDate):
     observed_ice = gro.get_all_season_ice(LocationName, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ice.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(ice.IceColumn(date[0], []), date, temp, sno, cc)
     else:
-        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
     plot_filename = '{0}Hakkloa {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     pts.plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
@@ -166,9 +231,9 @@ def runSkoddebergvatnet(startDate, endDate):
     observed_ice = gro.get_all_season_ice(LocationName, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ice.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(ice.IceColumn(date[0], []), date, temp, sno, cc)
     else:
-        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
     plot_filename = '{0}Skoddebergvatnet {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     pts.plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
@@ -198,9 +263,9 @@ def runGiljastolsvatnet(startDate, endDate):
     observed_ice = gro.get_all_season_ice(LocationNames, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ice.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(ice.IceColumn(date[0], []), date, temp, sno, cc)
     else:
-        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
     plot_filename = '{0}Giljastolsvatnet {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     pts.plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
@@ -228,9 +293,9 @@ def runBaklidammen(startDate, endDate):
     observed_ice = gro.get_all_season_ice(LocationNames, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ice.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(ice.IceColumn(date[0], []), date, temp, sno, cc)
     else:
-        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
     plot_filename = '{0}Baklidammen {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     pts.plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
@@ -258,9 +323,9 @@ def runStorvannetHammerfest(startDate, endDate):
     observed_ice = gro.get_all_season_ice(LocationNames, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover = calculateIceCover(ice.IceColumn(date[0], []), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(ice.IceColumn(date[0], []), date, temp, sno, cc)
     else:
-        ice_cover = calculateIceCover(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+        ice_cover = calculateIceCoverSimple(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
     plot_filename = '{0}StorvannetHammerfest {1}-{2}.png'.format(plot_folder, startDate[0:4], endDate[0:4])
     pts.plotIcecover(ice_cover, observed_ice, date, temp, snotot, plot_filename)
@@ -268,10 +333,12 @@ def runStorvannetHammerfest(startDate, endDate):
 
 if __name__ == "__main__":
 
+    runOrovannEB('2014-11-15', '2015-06-20')
+
     runSemsvann('2011-11-01', '2012-05-01')
-    runSemsvann('2012-11-01', '2013-06-01')
-    runSemsvann('2013-11-01', '2014-04-15')
-    runSemsvann('2014-11-01', '2015-05-15')
+    #runSemsvann('2012-11-01', '2013-06-01')
+    #runSemsvann('2013-11-01', '2014-04-15')
+    #runSemsvann('2014-11-01', '2015-05-15')
 
     #runOrovannNVE('2011-11-15', '2012-06-20')
     runOrovannMET('2011-11-15', '2012-06-20')

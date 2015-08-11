@@ -25,12 +25,13 @@ sigma_pr_second = (sigma_day/(24*60*60))        # pr second [kJ/m^2/s/K^4]
 # Misc constants
 temp_f = 0                      # [degC] freezing temp for fresh water
 absolute_zero = -273.15         # [degC] 0K is -273.15C
+temp_rain_snow = 0.5            # [degC] Threshold where precipitation falls as snow or rain.
 von_karmans_const = 0.41        # [-] von Karmans constant
 avg_wind_const = 1.5            # [m/s] if nothing else is given
 pressure_atm = 101.1            # [kPa] if nothing else is given
 
 
-# Thermal Conductivities
+# Thermal Conductivities [W/m/K]
 k_snow_max = 0.25               # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
 k_new_snow = 0.05               # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
 k_snow = 0.11                   # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html

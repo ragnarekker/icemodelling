@@ -4,13 +4,13 @@ __author__ = 'raek'
 import datetime
 
 
-def stripMetadata(weather_element_list, get_dates):
+def stripMetadata(weather_element_list, get_dates=False):
     """
     Method takes inn a list of WeatherElement objects and strips away all metadata. A list of values is returned and if
     getDate = True a corresponding list of dates is also retuned.
 
     :param weather_element_list [list of weatherElements]:    List of elements of class WeatherElement
-    :param get_dates [bool]:         if True dateList is returned
+    :param get_dates [bool]:         if True dateList is returned also
     :return valueList, dateList:    dateList is otional and is returned if get_dates is True.
     """
 
@@ -233,3 +233,77 @@ class WeatherElement():
         if (self.Date).date() == datetime.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.36
             self.Metadata.append({"ManualValue":self.Value})
+
+
+class EnergyBalanceElement():
+    """
+    Class for containing all variables and terms in the energy balance calculations.
+    """
+    def __init__(self, date_inn):
+        self.date = date_inn
+
+
+    def add_model_input(self, utm33_x_inn, utm33_y_inn, snow_depth_inn, snow_density_inn,
+                        temp_surface_inn, is_ice_inn,
+                        temp_atm_inn, prec_inn, prec_snow_inn, cloud_cover_inn,
+                        age_factor_tau_inn, albedo_prim_inn,
+                        day_no_inn, time_hour_inn, time_span_in_sec_inn):
+        self.utm33_x = utm33_x_inn
+        self.utm33_y = utm33_y_inn
+        self.snow_depth = snow_depth_inn
+        self.snow_density = snow_density_inn
+        self.temp_surface = temp_surface_inn
+        self.is_ice = is_ice_inn
+        self.cloud_cover = cloud_cover_inn
+        self.temp_atm = temp_atm_inn
+        self.prec = prec_inn
+        self.prec_snow = prec_snow_inn
+        self.age_factor_tau_before = age_factor_tau_inn
+        self.albedo_prim_before = albedo_prim_inn
+        self.day_no = day_no_inn
+        self.time_hour = time_hour_inn
+        self.time_span_in_sec = time_span_in_sec_inn
+
+        return
+
+
+    def add_short_wave(self, S_inn, s_inn_inn, albedo_inn, albedo_prim_inn, age_factor_tau_inn):
+        self.S = S_inn
+        self.s_inn = s_inn_inn
+        self.albedo = albedo_inn
+        self.albedo_prim = albedo_prim_inn
+        self.age_factor_tau = age_factor_tau_inn
+
+        return
+
+
+    def add_long_wave(self, L_a_inn, L_t_inn):
+        self.L_a = L_a_inn
+        self.L_t = L_t_inn
+
+        return
+
+
+    def add_sensible_and_latent_heat(self, H_inn, LE_inn):
+        self.H = H_inn
+        self.LE = LE_inn
+
+        return
+
+    def add_ground_heat(self, G_inn):
+        self.G = G_inn
+
+        return
+
+    def add_prec_heat(self, R_inn):
+        self.R = R_inn
+
+        return
+
+    def add_cold_content(self, SS_inn):
+        self.SS = SS_inn
+
+        return
+
+    def add_energy_budget(self, EB_inn):
+        self.EB = EB_inn

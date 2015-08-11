@@ -150,7 +150,24 @@ class IceColumn:
                 if i >= len(self.column):
                     condition = False
 
+    ## incomplete
+    def get_surface_temperature(self, temp_atm, effective_depth=0.5):
+        """
+        Surface temperature
 
+        :param temp_atm:
+        :param effective_depth:
+        :return:
+        """
+
+        temp_surface = (self.column_average_temperature + temp_atm)/2
+
+        # THS approach
+        #temp_surface = self.column_average_temperature * 2
+
+        return temp_surface
+
+    ## incomplete
     def update_column_temperatures(self, temp_atm):
         '''INCOMPLETE
         Temperatures are given as a wheighted (lamda_n) sum of the last N days.
@@ -178,7 +195,7 @@ class IceColumn:
 
 
     def update_column_average_temperature(self, temp_atm):
-        '''Average temperature of the column. The teory is:
+        '''Average temperature of the column. The theory is:
 
                 temp_avg = ( sum_n(temp_atm * weight_n) / sum_n(weight_n) )/2
 

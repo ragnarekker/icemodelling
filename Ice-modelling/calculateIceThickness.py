@@ -8,7 +8,19 @@ import ice as ice
 import constants as const
 
 
-def get_ice_thickness(ic, time_step, dh_snow, temp, cc=None):
+
+def get_ice_thickness_from_energy_balance(utm33_x, utm33_y, ice_column,
+                                          temp_atm, prec, prec_snow, prec_rain, age_factor_tau, albedo_prim,
+                                          time_span_in_sec, cloud_cover=None):
+
+    out_column = get_ice_thickness_from_conductivity(ice_column, time_span_in_sec, prec_snow, temp_atm, cc=cloud_cover)
+    energy_balance = cpz.get_energy_balance_from_senorge(utm33_x, utm33_y, ice_column,
+                                          temp_atm, prec, prec_snow, prec_rain, age_factor_tau, albedo_prim,
+                                          time_span_in_sec, cloud_cover=cloud_cover)
+
+    return out_column, energy_balance
+
+def get_ice_thickness_from_conductivity(ic, time_step, dh_snow, temp, cc=None):
 
     '''
     :param ic:          Ice column at the beginning of the time step. Object containing the ice column with metadata

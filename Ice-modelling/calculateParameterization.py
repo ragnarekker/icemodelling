@@ -1,7 +1,7 @@
 __author__ = 'ragnarekker'
 # -*- coding: utf-8 -*-
 
-import datetime
+import datetime as dt
 import types
 import math
 import constants as const
@@ -162,7 +162,7 @@ def normal_time_from_unix_time(unixDatetime):
     Ex: date = unix_time_2_normal(int(p['DtObsTime'][6:-2]))
     """
     unixDatetimeInSeconds = unixDatetime/1000 # For some reason they are given in miliseconds
-    dato = datetime.datetime.fromtimestamp(int(unixDatetimeInSeconds))
+    dato = dt.datetime.fromtimestamp(int(unixDatetimeInSeconds))
 
     return dato
 
@@ -421,27 +421,77 @@ def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, age_factor
     return age_factor_tau, albedo
 
 
-def energy_balance_from_senorge():
+def get_energy_balance_from_senorge(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow,
+                                    age_factor_tau, albedo_prim, time_span_in_sec, cloud_cover=None):
     '''
-
     The daily energy budget of a column of snow is expressed as (Walter et al. 2005):
 
-    λ_F * ρ_w * ΔSWE = S + (L_a - L_t) + (H + LE) + G + R - CC
+    EB = λ_F * ρ_w * ΔSWE = S + (L_a - L_t) + (H + LE) + G + R - CC
 
     Where λ_F is the latent heat of fusion (λ_F=335 kJ〖kg〗^(-1))
     ρ_w [1000kgm^(-3)] is the density of water
     ΔSWE is the change in the snowpack’s water equivalent [m]
-    '''
-    """
-    cloud_cover = clouds_from_precipitation(prec, method='Binary')
 
-    S, Sinn, albedo, albedo_prim, age_factor_tau = \
+    '''
+
+    from weather import EnergyBalanceElement as ebe
+
+    # times are given as the end of the time span
+    date = ice_column.date
+    day_no = (ice_column.date + dt.timedelta(seconds=time_span_in_sec)).timetuple().tm_yday
+    time_hour = (ice_column.date + dt.timedelta(seconds=time_span_in_sec)).hour
+
+
+    # Variables picked out from ice_column
+    snow_depth = ice_column.column[0].height
+    snow_density = ice_column.column[0].density
+    temp_surface = ice_column.get_surface_temperature(temp_atm)
+    is_ice = True
+    if len(ice_column.column) == 0:
+        is_ice = False
+
+
+    # Calculate some parameters
+    if not cloud_cover:
+        cloud_cover = clouds_from_precipitation(prec, method='Binary')
+
+
+    # Define an energy balance object to put it all in
+    energy_balance = ebe(date)
+    energy_balance.add_model_input(utm33_x, utm33_y, snow_depth, snow_density, temp_surface, is_ice,
+                        temp_atm, prec, prec_snow, cloud_cover,
+                        age_factor_tau, albedo_prim, day_no, time_hour, time_span_in_sec)
+
+
+    # Calculate the energy balance terms
+    S, s_inn, albedo, albedo_prim, age_factor_tau = \
         get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, snow_density, prec_snow, time_hour,
                        time_span_in_sec, temp_surface, age_factor_tau, albedo_prim, albedo_method="ueb")
-    """
 
+    L_a, L_t = \
+        get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_span_in_sec)
 
-    return
+    H, LE = \
+         get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, pressure_atm=None, wind=None)
+
+    G = get_ground_heat(time_span_in_sec)
+
+    R = get_prec_heat(temp_atm, prec)
+
+    #CC = get_cold_content(ice_column, temp_atm, prec_snow)
+    CC = 0.
+
+    EB = S + (L_a - L_t) + (H + LE) + G + R - CC
+
+    energy_balance.add_short_wave(S, s_inn, albedo, albedo_prim, age_factor_tau)
+    energy_balance.add_long_wave(L_a, L_t)
+    energy_balance.add_sensible_and_latent_heat(H, LE)
+    energy_balance.add_ground_heat(G)
+    energy_balance.add_prec_heat(R)
+    energy_balance.add_cold_content(CC)
+    energy_balance.add_energy_budget(EB)
+
+    return energy_balance
 
 
 def get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover,snow_depth, snow_density, prec_snow, time_hour,
@@ -463,7 +513,7 @@ def get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover,snow_depth, s
     :param albedo_prim:         Primary albedo from last timestep. Used in the albedo_walters routine.
     :param age_factor_tau:      [?] Age factor in the UEB albedo routine.
 
-    :return:    S, Sinn, albedo, albedo_prim, age_factor_tau
+    :return:    S, s_inn, albedo, albedo_prim, age_factor_tau
 
 
     '''
@@ -587,13 +637,13 @@ def get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover,snow_depth, s
         albedo = None
 
     #Solar radiation
-    Sinn = Trans * sin((pi/2)-zenith_angle) * S0
-    S = (1-albedo) * Sinn           # se likning Liston 1995, eq. 26 (Nett SW-radiation)
+    s_inn = Trans * sin((pi/2)-zenith_angle) * S0   #
+    S = (1-albedo) * s_inn           # se likning Liston 1995, eq. 26 (Nett SW-radiation)
 
-    return S, Sinn, albedo, albedo_prim, age_factor_tau
+    return S, s_inn, albedo, albedo_prim, age_factor_tau
 
 
-def get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, ice_thickness, time_span_in_sec):
+def get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_span_in_sec):
     '''
     Long wave radiation, both atmospheric and terrestrial, calculated from precipitation and temperature.
 
@@ -603,6 +653,7 @@ def get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, ice_thickness
     :param prec:                Precipitation (?)
     :param temp_atm:            Temperature (C)
     :param time_span_in_sec:     Time resolution gives the Boltzmann constant
+    :param is_ice:              [Bool]  It there ice or not?
     :param temp_surface:
     :param snow_depth:
     :return     L_a:            [kJm^(-2)] is the atmospheric long wave radiation over the given time span
@@ -618,7 +669,7 @@ def get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, ice_thickness
     if snow_depth == 0:
         eps_surface = const.eps_ice           # No snow gives ice emissivity
 
-    if ice_thickness == 0:
+    if is_ice == False:
         temp_surface == 0                     # water at 0degC
         eps_surface = const.eps_water         # water emissivity is the same as snow emidsitivity
 
@@ -688,22 +739,22 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, press
     return H, LE
 
 
-def get_ground_heat(temp_span_in_sec):
+def get_ground_heat(time_span_in_sec):
     """
     G [kJm^(-2)] is ground heat conduction to the bottom of the snowpack
 
-    :param temp_span_in_sec:
+    :param time_span_in_sec:
     :return:
     """
 
     # Ground heat
     G = 173./86400               # [kJ / second]
-    G = G * temp_span_in_sec     # desired resolution
+    G = G * time_span_in_sec     # desired resolution
 
     return G
 
 
-def get_prec_heat(temp_atm, prec_rain):
+def get_prec_heat(temp_atm, prec):
     """
     Heat from liquid precipitation. We assume rainwater has the same temperature as air and that heat is added to the
     snowpack when the rain’s temperature is lowered to zero degrees.
@@ -713,6 +764,10 @@ def get_prec_heat(temp_atm, prec_rain):
     :return R:          [kJm^-2] Heat added by precipitation
     """
 
+    if temp_atm > const.temp_rain_snow:
+        prec_rain = prec
+    else:
+        prec_rain = 0.
 
     if prec_rain > 0.:
         R = const.rho_water * const.c_water * prec_rain * temp_atm
@@ -735,7 +790,7 @@ def get_cold_content(ice_column, temp_atm, prec_snow):
     Dimensions:     kg m^-3 * kJ kg^-1 K^-1 * m * K = kJm^-2
     """
 
-    CC = 0      # kan kun bli negativ eller 0.
+    CC = 0.      # kan kun bli negativ eller 0.
 
     for layer in ice_column.column:
         CC += layer.rho * layer.heat_capacity * layer.height * layer.temperature
@@ -743,7 +798,7 @@ def get_cold_content(ice_column, temp_atm, prec_snow):
     # Add also the new snow
     CC += const.rho_new_snow * const.c_snow * prec_snow * temp_atm
 
-    return  CC
+    return CC
 
 
 if __name__ == "__main__":
