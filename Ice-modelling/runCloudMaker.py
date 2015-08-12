@@ -8,9 +8,9 @@ import datetime
 import pylab as plt
 import numpy as np
 
-from calculateParameterization import *
+from doparameterization import *
 from getWSklima import getMetData
-from weather import stripMetadata
+from weather import strip_metadata
 
 from setEnvironment import plot_folder, database_location
 
@@ -20,14 +20,14 @@ def ccFromPrecAndTemp2(stnr, startDate, endDate):
 
     # Values called once
     ws_temp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
-    temp = stripMetadata(ws_temp, False)
+    temp = strip_metadata(ws_temp, False)
 
     dTemp = delta_temperature_from_temperature(temp)
     dTemp_abs_raw = map(abs, dTemp)
     sign_dTemp = __getSign(dTemp, 0)
 
     ws_prec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
-    prec_raw = stripMetadata(ws_prec, False)
+    prec_raw = strip_metadata(ws_prec, False)
 
 
     # Calibration params
@@ -229,9 +229,9 @@ def doAREMCAnalyssis(stnr, startDate, endDate):
     wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
     wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
 
-    temp, date = stripMetadata(wsTemp, get_dates=True)
-    prec = stripMetadata(wsPrec, False)
-    clouds = stripMetadata(wsCC, False)
+    temp, date = strip_metadata(wsTemp, get_dates=True)
+    prec = strip_metadata(wsPrec, False)
+    clouds = strip_metadata(wsCC, False)
 
     loggdate = datetime.datetime.now()
     period = '{0} to {1}'.format(startDate,endDate)
@@ -298,8 +298,8 @@ def correlateCloudsAndTemp(stnr, startDate, endDate):
     wsTemp = getMetData(stnr, 'TAM', startDate, endDate, 0, 'list')
     wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
 
-    temp = stripMetadata(wsTemp, False)
-    clouds = stripMetadata(wsCC, False)
+    temp = strip_metadata(wsTemp, False)
+    clouds = strip_metadata(wsCC, False)
 
     oneMinusClouds = [1-cc for cc in clouds]
     dTemp = delta_temperature_from_temperature(temp)
@@ -384,9 +384,9 @@ def testCloudMaker(stnr, startDate, endDate, method):
     wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
     wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
 
-    temp, date = stripMetadata(wsTemp, get_dates=True)
-    prec = stripMetadata(wsPrec, False)
-    clouds = stripMetadata(wsCC, False)
+    temp, date = strip_metadata(wsTemp, get_dates=True)
+    prec = strip_metadata(wsPrec, False)
+    clouds = strip_metadata(wsCC, False)
 
     dayShift = 1
     clouds = __shiftClouds(clouds, dayShift)
@@ -491,9 +491,9 @@ def makeSomeScatterPlots(stnr, startDate, endDate):
     wsPrec = getMetData(stnr, 'RR', startDate, endDate, 0, 'list')
     wsCC = getMetData(stnr, 'NNM', startDate, endDate, 0, 'list')
 
-    temp, date = stripMetadata(wsTemp, get_dates=True)
-    prec = stripMetadata(wsPrec, False)
-    clouds = stripMetadata(wsCC, False)
+    temp, date = strip_metadata(wsTemp, get_dates=True)
+    prec = strip_metadata(wsPrec, False)
+    clouds = strip_metadata(wsCC, False)
 
     dTemp = delta_temperature_from_temperature(temp)
     abs_dTemp = map(abs, dTemp)

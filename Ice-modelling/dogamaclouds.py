@@ -2,7 +2,7 @@ __author__ = 'ragnarekker'
 # -*- coding: utf-8 -*-
 # In this file methods for calulating/estimating physical parameters WITHIN THE CURRENT TIMESTEP
 
-import calculateParameterization as pz
+import doparameterization as pz
 
 ########
 # Needs comments

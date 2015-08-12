@@ -1,10 +1,11 @@
 __author__ = 'raek'
 # -*- coding: utf-8 -*-
 
+
 import datetime
 
 
-def stripMetadata(weather_element_list, get_dates=False):
+def strip_metadata(weather_element_list, get_dates=False):
     """
     Method takes inn a list of WeatherElement objects and strips away all metadata. A list of values is returned and if
     getDate = True a corresponding list of dates is also retuned.
@@ -35,7 +36,7 @@ def stripMetadata(weather_element_list, get_dates=False):
         return valueList
 
 
-def okta2unit(cloud_cover_in_okta_list):
+def unit_from_okta(cloud_cover_in_okta_list):
     """
     Cloudcover from met.no is given in units of okta. Numbers 1-8. This method converts that list to values of units
     ranging from 0 to 1 where 1 is totaly overcast.
@@ -60,7 +61,7 @@ def okta2unit(cloud_cover_in_okta_list):
     return cloudCoverInUnitsList
 
 
-def cm2m(weather_element_list):
+def meter_from_centimeter(weather_element_list):
     """
 
     :param weather_element_list:
@@ -76,7 +77,7 @@ def cm2m(weather_element_list):
     return weatherElementListSI
 
 
-def makeDailyAvarage(weather_element_list):
+def make_daily_average(weather_element_list):
     """
     Takes a list of weatherelements with resolution less that 24hrs and calculates the dayly avarage
     of the timeseries.
@@ -144,7 +145,7 @@ def makeDailyAvarage(weather_element_list):
     return newWeatherElementList
 
 
-def avarageValue(weather_element_list, lower_index, upper_index):
+def average_value(weather_element_list, lower_index, upper_index):
     """
     The method will return the avarage value of a list or part of a list with weatherElements
 

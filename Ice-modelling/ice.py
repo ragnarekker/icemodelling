@@ -4,7 +4,7 @@ __author__ = 'ragnarekker'
 
 import math
 import datetime
-import calculateParameterization as pz
+import doparameterization as pz
 import constants as const
 import getRegObsdata as gro
 
@@ -164,6 +164,9 @@ class IceColumn:
 
         # THS approach
         #temp_surface = self.column_average_temperature * 2
+
+        if temp_surface > 0.:
+            temp_surface = 0.
 
         return temp_surface
 

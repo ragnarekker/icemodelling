@@ -3,24 +3,25 @@ __author__  =  'raek'
 
 import math
 import numpy as np
-import calculateParameterization as cpz
+import doparameterization as dp
+import doenergybalance as deb
 import ice as ice
 import constants as const
 
 
-
 def get_ice_thickness_from_energy_balance(utm33_x, utm33_y, ice_column,
                                           temp_atm, prec, prec_snow, prec_rain, age_factor_tau, albedo_prim,
-                                          time_span_in_sec, cloud_cover=None):
+                                          time_span_in_sec,
+                                          cloud_cover=None, wind=None,  pressure_atm=None):
 
-    out_column = get_ice_thickness_from_conductivity(ice_column, time_span_in_sec, prec_snow, temp_atm, cc=cloud_cover)
-    energy_balance = cpz.get_energy_balance_from_senorge(utm33_x, utm33_y, ice_column,
-                                          temp_atm, prec, prec_snow, prec_rain, age_factor_tau, albedo_prim,
-                                          time_span_in_sec, cloud_cover=cloud_cover)
+    out_column = get_ice_thickness_from_conductivity(ice_column, time_span_in_sec, prec_snow, temp_atm, cloud_cover)
+
+    energy_balance = deb.get_energy_balance_from_senorge(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, prec_rain, age_factor_tau,
+                                                         albedo_prim, time_span_in_sec, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
 
     return out_column, energy_balance
 
-def get_ice_thickness_from_conductivity(ic, time_step, dh_snow, temp, cc=None):
+def get_ice_thickness_from_conductivity(ic, time_step, dh_snow, temp, cloud_cover=None):
 
     '''
     :param ic:          Ice column at the beginning of the time step. Object containing the ice column with metadata
@@ -30,9 +31,9 @@ def get_ice_thickness_from_conductivity(ic, time_step, dh_snow, temp, cc=None):
     :return:            Ice column at end of time step
     '''
 
-    # temp = cpz.temperature_from_temperature_and_snow(temp, dh_snow)
-    if cc != None:
-        temp = cpz.temperature_from_temperature_and_clouds(temp, cc)
+    # temp = dp.temperature_from_temperature_and_snow(temp, dh_snow)
+    if cloud_cover != None:
+        temp = dp.temperature_from_temperature_and_clouds(temp, cloud_cover)
 
      # step the date forward on time step. We do it initially because the variable is also used and subtracted
      # in the following calculations.
@@ -96,14 +97,14 @@ def get_ice_thickness_from_conductivity(ic, time_step, dh_snow, temp, cc=None):
                         ic.add_layer_at_index(i, ice.IceLayer(dh, 'slush_ice'))
                         time_step = 0
 
-                # Go to next icelayer
-                i = i + 1
+                # Go to next ice layer
+                i += 1
 
 
     # if air temperature is MELTING
     else:
-    # all melting is made by simle degreeday model using different calibration constants for snow, slushice and blackice
-    # melting only effects the topp layer (index = 0)
+    # all melting is made by simple degree day model using different calibration constants for snow, slushice and blackice
+    # melting only effects the top layer (index = 0)
         meltingcoeff = -1
         while time_step > 0 and len(ic.column) > 0:
             if ic.column[0].type == 'water':
@@ -120,7 +121,7 @@ def get_ice_thickness_from_conductivity(ic, time_step, dh_snow, temp, cc=None):
                 else:
                     print("Melting: Unknown layer type.")
 
-                # degreeday melting. I have separated the time factor from the melting coefficiant.
+                # degree day melting. I have separated the time factor from the melting coefficiant.
                 dh = meltingcoeff * time_step * (temp - const.temp_f)
 
                 # if layer is thinner than total melting the layer is removed and the rest of melting occurs

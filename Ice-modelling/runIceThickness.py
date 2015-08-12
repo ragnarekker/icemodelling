@@ -5,15 +5,20 @@ __author__ = 'ragnarekker'
 import copy
 import datetime as dt
 
-import calculateIceThickness as itc
-import calculateParameterization as pz
+import doicethickness as dit
+import doparameterization as dp
+import doenergybalance as deb
+
 import ice as ice
 import weather as we
+
 import getRegObsdata as gro
 import getFiledata as gfd
 import getWSklima as gws
 import getChartserverdata as gcsd
+
 import makePlots as pts
+
 import constants as const
 from setEnvironment import data_path, plot_folder
 
@@ -29,9 +34,9 @@ def calculateIceCoverSimple(inn_column, date, temp, sno, cloudcover=None):
             i = i + 1
         else:
             if cloudcover != None:
-                out_column = itc.get_ice_thickness_from_conductivity(inn_column, timestep, sno[i], temp[i], cloudcover[i])
+                out_column = dit.get_ice_thickness_from_conductivity(inn_column, timestep, sno[i], temp[i], cloudcover[i])
             else:
-                out_column = itc.get_ice_thickness_from_conductivity(inn_column, timestep, sno[i], temp[i])
+                out_column = dit.get_ice_thickness_from_conductivity(inn_column, timestep, sno[i], temp[i])
             icecover.append(out_column)
             inn_column = copy.deepcopy(out_column)
 
@@ -49,9 +54,9 @@ def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec
 
     for i in range(0, len(date), 1):
 
-        out_column = itc.get_ice_thickness_from_conductivity(inn_column, time_span_in_sec,
+        out_column = dit.get_ice_thickness_from_conductivity(inn_column, time_span_in_sec,
                                                              prec_snow[i], temp_atm[i], cloud_cover[i])
-        eb = pz.get_energy_balance_from_senorge(utm33_x, utm33_y, inn_column,
+        eb = deb.get_energy_balance_from_senorge(utm33_x, utm33_y, inn_column,
                             temp_atm[i], prec[i], prec_snow[i], age_factor_tau, albedo_prim,
                             time_span_in_sec, cloud_cover=cloud_cover[i])
 
@@ -103,7 +108,7 @@ def runOrovannMET(startDate, endDate):
     for e in wsSno:
         snotot.append(e.Value)
 
-    sno = pz.delta_snow_from_total_snow(snotot)
+    sno = dp.delta_snow_from_total_snow(snotot)
 
     #observed_ice_filename = '{0}Otroevann observasjoner {1}-{2}.csv'.format(data_path, startDate.year, endDate.year)
     #observed_ice = importColumns(observed_ice_filename)
@@ -132,11 +137,11 @@ def runOrovannEB(startDate, endDate):
     utm33_y = 6802070
     utm33_x = 130513
 
-    temp, date = we.stripMetadata(wsTemp, get_dates=True)
-    sno_tot = we.stripMetadata(wsSno)
-    prec_snow = pz.delta_snow_from_total_snow(sno_tot)
-    prec = we.stripMetadata(wsPrec)
-    cloud_cover = pz.clouds_average_from_precipitation(prec)
+    temp, date = we.strip_metadata(wsTemp, get_dates=True)
+    sno_tot = we.strip_metadata(wsSno)
+    prec_snow = dp.delta_snow_from_total_snow(sno_tot)
+    prec = we.strip_metadata(wsPrec)
+    cloud_cover = dp.clouds_average_from_precipitation(prec)
 
     # available_elements = gws.getElementsFromTimeserieTypeStation(54710, 0, 'csv')
     observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
@@ -156,7 +161,6 @@ def runOrovannEB(startDate, endDate):
     pts.plotIcecover(ice_cover, observed_ice, date, temp, sno_tot, plot_filename)
 
 
-
 def runSemsvann(startDate, endDate):
 
     LocationName = 'Semsvannet v/Lo 145 moh'
@@ -165,11 +169,11 @@ def runSemsvann(startDate, endDate):
     wsSno = gws.getMetData(19710, 'SA', startDate, endDate, 0, 'list')
     wsCC = gws.getMetData(18700, 'NNM', startDate, endDate, 0 , 'list')
 
-    temp, date = we.stripMetadata(wsTemp, True)
-    snotot = we.stripMetadata(wsSno, False)
-    cc = we.stripMetadata(wsCC, False)
+    temp, date = we.strip_metadata(wsTemp, True)
+    snotot = we.strip_metadata(wsSno, False)
+    cc = we.strip_metadata(wsCC, False)
 
-    sno = pz.delta_snow_from_total_snow(snotot)
+    sno = dp.delta_snow_from_total_snow(snotot)
 
     #observed_ice_filename = '{0}Semsvann observasjoner {1}-{2}.csv'.format(data_path, startDate[0:4], endDate[0:4])
     #observed_ice = importColumns(observed_ice_filename)
@@ -189,15 +193,15 @@ def runHakkloa(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    cs_temp = we.makeDailyAvarage(gcsd.getStationdata('6.24.4','17.1', from_date, to_date, 'list'))
-    cs_sno = we.makeDailyAvarage(gcsd.getGriddata(260150, 6671135, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.makeDailyAvarage(gcsd.getGriddata(260150, 6671135, 'sd', from_date, to_date, 'list'))
+    cs_temp = we.make_daily_average(gcsd.getStationdata('6.24.4','17.1', from_date, to_date, 'list'))
+    cs_sno = we.make_daily_average(gcsd.getGriddata(260150, 6671135, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = we.make_daily_average(gcsd.getGriddata(260150, 6671135, 'sd', from_date, to_date, 'list'))
     wsCC = gws.getMetData(18700, 'NNM', startDate, endDate, 0, 'list')
 
-    temp, date = we.stripMetadata(cs_temp, True)
-    sno = we.stripMetadata(cs_sno, False)
-    snotot = we.stripMetadata(cs_snotot, False)
-    cc = we.stripMetadata(wsCC, False)
+    temp, date = we.strip_metadata(cs_temp, True)
+    sno = we.strip_metadata(cs_sno, False)
+    snotot = we.strip_metadata(cs_snotot, False)
+    cc = we.strip_metadata(wsCC, False)
 
     observed_ice = gro.get_all_season_ice(LocationName, startDate, endDate)
 
@@ -217,16 +221,16 @@ def runSkoddebergvatnet(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    #cs_temp = makeDailyAvarage(gcsd.getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
-    cs_temp = we.makeDailyAvarage(gcsd.getGriddata(593273, 7612469, 'tm', from_date, to_date, 'list'))
-    cs_sno = we.makeDailyAvarage(gcsd.getGriddata(593273, 7612469, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.makeDailyAvarage(gcsd.getGriddata(593273, 7612469, 'sd', from_date, to_date, 'list'))
+    #cs_temp = make_daily_average(gcsd.getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
+    cs_temp = we.make_daily_average(gcsd.getGriddata(593273, 7612469, 'tm', from_date, to_date, 'list'))
+    cs_sno = we.make_daily_average(gcsd.getGriddata(593273, 7612469, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = we.make_daily_average(gcsd.getGriddata(593273, 7612469, 'sd', from_date, to_date, 'list'))
     wsCC = gws.getMetData(87640, 'NNM', startDate, endDate, 0, 'list')  # Harstad Stadion
 
-    temp, date = we.stripMetadata(cs_temp, True)
-    sno = we.stripMetadata(cs_sno, False)
-    snotot = we.stripMetadata(cs_snotot, False)
-    cc = we.stripMetadata(wsCC, False)
+    temp, date = we.strip_metadata(cs_temp, True)
+    sno = we.strip_metadata(cs_sno, False)
+    snotot = we.strip_metadata(cs_snotot, False)
+    cc = we.strip_metadata(wsCC, False)
 
     observed_ice = gro.get_all_season_ice(LocationName, startDate, endDate)
 
@@ -248,17 +252,17 @@ def runGiljastolsvatnet(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    #cs_temp = makeDailyAvarage(gcsd.getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
-    cs_temp = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
-    cs_sno = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    #cs_temp = make_daily_average(gcsd.getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
+    cs_temp = we.make_daily_average(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
+    cs_sno = we.make_daily_average(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = we.make_daily_average(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
     wsCC = gws.getMetData(43010, 'NNM', startDate, endDate, 0, 'list')  # Eik - Hove. Ligger lenger sør men er litt inn i landet.
     #wsCC = getMetData(43010, 'NNM', startDate, endDate, 0, 'list') # Sola (44560) er et alternativ
 
-    temp, date = we.stripMetadata(cs_temp, True)
-    sno = we.stripMetadata(cs_sno, False)
-    snotot = we.stripMetadata(cs_snotot, False)
-    cc = we.stripMetadata(wsCC, False)
+    temp, date = we.strip_metadata(cs_temp, True)
+    sno = we.strip_metadata(cs_sno, False)
+    snotot = we.strip_metadata(cs_snotot, False)
+    cc = we.strip_metadata(wsCC, False)
 
     observed_ice = gro.get_all_season_ice(LocationNames, startDate, endDate)
 
@@ -280,15 +284,15 @@ def runBaklidammen(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    cs_temp = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
-    cs_sno = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    cs_temp = we.make_daily_average(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
+    cs_sno = we.make_daily_average(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = we.make_daily_average(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
     wsCC = gws.getMetData(68860, 'NNM', startDate, endDate, 0, 'list')  # TRONDHEIM - VOLL
 
-    temp, date = we.stripMetadata(cs_temp, True)
-    sno = we.stripMetadata(cs_sno, False)
-    snotot = we.stripMetadata(cs_snotot, False)
-    cc = we.stripMetadata(wsCC, False)
+    temp, date = we.strip_metadata(cs_temp, True)
+    sno = we.strip_metadata(cs_sno, False)
+    snotot = we.strip_metadata(cs_snotot, False)
+    cc = we.strip_metadata(wsCC, False)
 
     observed_ice = gro.get_all_season_ice(LocationNames, startDate, endDate)
 
@@ -310,15 +314,15 @@ def runStorvannetHammerfest(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    cs_temp = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
-    cs_sno = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.makeDailyAvarage(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    cs_temp = we.make_daily_average(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
+    cs_sno = we.make_daily_average(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
+    cs_snotot = we.make_daily_average(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
     wsCC = gws.getMetData(95350, 'NNM', startDate, endDate, 0, 'list')  # BANAK - østover innerst i fjorden
 
-    temp, date = we.stripMetadata(cs_temp, True)
-    sno = we.stripMetadata(cs_sno, False)
-    snotot = we.stripMetadata(cs_snotot, False)
-    cc = we.stripMetadata(wsCC, False)
+    temp, date = we.strip_metadata(cs_temp, True)
+    sno = we.strip_metadata(cs_sno, False)
+    snotot = we.strip_metadata(cs_snotot, False)
+    cc = we.strip_metadata(wsCC, False)
 
     observed_ice = gro.get_all_season_ice(LocationNames, startDate, endDate)
 

@@ -10,7 +10,7 @@ import ice as ice
 import fEncoding as fe
 import makePickle as mp
 import constants as const
-import calculateParameterization as pz
+import doparameterization as pz
 from setEnvironment import api_version, kdv_elements_folder
 
 

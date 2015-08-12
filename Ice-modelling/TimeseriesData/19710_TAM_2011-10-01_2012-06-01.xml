@@ -3,7 +3,7 @@
 <SOAP-ENV:Body>
 <ns1:getMetDataResponse xmlns:ns1="http://no/met/metdata/MetDataService.wsdl" SOAP-ENV:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
 <return xmlns:ns2="http://no.met.metdata/IMetDataService.xsd" xsi:type="ns2:no_met_metdata_Metdata">
-<created xsi:type="xsd:dateTime">2014-11-04T16:44:06.515Z</created>
+<created xsi:type="xsd:dateTime">2015-08-12T12:37:08.784Z</created>
 <timeStamp xmlns:ns3="http://schemas.xmlsoap.org/soap/encoding/" xsi:type="ns3:Array" ns3:arrayType="ns2:no_met_metdata_TimeStamp[245]">
 <item xsi:type="ns2:no_met_metdata_TimeStamp">
 <from xsi:type="xsd:dateTime">2011-10-01T00:00:00.000Z</from>

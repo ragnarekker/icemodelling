@@ -4,8 +4,9 @@ __author__ = 'ragnarekker'
 import requests
 from lxml import etree
 import datetime
-from weather import WeatherElement, okta2unit
+from weather import WeatherElement, unit_from_okta
 import xml.etree.ElementTree as ET      # used in the incomplete methods
+from setEnvironment import data_path
 
 # Incomplete
 def getElementsProperties():
@@ -39,7 +40,7 @@ def getTimeserieTypesProperties():
     ws = requests.get(url)
 
     # print ws.text
-    filename = 'TimeseriesTypesProperties.xml'
+    filename = '{0}TimeseriesTypesProperties.xml'.format(data_path)
 
     f = open(filename, 'w')
     f.write((ws.text).encode('utf-8'))
@@ -48,7 +49,7 @@ def getTimeserieTypesProperties():
     tree = ET.parse(filename)
     root = tree.getroot()
 
-    filename = 'TimeseriesTypesProperties.csv'
+    filename = '{0}TimeseriesTypesProperties.csv'.format(data_path)
     f = open(filename, 'w')
     for element in root.iter('item'):
         Name = (element.find('serieTypeName').text).encode('utf-8')
@@ -105,13 +106,13 @@ def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output):
     if output == 'list':
         stationElementList = []
     elif output == 'xml':
-        filename = 'Elements on {0}_{1}.xml'.format(stationID, timeseriesType)
+        filename = '{0}Elements on {1}_{2}.xml'.format(data_path, stationID, timeseriesType)
         f = open(filename, 'w')
         f.write((wsKlimaRequest.text).encode('utf-8'))
         f.close()
         return
     elif output == 'csv':
-        filename = 'Elements on {0}_{1}.csv'.format(stationID, timeseriesType)
+        filename = '{0}Elements on {1}_{2}.csv'.format(data_path, stationID, timeseriesType)
         f = open(filename, 'w')
 
     # Take the request and make an element tree to be iterated
@@ -198,13 +199,13 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
     if output == 'list':
         weatherElementList = []
     elif output == 'xml':
-        filename = '{0}_{1}_{2}_{3}.xml'.format(stationID, elementID, fromDate, toDate)
+        filename = '{0}{1}_{2}_{3}_{4}.xml'.format(data_path, stationID, elementID, fromDate, toDate)
         f = open(filename, 'w')
         f.write((wsKlimaRequest.text).encode('utf-8'))
         f.close()
         return
     elif output == 'csv':
-        filename = '{0}_{1}_{2}_{3}.csv'.format(stationID, elementID, fromDate, toDate)
+        filename = '{0}{1}_{2}_{3}_{4}.csv'.format(data_path, stationID, elementID, fromDate, toDate)
         f = open(filename, 'w')
     else:
         print('No valid output requested.')
@@ -249,8 +250,9 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
 if __name__ == "__main__":
 
     ### Examles ###
-    # getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'xml')
-    # getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'csv')
+    getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'xml')
+    getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'csv')
+    list = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
     # temp = getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'list')
     # sno = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
     # CC = getMetData(19710, 'NNM',  '2011-10-01', '2012-07-01', 0, 'list')
@@ -258,5 +260,8 @@ if __name__ == "__main__":
     # elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
     # elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
     elementsOnEvenes = getElementsFromTimeserieTypeStation(84970, 0, 'list')
+    getElementsFromTimeserieTypeStation(84970, 0, 'xml')
+    getElementsFromTimeserieTypeStation(84970, 0, 'csv')
+
 
     a = 0

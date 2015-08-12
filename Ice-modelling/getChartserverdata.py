@@ -5,8 +5,8 @@ import datetime
 
 import requests
 
-import calculateParameterization as pz
-from weather import WeatherElement, makeDailyAvarage, cm2m
+import doparameterization as pz
+from weather import WeatherElement, make_daily_average, meter_from_centimeter
 
 # URL to the chartserver/ShowData service
 baseURL = "http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart&ver=1.0&vfmt=json"
@@ -84,7 +84,7 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, output):
     if output == 'list':
         weatherElementList = __makeWeatherElementListFromURL(url , 'UTM33 X{0} Y{1}'.format(UTM33X, UTM33Y), elementID, {'MethodName': 'Chartserver - getGriddata'})
         if elementID == 'fsw' or elementID == 'sd':
-            weatherElementList = cm2m(weatherElementList)        # convert for [cm] til [m]
+            weatherElementList = meter_from_centimeter(weatherElementList)        # convert for [cm] til [m]
         return weatherElementList
 
     elif output == 'json':
@@ -136,7 +136,7 @@ def getYrdata(stationID, elementID, fromDate, toDate, output):
 
     if output == 'list':
         weatherElementList = __makeWeatherElementListFromURL(url, stationID, elementID, {'MethodName': 'Chartserver - getYrdata'})
-        weatherElementList = makeDailyAvarage(weatherElementList)        # make dailyavaregs of hourly values
+        weatherElementList = make_daily_average(weatherElementList)        # make dailyavaregs of hourly values
 
     elif output == 'json':
         datareq = requests.get(url)
@@ -188,7 +188,7 @@ def getStationdata(stationID, elementID, fromDate, toDate, output):
 
     if output == 'list':
         weatherElementList = __makeWeatherElementListFromURL(url, stationID, elementID, {'MethodName': 'Chartserver - getStationdata'})
-        weatherElementList = makeDailyAvarage(weatherElementList)               # daily avarages
+        weatherElementList = make_daily_average(weatherElementList)               # daily avarages
         return weatherElementList
 
     elif output == 'json':
