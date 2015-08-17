@@ -170,31 +170,79 @@ class IceColumn:
 
         return temp_surface
 
-    ## incomplete
     def update_column_temperatures(self, temp_atm):
-        '''INCOMPLETE
-        Temperatures are given as a wheighted (lamda_n) sum of the last N days.
+        '''Column temperatures calculated under the assumption that over 24hrs temperature
+        reaches steady state. Calculation hold the boundary conditions of bottom at 0C and
+        top at temperature of atmosphere.
 
-        temp_i = sum_N(temp_(i-1) * lamda_n)
+        For multiple dry layers the set of equations is solves with matrix linear algebra:
 
-        Lambda_n is dependant of layer thickness. As refferance I estimate a snow/icepack of 1 meter to
-        reach equlibrium after 3 days with the same temperature.
+            AA * xx = bb
 
-        Columntemperatures should hold the condition that bottom layer is 0C and that material conductivities shold
-        reflect the temperature gradient.
+        Possible extension: Effect of temp from precious days weight inn, in the end.
 
-        :param temp_atm:
+        :param temp_atm:        Temp in atmosphere
         :return:
         '''
 
-        N = 3
+        import numpy as np
 
-        for layer in self.column:
-            if len(layer) < 3:
-                layer.append(0.)
-            weight = 1 / layer[0] / N
-            layer[2] = (layer[2] * weight + temp_atm) / 2
-            a = 1
+        # only continuous dry layers from surface can be below freezing (0C)
+        num_dry_layers = 0
+        for l in self.column:
+            if l.enum() > 9:
+                num_dry_layers += 1
+            else:
+                break
+
+        num_boundaries = num_dry_layers - 1
+        temp_top = temp_atm
+        temp_bottom = const.temp_f      # freezing temp
+
+        # case surface layer is wet, we assume all is 0C
+        if num_boundaries == -1:
+            for l in self.column:
+                l.set_temperature(0.)
+
+        # case only one layer or only the top layer is dry, this layer is avg of air temp and 0C
+        elif num_boundaries == 0:
+            self.column[0].set_temperature((temp_top+temp_bottom)/2)
+            for l in self.column[1:]:
+                l.set_temperature(0.)
+
+        # case more dry layers, solve numerically
+        else:
+            AA = np.zeros([num_boundaries, num_boundaries])
+
+            for i in range(num_boundaries):
+                AA[i,i] = self.column[i].conductivity * self.column[i].height \
+                        + self.column[i+1].conductivity * self.column[i+1].height
+
+            for i in range(num_boundaries-1):
+                AA[i, i+1] = -1 * self.column[i+1].conductivity * self.column[i+1].height
+                AA[i+1, i] = -1 * self.column[i+1].conductivity * self.column[i+1].height
+
+            bb = np.zeros([num_boundaries])
+            bb[0] = temp_top * self.column[0].conductivity * self.column[0].height
+            bb[num_boundaries-1] = temp_bottom * self.column[num_boundaries].conductivity \
+                                  * self.column[num_boundaries].height
+
+            xx = np.linalg.solve(AA, bb)
+
+            #print (AA)
+            #print (xx)
+            #print (bb)
+
+            # add the outer boundary conditions to the solution
+            boundary_temps = xx
+            boundary_temps = np.insert(boundary_temps, 0, temp_top)
+            boundary_temps = np.insert(boundary_temps, len(boundary_temps), temp_bottom)
+
+            # layer temp is average of the boundary temps
+            for i in range(0, len(boundary_temps)-1, 1):
+                self.column[i].set_temperature((boundary_temps[i]+boundary_temps[i+1])/2)
+
+        return
 
 
     def update_column_average_temperature(self, temp_atm):
@@ -231,11 +279,11 @@ class IceColumn:
 
         avg_temp = 0
 
-        # no sno or ice
+        # no sno or ice. Avarage temp set to feezing temp in water
         if total_thick == 0:
-            avg_temp = 0 # feezing temp in water
+            avg_temp = 0
 
-        # Thin layer case
+        # Thin layer case. Temperature in snow and ice is same as temp in atm.
         elif total_thick < max_h_thin_layer:
             avg_temp = temp_atm - const.absolute_zero
 
@@ -483,22 +531,9 @@ class IceLayer:
         self.metadata[key] = value
 
 
-    def colour(self):
-        # returns the color used for plotting a given snow or ice type
-        if self.type == 'new_snow': return "0.9"
-        elif self.type == 'snow': return "0.8"
-        elif self.type == 'drained_snow': return "0.7"
-        elif self.type == 'slush': return "blue"
-        elif self.type == 'slush_ice': return "0.4"
-        elif self.type == 'black_ice': return "0.1"
-        elif self.type == 'water': return "red"
-        elif self.type == 'unknown': return "orange"
-        else: return "yellow"
-
-
     def set_conductivity(self):
         # sets conductivity for a given snow or ice type
-        # Method should only be used when initiallizing a new IceLayer
+        # Method should only be used when initialising a new IceLayer
         if self.type == 'new_snow':     self.conductivity = const.k_new_snow
         elif self.type == 'snow':       self.conductivity = const.k_snow
         elif self.type == 'drained_snow': self.conductivity = const.k_drained_snow
@@ -511,7 +546,7 @@ class IceLayer:
 
     def set_density(self):
         # Desities [kg m-3]
-        # Method should only be used when initiallizing a new IceLayer
+        # Method should only be used when initialising a new IceLayer
         if self.type == 'new_snow':     self.density = const.rho_new_snow
         elif self.type == 'snow':       self.density = const.rho_snow
         elif self.type == 'drained_snow': self.density = const.rho_drained_snow
@@ -520,6 +555,19 @@ class IceLayer:
         elif self.type == 'black_ice':  self.density = const.rho_black_ice
         elif self.type == 'water':      self.density = const.rho_water
         elif self.type == 'unknown':    self.density = const.rho_slush_ice
+
+
+    def colour(self):
+        # returns the color used for plotting a given snow or ice type
+        if self.type == 'new_snow': return "0.9"
+        elif self.type == 'snow': return "0.8"
+        elif self.type == 'drained_snow': return "0.7"
+        elif self.type == 'slush': return "blue"
+        elif self.type == 'slush_ice': return "0.4"
+        elif self.type == 'black_ice': return "0.1"
+        elif self.type == 'water': return "red"
+        elif self.type == 'unknown': return "orange"
+        else: return "yellow"
 
 
     def enum(self):
@@ -565,14 +613,24 @@ class IceCover:
         self.RegID = regid_inn
 
 
-def tests_IceColumn():
-    # some tests of the functions in the IceColumn file
+if __name__ == "__main__":
 
-    date = datetime.datetime.strptime("2011-10-05", "%Y-%m-%d")
-    icecol = IceColumn(date, 0)
+    import getFiledata as gfd
+    from setEnvironment import data_path
+
+    # some tests of the functions in the IceColumn file
+    #date = datetime.datetime.strptime("2011-10-05", "%Y-%m-%d")
+    #icecol = IceColumn(date, 0)
     # icecol.add_layer_at_index(0, 0.1, 'new_snow')
     #icecol.update_slush_level()
     #icecol.merge_and_remove_excess_layers()
-    icecol.merge_snow_layers_and_compress(-5)
+    #icecol.merge_snow_layers_and_compress(-5)
 
+    icecols = gfd.importColumns("{0}Semsvann observasjoner 2012-2013.csv".format(data_path))
+    icecol = icecols[3]
+    icecol.update_column_temperatures(-15)
+
+
+
+    a = 1
 

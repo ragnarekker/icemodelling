@@ -337,18 +337,18 @@ def runStorvannetHammerfest(startDate, endDate):
 
 if __name__ == "__main__":
 
-    runOrovannEB('2014-11-15', '2015-06-20')
+    #runOrovannEB('2014-11-15', '2015-06-20')
 
-    runSemsvann('2011-11-01', '2012-05-01')
+    #runSemsvann('2011-11-01', '2012-05-01')
     #runSemsvann('2012-11-01', '2013-06-01')
     #runSemsvann('2013-11-01', '2014-04-15')
     #runSemsvann('2014-11-01', '2015-05-15')
 
     #runOrovannNVE('2011-11-15', '2012-06-20')
-    runOrovannMET('2011-11-15', '2012-06-20')
-    runOrovannMET('2012-11-15', '2013-06-20')
-    runOrovannMET('2013-11-15', '2014-06-20')
-    runOrovannMET('2014-11-15', '2015-06-20')
+    #runOrovannMET('2011-11-15', '2012-06-20')
+    #runOrovannMET('2012-11-15', '2013-06-20')
+    #runOrovannMET('2013-11-15', '2014-06-20')
+    #runOrovannMET('2014-11-15', '2015-06-20')
 
     runHakkloa('2011-11-01', '2012-06-01')
     runHakkloa('2012-11-01', '2013-06-01')

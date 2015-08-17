@@ -141,6 +141,7 @@ def get_ice_thickness_from_conductivity(ic, time_step, dh_snow, temp, cloud_cove
     ic.update_draft_thickness()
     ic.update_water_line()
     ic.update_column_average_temperature(temp)
+    ic.update_column_temperatures(temp)
 
     return ic
 
