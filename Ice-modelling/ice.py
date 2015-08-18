@@ -151,12 +151,11 @@ class IceColumn:
                     condition = False
 
     ## incomplete
-    def get_surface_temperature(self, temp_atm, effective_depth=0.5):
+    def get_surface_temperature(self, temp_atm):
         """
         Surface temperature
 
         :param temp_atm:
-        :param effective_depth:
         :return:
         """
 

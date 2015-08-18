@@ -10,14 +10,15 @@ import constants as const
 
 
 def get_ice_thickness_from_energy_balance(utm33_x, utm33_y, ice_column,
-                                          temp_atm, prec, prec_snow, prec_rain, age_factor_tau, albedo_prim,
+                                          temp_atm, prec, prec_snow, prec_rain,  albedo_prim,
                                           time_span_in_sec,
-                                          cloud_cover=None, wind=None,  pressure_atm=None):
+                                          age_factor_tau=None, cloud_cover=None, wind=None,  pressure_atm=None):
 
     out_column = get_ice_thickness_from_conductivity(ice_column, time_span_in_sec, prec_snow, temp_atm, cloud_cover)
 
-    energy_balance = deb.get_energy_balance_from_senorge(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, prec_rain, age_factor_tau,
-                                                         albedo_prim, time_span_in_sec, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+    energy_balance = deb.energy_balance_from_temp_sfc(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, prec_rain,
+                                                         albedo_prim, time_span_in_sec, age_factor_tau=age_factor_tau,
+                                                         cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
 
     return out_column, energy_balance
 

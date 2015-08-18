@@ -3,11 +3,12 @@
 * hvis øverste laget er sørpe og det oppgis overvann så kan noe av sørpen antas å være overvann.
   Se plot Giljastolsvannet 14/15 og http://www.regobs.no/Registration/55838
 
-* test rho_new_snow with different temps and both methods
-* plot for eb parametrinsering og plot CC og RR i eb-plot
+* plot for eb parametrinsering og plot CC og RR in eb-plot
 * plot layer temperatures
+* calculate implement shortwave atuenation in the colomn top layers in energy_balance_from_temp_sfc
+* make reference list for articles
+* test rho_new_snow with different temps and both methods
 * figurtext med hva som brukes og plottes
-
 * introduce a EB driving force for dH
 * modell med 2 uker fram
 * comment cloudcover functions*

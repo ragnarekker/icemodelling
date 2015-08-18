@@ -42,7 +42,20 @@ def calculateIceCoverSimple(inn_column, date, temp, sno, cloudcover=None):
 
     return icecover
 
+
 def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec_snow, cloud_cover):
+    """For now this method only evaluates the energy balance using an estimate for surface temperature.
+
+    :param utm33_x:
+    :param utm33_y:
+    :param inn_column:
+    :param date:
+    :param temp_atm:
+    :param prec:
+    :param prec_snow:
+    :param cloud_cover:
+    :return:
+    """
 
     icecover = []
     time_span_in_sec = 60*60*24     # fixed timestep of 24hrs given in seconds
@@ -54,11 +67,12 @@ def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec
 
     for i in range(0, len(date), 1):
 
-        out_column = dit.get_ice_thickness_from_conductivity(inn_column, time_span_in_sec,
-                                                             prec_snow[i], temp_atm[i], cloud_cover[i])
-        eb = deb.get_energy_balance_from_senorge(utm33_x, utm33_y, inn_column,
-                            temp_atm[i], prec[i], prec_snow[i], age_factor_tau, albedo_prim,
-                            time_span_in_sec, cloud_cover=cloud_cover[i])
+        out_column = dit.get_ice_thickness_from_conductivity(
+            inn_column, time_span_in_sec, prec_snow[i], temp_atm[i], cloud_cover[i])
+
+        eb = deb.energy_balance_from_temp_sfc(
+            utm33_x, utm33_y, inn_column, temp_atm[i], prec[i], prec_snow[i],
+            albedo_prim, time_span_in_sec, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover[i])
 
         icecover.append(out_column)
         energy_balance.append(eb)
@@ -70,6 +84,40 @@ def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec
 
 
     return icecover, energy_balance
+
+
+def calculateIceCoverEB2(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec_snow, cloud_cover):
+
+    icecover = []
+    time_span_in_sec = 60*60*24     # fixed timestep of 24hrs given in seconds
+    icecover.append(copy.deepcopy(inn_column))
+    energy_balance = []
+
+    age_factor_tau = 0.
+    albedo_prim = const.alfa_black_ice
+
+    for i in range(0, len(date), 1):
+
+        out_column = dit.get_ice_thickness_from_conductivity(
+            inn_column, time_span_in_sec, prec_snow[i], temp_atm[i], cloud_cover[i])
+
+        eb = deb.temp_surface_from_eb(
+            utm33_x=utm33_x, utm33_y=utm33_y, ice_column=inn_column, temp_atm=temp_atm[i],
+            prec=prec[i], prec_snow=prec_snow[i], time_span_in_sec=time_span_in_sec,
+            albedo_prim=albedo_prim,
+            age_factor_tau=age_factor_tau, cloud_cover=cloud_cover[i])
+
+        icecover.append(out_column)
+        energy_balance.append(eb)
+        inn_column = copy.deepcopy(out_column)
+
+        age_factor_tau = eb.age_factor_tau
+        albedo_prim = eb.albedo_prim
+
+
+
+    return icecover, energy_balance
+
 
 
 def runOrovannNVE(startDate, endDate):
@@ -147,10 +195,10 @@ def runOrovannEB(startDate, endDate):
     observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
 
     if len(observed_ice) == 0:
-        ice_cover, energy_balance = calculateIceCoverEB(utm33_x, utm33_y, ice.IceColumn(date[0], []), date, temp,
+        ice_cover, energy_balance = calculateIceCoverEB2(utm33_x, utm33_y, ice.IceColumn(date[0], []), date, temp,
                                         prec, prec_snow, cloud_cover)
     else:
-        ice_cover, energy_balance = calculateIceCoverEB(utm33_x, utm33_y, copy.deepcopy(observed_ice[0]), date, temp,
+        ice_cover, energy_balance = calculateIceCoverEB2(utm33_x, utm33_y, copy.deepcopy(observed_ice[0]), date, temp,
                                         prec, prec_snow, cloud_cover)
 
     # Need datetime objects from now on
@@ -337,7 +385,7 @@ def runStorvannetHammerfest(startDate, endDate):
 
 if __name__ == "__main__":
 
-    #runOrovannEB('2014-11-15', '2015-06-20')
+    runOrovannEB('2014-11-15', '2015-06-20')
 
     #runSemsvann('2011-11-01', '2012-05-01')
     #runSemsvann('2012-11-01', '2013-06-01')

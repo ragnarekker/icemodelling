@@ -9,18 +9,44 @@ from weather import EnergyBalanceElement as ebe
 from math import log, exp, sin, cos, pi, fabs, sqrt, acos
 
 
-def get_energy_balance_from_senorge(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, age_factor_tau,
-                                    albedo_prim, time_span_in_sec, cloud_cover=None, wind=None, pressure_atm=None):
-    '''
+def energy_balance_from_temp_sfc(
+        utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+        temp_surface=None, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
+    """
     The daily energy budget of a column of snow is expressed as (Walter et al. 2005):
 
     EB = λ_F * ρ_w * ΔSWE = S + (L_a - L_t) + (H + LE) + G + R - CC
 
-    Where λ_F is the latent heat of fusion (λ_F=335 kJ〖kg〗^(-1))
+    Where λ_F is the latent heat of fusion (λ_F=335 kJ (kg)^(-1))
     ρ_w [1000kgm^(-3)] is the density of water
-    ΔSWE is the change in the snowpack’s water equivalent [m]
+    ΔSWE is the change in the snow pack’s water equivalent [m]
 
-    '''
+    INCOMPLETE: Need to implement shortwave attuenation in the colomn topp layers.
+    Use q_s(z,t) in eq 10 in Yang et al (2012)
+
+    Mandatory
+    :param utm33_x:
+    :param utm33_y:
+    :param ice_column:
+    :param temp_atm:
+    :param prec:
+    :param prec_snow:
+    :param albedo_prim:
+    :param time_span_in_sec:
+
+    Optional
+    :param temp_surface:        If surface temp not given, one will be estimated. Should be avoided!
+    :param age_factor_tau:
+    :param cloud_cover:
+    :param wind:
+    :param pressure_atm:
+    :return:
+
+    For reference:  1 kWh is 3600 kJ.
+                    10 000 kJ can melt 30kg ice or (3cm/m2 ice).
+
+    """
+
 
     date = ice_column.date
     day_no = ice_column.date.timetuple().tm_yday
@@ -40,24 +66,30 @@ def get_energy_balance_from_senorge(utm33_x, utm33_y, ice_column, temp_atm, prec
             snow_density = ice_column.column[0].density
             snow_depth = ice_column.column[0].height
 
-    temp_surface = ice_column.get_surface_temperature(temp_atm)
 
     # Calculate some parameters
     if not cloud_cover:
         cloud_cover = dp.clouds_from_precipitation(prec, method='Binary')
 
+    # This scenario should be avoided but I keep it for now because it it the method used in senorge_eb
+    if not temp_surface:
+        temp_surface = ice_column.get_surface_temperature(temp_atm)
+
 
     # Define an energy balance object to put it all in
     energy_balance = ebe(date)
-    energy_balance.add_model_input(utm33_x, utm33_y, snow_depth, snow_density, temp_surface, is_ice,
-                        temp_atm, prec, prec_snow, cloud_cover,
-                        age_factor_tau, albedo_prim, day_no, time_hour, time_span_in_sec)
+    energy_balance.add_model_input(
+        utm33_x_inn=utm33_x, utm33_y_inn=utm33_y, snow_depth_inn=snow_depth, snow_density_inn=snow_density,
+        temp_surface_inn=temp_surface, is_ice_inn=is_ice, temp_atm_inn=temp_atm,
+        prec_inn=prec, prec_snow_inn=prec_snow, cloud_cover_inn=cloud_cover,
+        age_factor_tau_inn=age_factor_tau, albedo_prim_inn=albedo_prim,
+        day_no_inn=day_no, time_hour_inn=time_hour, time_span_in_sec_inn=time_span_in_sec)
 
 
     # Calculate the energy balance terms
     S, s_inn, albedo, albedo_prim, age_factor_tau = \
         get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, snow_density, prec_snow, time_hour,
-                       time_span_in_sec, temp_surface, age_factor_tau, albedo_prim, albedo_method="ueb")
+                       time_span_in_sec, temp_surface, albedo_prim, age_factor_tau=age_factor_tau, albedo_method="ueb")
 
     L_a, L_t = \
         get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_span_in_sec)
@@ -70,16 +102,15 @@ def get_energy_balance_from_senorge(utm33_x, utm33_y, ice_column, temp_atm, prec
     R = get_prec_heat(temp_atm, prec)
 
     #CC = get_cold_content(ice_column, temp_atm, prec_snow)
-    CC = 0.
 
-    EB = S + (L_a - L_t) + (H + LE) + G + R - CC
+    EB = S + (L_a - L_t) + (H + LE) + G + R         # - CC
 
     energy_balance.add_short_wave(S, s_inn, albedo, albedo_prim, age_factor_tau)
     energy_balance.add_long_wave(L_a, L_t)
     energy_balance.add_sensible_and_latent_heat(H, LE)
     energy_balance.add_ground_heat(G)
     energy_balance.add_prec_heat(R)
-    energy_balance.add_cold_content(CC)
+    #energy_balance.add_cold_content(CC)
     energy_balance.add_energy_budget(EB)
 
     return energy_balance
@@ -140,7 +171,7 @@ def get_albedo_walter(prec_snow, snow_depth, snow_density, temp_atm, albedo_prim
     return albedo_prim, albedo
 
 
-def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, age_factor_tau, time_span_in_sec):
+def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, time_span_in_sec, age_factor_tau=None):
     """
     Method estimates albedo as in the Utah energy balance Snow Accumulation and Melt Model (UEB).
     Adaption from Dickinson et al. 1993 (BATS, NCAR).
@@ -151,7 +182,7 @@ def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, age_factor
     :param zenith_angle:        [Radians]
     :param age_factor_tau:      [-] non-dimensional snow surface age that is incremented at each times step
                                 by a quantity designed to emulate the effect of the growth of surface
-                                grain sizes.
+                                grain sizes. Defalt 0. as for new snow
     :param time_span_in_sec:
     :return:
 
@@ -186,6 +217,9 @@ def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, age_factor
     r3 = 0.03
     d_tau = ((r1+r2+r3)/tau_0)*time_span_in_sec
 
+    if not age_factor_tau:
+        age_factor_tau = 0.
+
     # In case of new snow, the age factor becomes 0.
     if prec_snow >= 0.01:
         age_factor_tau = 0.
@@ -219,8 +253,9 @@ def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, age_factor
     return age_factor_tau, albedo
 
 
-def get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, snow_density, prec_snow, time_hour,
-                   time_span_in_sec, temp_surface, age_factor_tau, albedo_prim, albedo_method="ueb"):
+def get_short_wave(
+        utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, snow_density, prec_snow, time_hour,
+        time_span_in_sec, temp_surface, albedo_prim, age_factor_tau=None, albedo_method="ueb"):
     '''
     S [kJm^(-2)]is the net incident solar (short wave) radiation
     Method calculates albedo in two different ways for comparison and testing. In the end one is chose based on
@@ -234,9 +269,9 @@ def get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, 
     :param time_hour:           [0-23] Hour of the day the time_span_in_sec ends
     :param time_span_in_sec:    [sec] Time resolution in sec
     :param temp_surface:        [C] Snøoverflate temperatur
-    :param prec_snow:           [m] Meter snøfall
-    :param albedo_prim:         Primary albedo from last timestep. Used in the albedo_walters routine.
-    :param age_factor_tau:      [?] Age factor in the UEB albedo routine.
+    :param prec_snow:           [m] New snow in meter
+    :param albedo_prim:         Primary albedo from last time step. Used in the albedo_walters routine.
+    :param age_factor_tau:      [-] Age factor in the UEB albedo routine.
 
     :return:    S, s_inn, albedo, albedo_prim, age_factor_tau
 
@@ -344,7 +379,7 @@ def get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, 
 
     # UEB albedo
     age_factor_tau, albedo_ueb \
-        = get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, age_factor_tau, time_span_in_sec)
+        = get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, time_span_in_sec, age_factor_tau=age_factor_tau)
 
     # Todd Walters albedo
     albedo_prim, albedo_walter \
@@ -524,7 +559,77 @@ def get_cold_content(ice_column, temp_atm, prec_snow):
     return CC
 
 
+def temp_surface_from_eb(
+        utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+        error=100., age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
+    """Solves surface temperature from the criteria that the energy budget has to be zero.
+    This method iterates surface temperatures so that the error goes below a requested threshold.
+
+    INCOMPLETE: method needs iterations in the case that surface temp is at melting temp (0C)
+
+    :param utm33_x:
+    :param utm33_y:
+    :param ice_column:
+    :param temp_atm:
+    :param prec:
+    :param prec_snow:
+    :param albedo_prim:
+    :param time_span_in_sec:
+    :param age_factor_tau:
+    :param error:
+    :param cloud_cover:
+    :param wind:
+    :param pressure_atm:
+    :return:
+    """
+
+    temp_sfc = 0.
+    eb = error + 1.
+    num_iterations = 0
+    eb_obj = None
+    melting = False
+
+    while abs(eb) > error:
+        eb_obj = energy_balance_from_temp_sfc(
+                utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+                temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+
+        eb = eb_obj.EB
+        delta_t = 0.01 * abs(eb)/error
+
+        if eb > 0.:   # to much energy coming inn????
+            temp_sfc += delta_t
+
+        if eb < 0.:   # to much energy going out???
+            temp_sfc -= delta_t
+            if melting:
+                melting = False
+
+        num_iterations += 1
+
+        if temp_sfc > 0.:
+            if melting:     # if the melting condition is true already (from previous iteration)
+                break
+            temp_sfc = 0.
+            melting = True
+
+
+    eb_obj.num_iterations = num_iterations
+
+    return eb_obj
+
+
+
 if __name__ == "__main__":
+
+    import getFiledata as gfd
+    from setEnvironment import data_path
+
+    icecols = gfd.importColumns("{0}Semsvann observasjoner 2012-2013.csv".format(data_path))
+    icecol = icecols[6]
+
+    eb = temp_surface_from_eb(utm33_x=130513, utm33_y=6802070, ice_column=icecol, temp_atm=5,
+                                    prec=0.01,prec_snow=0.1,time_span_in_sec=24*60*60,albedo_prim=0.37)
 
     S, s_inn, albedo, albedo_prim, age_factor_tau\
            = get_short_wave(utm33_x=130513, utm33_y=6802070, day_no=180, temp_atm= -1.5, cloud_cover=0.5,
