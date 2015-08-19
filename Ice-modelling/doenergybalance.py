@@ -61,6 +61,7 @@ def energy_balance_from_temp_sfc(
 
     if len(ice_column.column) == 0:
         is_ice = False
+        # albedo_prim = 0.10      # no ice, water absobs much of the short wave
     else:
         if ice_column.column[0].type == "snow":
             snow_density = ice_column.column[0].density
@@ -68,12 +69,12 @@ def energy_balance_from_temp_sfc(
 
 
     # Calculate some parameters
-    if not cloud_cover:
+    if cloud_cover is None:
         cloud_cover = dp.clouds_from_precipitation(prec, method='Binary')
 
     # This scenario should be avoided but I keep it for now because it it the method used in senorge_eb
-    if not temp_surface:
-        temp_surface = ice_column.get_surface_temperature(temp_atm)
+    if temp_surface is None:
+        temp_surface = ice_column.get_surface_temperature_estimate(temp_atm)
 
 
     # Define an energy balance object to put it all in
@@ -283,7 +284,7 @@ def get_short_wave(
     phi, thi, ddphi, ddthi = dc.lat_long_from_utm33(utm33_x,utm33_y, output= "both")
 
     thetaW = 0.4102*sin((2*pi/365)*(day_no-80))     # solar declination angleday angle, Walter 2005
-    print("sol.decl.angle={0} on daynumber={1}".format(thetaW, day_no))
+    # print("sol.decl.angle={0} on daynumber={1}".format(thetaW, day_no))
 
     #theta <- vector("numeric", 365)
     #theta2 <- vector("numeric", 365)
@@ -291,10 +292,7 @@ def get_short_wave(
     #for (day_no in 1:365)theta2[day_no] <- 0.4102*sin((2*pi/365)*(day_no-80))#solar declination angleday angle
 
     theta = 0.4092*cos((2*pi/365.25)*(day_no-173))  # solar declination angleday angle, Liston 1995
-    print(theta)
-
     theta2 = 2*pi/365.25*(day_no-80)
-    print(theta2)
 
     r = 149598000   # distance from the sun
     R = 6378        # Radius of earth
@@ -375,7 +373,7 @@ def get_short_wave(
 
     S0 = (117.6*10**3)/86400    # [kJ/m2*s] Solar constant pr sec
     S0 *= time_span_in_sec      # solar constant pr time step
-    print("Solar constant={0}, time resolution = {1}".format(S0, time_span_in_sec))
+    # print("Solar constant={0}, time resolution = {1}".format(S0, time_span_in_sec))
 
     # UEB albedo
     age_factor_tau, albedo_ueb \
@@ -454,9 +452,9 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, press
     :return:
     '''
 
-    if not pressure_atm:
+    if pressure_atm is None:
         pressure_atm = const.pressure_atm
-    if not wind:
+    if wind is None:
         wind = const.avg_wind_const
 
     c_air = const.c_air         # specific heatcapacity air
@@ -487,10 +485,11 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, press
     LE = None       # Latent varme. Positivt hvis temp_surface < temp_atm
     if temp_surface < 0.:
         LE = (lambda_V+lambda_F)*0.622*(rho_air/pressure_atm)*common*wind*(ea-es)
-    if temp_surface == 0.:
+    elif temp_surface == 0.:
         LE = lambda_V * 0.622 * (rho_air/pressure_atm) * common * wind *(ea-es)
     else:
-        print('Surface temperature above 0C not possible.')
+        print('get_sensible_and_latent_heat: Surface temperature above 0C not possible for snow and ice. Forcing temp_surface = 0')
+        LE = lambda_V * 0.622 * (rho_air/pressure_atm) * common * wind *(ea-es)
 
     LE = LE * time_span_in_sec
 
@@ -583,35 +582,36 @@ def temp_surface_from_eb(
     :return:
     """
 
-    temp_sfc = 0.
-    eb = error + 1.
+    temp_sfc = temp_atm     # initail value
+    eb = error + 1.         # initial value to start while loop
     num_iterations = 0
     eb_obj = None
     melting = False
 
     while abs(eb) > error:
+        if temp_sfc > 0.:
+            # in this case EB(T_sfc = 0) = Q_melt
+            if melting is True:     # if the melting condition is true already (from previous iteration)
+                break
+            temp_sfc = 0.
+            melting = True      # condition to avoid calculating EB at surf_temp multiple times-
+
         eb_obj = energy_balance_from_temp_sfc(
-                utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-                temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
 
         eb = eb_obj.EB
         delta_t = 0.01 * abs(eb)/error
 
-        if eb > 0.:   # to much energy coming inn????
+        if eb > 0.:   # to much energy coming inn.
             temp_sfc += delta_t
 
-        if eb < 0.:   # to much energy going out???
+        if eb < 0.:   # to much energy going out.
             temp_sfc -= delta_t
             if melting:
                 melting = False
 
         num_iterations += 1
-
-        if temp_sfc > 0.:
-            if melting:     # if the melting condition is true already (from previous iteration)
-                break
-            temp_sfc = 0.
-            melting = True
 
 
     eb_obj.num_iterations = num_iterations

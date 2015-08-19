@@ -251,7 +251,7 @@ class EnergyBalanceElement():
                         day_no_inn, time_hour_inn, time_span_in_sec_inn):
         self.utm33_x = utm33_x_inn
         self.utm33_y = utm33_y_inn
-        self.snow_depth = snow_depth_inn
+        self.snow_depth = snow_depth_inn            # Snowdepth on top of colunm. Not total snowdepth on land.
         self.snow_density = snow_density_inn
         self.temp_surface = temp_surface_inn
         self.is_ice = is_ice_inn

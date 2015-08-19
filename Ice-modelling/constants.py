@@ -23,7 +23,7 @@ sigma_pr_second = (sigma_day/(24*60*60))        # pr second [kJ/m^2/s/K^4]
 
 
 # Misc constants
-temp_f = 0                      # [degC] freezing temp for fresh water
+temp_f = 0.                     # [degC] freezing temp for fresh water
 absolute_zero = -273.15         # [degC] 0K is -273.15C
 temp_rain_snow = 0.5            # [degC] Threshold where precipitation falls as snow or rain.
 von_karmans_const = 0.41        # [-] von Karmans constant
@@ -56,7 +56,8 @@ rho_air = 1.29                  # kg/m3
 
 # Latent heat of fusion [J kg-1]
 L_black_ice = 333500            # latent heat of freezing water to black ice
-L_slush_ice = 0.5*L_black_ice   # freezing slush to slush ice
+part_ice_in_slush = 0.5         # How big part of sluh is frozen? This number is probably to low. Slush is probably 20-30% ice only?
+
 
 
 # Specific heat capacities [kJ/kg/K]
@@ -81,6 +82,9 @@ meltingcoeff_slush_ice = -0.04 /(60*60*24) / 5  # 4cm melting pr day at 5degC
 meltingcoeff_slush = meltingcoeff_slush_ice*2   # slush is partly melted
 meltingcoeff_black_ice = -0.02 /(60*60*24) / 5  # 2cm melting pr day at 5degC
 
+# melting energy from eb calculations when surface temp is forced to 0C is way to efficient.
+# 10% of the energy seems to be sufficient to melt the snow an ice.
+melt_energy_coefficient = 0.1
 
 # Constants affecting how surface water interacts with snow on an ice cover
 snow_pull_on_water = 0.05       # [m] The length water is pulled upp into the snow by capillary forces

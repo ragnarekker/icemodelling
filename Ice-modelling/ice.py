@@ -53,6 +53,10 @@ class IceColumn:
         self.water_line = water_line_inn
 
 
+    def set_surface_temperature(self, surface_temperature_inn):
+        self.temp_surface = surface_temperature_inn
+
+
     def add_layer_at_index(self, index, layer):
         '''
         Adds a new layer at a given index in ice column. Subsequent layers are added after the new layer.
@@ -150,8 +154,20 @@ class IceColumn:
                 if i >= len(self.column):
                     condition = False
 
-    ## incomplete
-    def get_surface_temperature(self, temp_atm):
+
+    def get_surface_temperature(self):
+        """
+        Retruns surface temperature if on exists.
+        :return:
+        """
+        try:
+            return self.temp_surface
+        except Exception as e:
+            print e
+            print "Try using the get_surface_temperature_estimate function."
+
+
+    def get_surface_temperature_estimate(self, temp_atm):
         """
         Surface temperature
 
@@ -168,6 +184,7 @@ class IceColumn:
             temp_surface = 0.
 
         return temp_surface
+
 
     def update_column_temperatures(self, temp_atm):
         '''Column temperatures calculated under the assumption that over 24hrs temperature

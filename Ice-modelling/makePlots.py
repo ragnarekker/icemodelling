@@ -114,3 +114,7 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
     plt.ylim(-4*(max(temp)-min(temp)), max(temp))
 
     plt.savefig(filename)
+
+
+def plotIcecoverEB(icecover, enegy_balance, observed_ice, date, temp, snotot, filename):
+    return

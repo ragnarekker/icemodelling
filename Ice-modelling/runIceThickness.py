@@ -34,9 +34,9 @@ def calculateIceCoverSimple(inn_column, date, temp, sno, cloudcover=None):
             i = i + 1
         else:
             if cloudcover != None:
-                out_column = dit.get_ice_thickness_from_conductivity(inn_column, timestep, sno[i], temp[i], cloudcover[i])
+                out_column = dit.get_ice_thickness_from_surface_temp(inn_column, timestep, sno[i], temp[i], cloudcover[i])
             else:
-                out_column = dit.get_ice_thickness_from_conductivity(inn_column, timestep, sno[i], temp[i])
+                out_column = dit.get_ice_thickness_from_surface_temp(inn_column, timestep, sno[i], temp[i])
             icecover.append(out_column)
             inn_column = copy.deepcopy(out_column)
 
@@ -67,7 +67,7 @@ def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec
 
     for i in range(0, len(date), 1):
 
-        out_column = dit.get_ice_thickness_from_conductivity(
+        out_column = dit.get_ice_thickness_from_surface_temp(
             inn_column, time_span_in_sec, prec_snow[i], temp_atm[i], cloud_cover[i])
 
         eb = deb.energy_balance_from_temp_sfc(
@@ -97,27 +97,26 @@ def calculateIceCoverEB2(utm33_x, utm33_y, inn_column, date, temp_atm, prec, pre
     albedo_prim = const.alfa_black_ice
 
     for i in range(0, len(date), 1):
+        if date[i] < inn_column.date:
+            i = i + 1
+        else:
+            out_column, eb = dit.get_ice_thickness_from_energy_balance(
+                utm33_x=utm33_x, utm33_y=utm33_y, ice_column=inn_column, temp_atm=temp_atm[i],
+                prec=prec[i], prec_snow=prec_snow[i], time_span_in_sec=time_span_in_sec,
+                albedo_prim=albedo_prim, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover[i])
 
-        out_column = dit.get_ice_thickness_from_conductivity(
-            inn_column, time_span_in_sec, prec_snow[i], temp_atm[i], cloud_cover[i])
+            icecover.append(out_column)
+            energy_balance.append(eb)
+            inn_column = copy.deepcopy(out_column)
 
-        eb = deb.temp_surface_from_eb(
-            utm33_x=utm33_x, utm33_y=utm33_y, ice_column=inn_column, temp_atm=temp_atm[i],
-            prec=prec[i], prec_snow=prec_snow[i], time_span_in_sec=time_span_in_sec,
-            albedo_prim=albedo_prim,
-            age_factor_tau=age_factor_tau, cloud_cover=cloud_cover[i])
-
-        icecover.append(out_column)
-        energy_balance.append(eb)
-        inn_column = copy.deepcopy(out_column)
-
-        age_factor_tau = eb.age_factor_tau
-        albedo_prim = eb.albedo_prim
-
-
+            if eb is None:
+                age_factor_tau = 0.
+                albedo_prim = const.alfa_black_ice
+            else:
+                age_factor_tau = eb.age_factor_tau
+                albedo_prim = eb.albedo_prim
 
     return icecover, energy_balance
-
 
 
 def runOrovannNVE(startDate, endDate):
@@ -205,8 +204,10 @@ def runOrovannEB(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    plot_filename = '{0}Ortovann MET {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
+    plot_filename = '{0}Ortovann MET EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
     pts.plotIcecover(ice_cover, observed_ice, date, temp, sno_tot, plot_filename)
+    plot_filename = '{0}Ortovann MET with EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
+    pts.plotIcecoverEB(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename)
 
 
 def runSemsvann(startDate, endDate):
