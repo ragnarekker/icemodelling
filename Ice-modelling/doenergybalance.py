@@ -66,6 +66,10 @@ def energy_balance_from_temp_sfc(
         if ice_column.column[0].type == "snow":
             snow_density = ice_column.column[0].density
             snow_depth = ice_column.column[0].height
+        if ice_column.column[0].type == "black_ice":
+            albedo_prim = const.alfa_black_ice
+        if ice_column.column[0].type == "slush_ice":
+            albedo_prim = const.alfa_slush_ice
 
 
     # Calculate some parameters
@@ -151,6 +155,10 @@ def get_albedo_walter(prec_snow, snow_depth, snow_density, temp_atm, albedo_prim
 
         # case no new snow or melt. Apply albedo decay
         if delta_swe <= 0.:
+            if albedo_prim <= 0.35:
+                print "get_albedo_walter: albedo_prim <= 0.35 (value: [0]). Forced to 0.355."
+                albedo_prim = 0.355
+
             A = 0.35-(0.35-albedo_max)*exp(-(0.177+log((albedo_max-0.35)/(albedo_prim-0.35))**2.16))**0.46 #US Army corps of engineers (empirical)
             albedo_prim = A
 
@@ -194,7 +202,7 @@ def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, time_span_
     snow_depth += prec_snow
 
     # Constants from Tarboton and Luce, Utah energy balance Snow Accumulation and Melt Model UEB, 1996
-    albedo_bare_ground = const.alfa_black_ice     # Bare ground albedo means albedo of the ice beneath
+    albedo_bare_ground = const.alfa_black_ice   # Bare ground albedo means albedo of the ice beneath
     C_v = 0.2           # sensitivity of albedo to snow surface aging (grain size growth)
     C_ir = 0.5          # sensitivity of albedo to snow surface aging (grain size growth)
     alfa_v0 = 0.95      # fresh snow diffuse reflectances in the visible
@@ -375,22 +383,27 @@ def get_short_wave(
     S0 *= time_span_in_sec      # solar constant pr time step
     # print("Solar constant={0}, time resolution = {1}".format(S0, time_span_in_sec))
 
-    # UEB albedo
-    age_factor_tau, albedo_ueb \
-        = get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, time_span_in_sec, age_factor_tau=age_factor_tau)
+    if snow_depth == 0.:
+        albedo = albedo_prim
+        age_factor_tau = 0.
 
-    # Todd Walters albedo
-    albedo_prim, albedo_walter \
-        = get_albedo_walter(prec_snow, snow_depth, snow_density, temp_atm, albedo_prim, time_span_in_sec, time_hour)
-
-    # At this point I choose which albedo variant to use in calculating short wave radiation
-    if albedo_method == "ueb":
-        albedo = albedo_ueb
-    elif albedo_method == "walter":
-        albedo = albedo_walter
     else:
-        print("No valid albedo method selected.")
-        albedo = None
+        # UEB albedo
+        age_factor_tau, albedo_ueb \
+            = get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, time_span_in_sec, age_factor_tau=age_factor_tau)
+
+        # Todd Walters albedo
+        albedo_prim, albedo_walter \
+            = get_albedo_walter(prec_snow, snow_depth, snow_density, temp_atm, albedo_prim, time_span_in_sec, time_hour)
+
+        # At this point I choose which albedo variant to use in calculating short wave radiation
+        if albedo_method == "ueb":
+            albedo = albedo_ueb
+        elif albedo_method == "walter":
+            albedo = albedo_walter
+        else:
+            print("No valid albedo method selected.")
+            albedo = None
 
     #Solar radiation
     s_inn = Trans * sin((pi/2)-zenith_angle) * S0   #
@@ -608,6 +621,7 @@ def temp_surface_from_eb(
 
         if eb < 0.:   # to much energy going out.
             temp_sfc -= delta_t
+            # The melting condition is no longer valid and surface temp can be lowered
             if melting:
                 melting = False
 

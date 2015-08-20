@@ -23,7 +23,7 @@ import constants as const
 from setEnvironment import data_path, plot_folder
 
 
-def calculateIceCoverSimple(inn_column, date, temp, sno, cloudcover=None):
+def calculateIceCoverSimple(inn_column, date, temp, sno, cloud_cover=None):
 
     icecover = []
     timestep = 60*60*24     # fixed timestep of 24hrs given in seconds
@@ -33,8 +33,8 @@ def calculateIceCoverSimple(inn_column, date, temp, sno, cloudcover=None):
         if date[i] < inn_column.date:
             i = i + 1
         else:
-            if cloudcover != None:
-                out_column = dit.get_ice_thickness_from_surface_temp(inn_column, timestep, sno[i], temp[i], cloudcover[i])
+            if cloud_cover != None:
+                out_column = dit.get_ice_thickness_from_surface_temp(inn_column, timestep, sno[i], temp[i], cloud_cover=cloud_cover[i])
             else:
                 out_column = dit.get_ice_thickness_from_surface_temp(inn_column, timestep, sno[i], temp[i])
             icecover.append(out_column)
@@ -86,7 +86,10 @@ def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec
     return icecover, energy_balance
 
 
-def calculateIceCoverEB2(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec_snow, cloud_cover):
+def calculateIceCoverEB2(utm33_x, utm33_y, date, temp_atm, prec, prec_snow, cloud_cover, inn_column=None):
+
+    if inn_column is None:
+        inn_column = ice.IceColumn(date[0], []),
 
     icecover = []
     time_span_in_sec = 60*60*24     # fixed timestep of 24hrs given in seconds
@@ -97,6 +100,7 @@ def calculateIceCoverEB2(utm33_x, utm33_y, inn_column, date, temp_atm, prec, pre
     albedo_prim = const.alfa_black_ice
 
     for i in range(0, len(date), 1):
+        print "{0}".format(date[i])
         if date[i] < inn_column.date:
             i = i + 1
         else:
@@ -109,7 +113,7 @@ def calculateIceCoverEB2(utm33_x, utm33_y, inn_column, date, temp_atm, prec, pre
             energy_balance.append(eb)
             inn_column = copy.deepcopy(out_column)
 
-            if eb is None:
+            if eb.EB is None:
                 age_factor_tau = 0.
                 albedo_prim = const.alfa_black_ice
             else:
@@ -193,19 +197,16 @@ def runOrovannEB(startDate, endDate):
     # available_elements = gws.getElementsFromTimeserieTypeStation(54710, 0, 'csv')
     observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
 
-    if len(observed_ice) == 0:
-        ice_cover, energy_balance = calculateIceCoverEB2(utm33_x, utm33_y, ice.IceColumn(date[0], []), date, temp,
-                                        prec, prec_snow, cloud_cover)
-    else:
-        ice_cover, energy_balance = calculateIceCoverEB2(utm33_x, utm33_y, copy.deepcopy(observed_ice[0]), date, temp,
-                                        prec, prec_snow, cloud_cover)
+    ice_cover, energy_balance = calculateIceCoverEB2(
+        utm33_x, utm33_y, date, temp,prec, prec_snow, cloud_cover,
+        inn_column=copy.deepcopy(observed_ice[0]))
 
     # Need datetime objects from now on
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
     plot_filename = '{0}Ortovann MET EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
-    pts.plotIcecover(ice_cover, observed_ice, date, temp, sno_tot, plot_filename)
+    # pts.plotIcecover(ice_cover, observed_ice, date, temp, sno_tot, plot_filename)
     plot_filename = '{0}Ortovann MET with EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
     pts.plotIcecoverEB(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename)
 

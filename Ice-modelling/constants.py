@@ -70,6 +70,7 @@ c_slush = (c_water + c_ice)/2  # Assume slush is half/half water and ice
 
 # Albedo in values [0,1]
 alfa_black_ice = 0.35             # from http://en.wikipedia.org/wiki/Albedo
+alfa_slush_ice = alfa_black_ice
 alfa_snow_new = 0.85              # from http://en.wikipedia.org/wiki/Albedo
 alfa_snow_old = 0.45              # from http://en.wikipedia.org/wiki/Albedo
 alfa_max = 0.95
@@ -82,9 +83,10 @@ meltingcoeff_slush_ice = -0.04 /(60*60*24) / 5  # 4cm melting pr day at 5degC
 meltingcoeff_slush = meltingcoeff_slush_ice*2   # slush is partly melted
 meltingcoeff_black_ice = -0.02 /(60*60*24) / 5  # 2cm melting pr day at 5degC
 
+
 # melting energy from eb calculations when surface temp is forced to 0C is way to efficient.
-# 10% of the energy seems to be sufficient to melt the snow an ice.
-melt_energy_coefficient = 0.1
+melt_energy_coefficient = 1.0
+
 
 # Constants affecting how surface water interacts with snow on an ice cover
 snow_pull_on_water = 0.05       # [m] The length water is pulled upp into the snow by capillary forces

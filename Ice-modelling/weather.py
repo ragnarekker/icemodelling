@@ -202,13 +202,13 @@ class WeatherElement():
             else:
                 self.Value = elementValue/100.
 
-        # Rain seems to have a special treatment as well
+        # Rain seems to have a special treatment as well. Also, we use meter and not mm..
         if elementID == 'RR':
             if elementValue < 0.:
                 self.Value = 0.
                 self.Metadata.append({'On import':'removed negative value'})
             else:
-                self.Value = elementValue
+                self.Value = elementValue/1000.
 
         # Clouds come in octas and should be in units (ranging from 0 to 1) for further use
         if elementID == 'NNM':
@@ -266,6 +266,12 @@ class EnergyBalanceElement():
         self.time_span_in_sec = time_span_in_sec_inn
 
         return
+
+
+    def add_no_energy_balance(self, is_ice_inn):
+        self.is_ice = is_ice_inn
+        self.EB = None
+
 
 
     def add_short_wave(self, S_inn, s_inn_inn, albedo_inn, albedo_prim_inn, age_factor_tau_inn):

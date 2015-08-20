@@ -7,6 +7,7 @@ import doparameterization as dp
 import doenergybalance as deb
 import ice as ice
 import constants as const
+import weather as we
 
 
 def get_ice_thickness_from_energy_balance(
@@ -35,13 +36,14 @@ def get_ice_thickness_from_energy_balance(
 
     # No ice?, dont do EB and use air temp as surface temp
     if len(ice_column.column) == 0:
-        energy_balance = None
+        energy_balance = we.EnergyBalanceElement(ice_column.date)
+        energy_balance.add_no_energy_balance(is_ice_inn=False)
         out_column = get_ice_thickness_from_surface_temp(
                 ice_column, time_span_in_sec, prec_snow, temp_atm)
     else:
         energy_balance = deb.temp_surface_from_eb(
             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+            error=25., age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
 
         surface_temp = energy_balance.temp_surface
         out_column = None
@@ -150,11 +152,11 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
 
     # if surface or air temperature is MELTING
     else:
-        if temp > 0.:
         # In case surface temperatures are above 0C (when air temp is used to calculate ice evolution) there
-        # should not be submitted a enery term from the energy balance calculations.
-        # all melting is made by simple degree day model using different calibration constants for snow,
-        # slush ice and black ice melting only effects the top layer (index = 0)
+        # should not be submitted a energy term from the energy balance calculations (melt_energy = None).
+        if temp > 0.:
+            # all melting is made by simple degree day model using different calibration constants for snow,
+            # slush ice and black ice melting only effects the top layer (index = 0)
             while time_step > 0 and len(ic.column) > 0:
                 if ic.column[0].type == 'water':
                     ic.remove_layer_at_index(0)
@@ -184,7 +186,10 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
                     else:
                         ic.column[0].height = ic.column[0].height + dh
                         time_step = 0
-        if melt_energy is not None:
+
+        # In case surface temp is calculated form energy balance, surface temp is never above 0C, but if we have
+        # melting and thus melt_energy is not None and temp == 0.
+        elif melt_energy is not None:
             while time_step > 0 and len(ic.column) > 0:
                 if ic.column[0].type == 'water':
                     ic.remove_layer_at_index(0)
@@ -206,7 +211,8 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
                         time_step = 0
 
         else:
-            print "Message from melting routine in get_ice_thickness_from_surface_temp: Need either energy or positive temperatures in model to melt snow and ice."
+            print "Message from melting routine in get_ice_thickness_from_surface_temp: " \
+                  "Need either energy or positive temperatures in model to melt snow and ice."
 
 
     ic.merge_and_remove_excess_layers()
