@@ -86,7 +86,7 @@ def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec
     return icecover, energy_balance
 
 
-def calculateIceCoverEB2(utm33_x, utm33_y, date, temp_atm, prec, prec_snow, cloud_cover, inn_column=None):
+def calculateIceCoverEB2(utm33_x, utm33_y, date, temp_atm, prec, prec_snow, cloud_cover, wind=None, inn_column=None):
 
     if inn_column is None:
         inn_column = ice.IceColumn(date[0], []),
@@ -107,7 +107,7 @@ def calculateIceCoverEB2(utm33_x, utm33_y, date, temp_atm, prec, prec_snow, clou
             out_column, eb = dit.get_ice_thickness_from_energy_balance(
                 utm33_x=utm33_x, utm33_y=utm33_y, ice_column=inn_column, temp_atm=temp_atm[i],
                 prec=prec[i], prec_snow=prec_snow[i], time_span_in_sec=time_span_in_sec,
-                albedo_prim=albedo_prim, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover[i])
+                albedo_prim=albedo_prim, age_factor_tau=age_factor_tau, wind=wind[i], cloud_cover=cloud_cover[i])
 
             icecover.append(out_column)
             energy_balance.append(eb)
@@ -192,7 +192,7 @@ def runOrovannEB(startDate, endDate):
     sno_tot = we.strip_metadata(wsSno)
     prec_snow = dp.delta_snow_from_total_snow(sno_tot)
     prec = we.strip_metadata(wsPrec)
-    cloud_cover = dp.clouds_average_from_precipitation(prec)
+    cloud_cover = dp.clouds_from_precipitation(prec)
 
     # available_elements = gws.getElementsFromTimeserieTypeStation(54710, 0, 'csv')
     observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
@@ -209,6 +209,46 @@ def runOrovannEB(startDate, endDate):
     # pts.plotIcecover(ice_cover, observed_ice, date, temp, sno_tot, plot_filename)
     plot_filename = '{0}Ortovann MET with EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
     pts.plotIcecoverEB(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename)
+
+
+
+def runSemsvannEB(startDate, endDate):
+
+    location_name = 'Semsvannet v/Lo 145 moh'
+
+    wsTemp = gws.getMetData(19710, 'TAM', startDate, endDate, 0, 'list')
+    wsSno = gws.getMetData(19710, 'SA', startDate, endDate, 0, 'list')
+    wsPrec = gws.getMetData(19710, 'RR', startDate, endDate, 0, 'list')
+    wsWind = gws.getMetData(18700, 'FFM', startDate, endDate, 0, 'list')
+    wsCC = gws.getMetData(18700, 'NNM', startDate, endDate, 0, 'list')
+
+    utm33_y = 6644410
+    utm33_x = 243940
+
+    temp, date = we.strip_metadata(wsTemp, get_dates=True)
+    sno_tot = we.strip_metadata(wsSno)
+    prec_snow = dp.delta_snow_from_total_snow(sno_tot)
+    prec = we.strip_metadata(wsPrec)
+    cloud_cover = we.strip_metadata(wsCC)
+    wind = we.strip_metadata(wsWind)
+
+    # available_elements = gws.getElementsFromTimeserieTypeStation(54710, 0, 'csv')
+    observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
+
+    ice_cover, energy_balance = calculateIceCoverEB2(
+        utm33_x, utm33_y, date, temp,prec, prec_snow, cloud_cover=cloud_cover, wind=wind,
+        inn_column=copy.deepcopy(observed_ice[0]))
+
+    # Need datetime objects from now on
+    from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
+    to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
+
+    plot_filename = '{0}Semsvann EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
+    # pts.plotIcecover(ice_cover, observed_ice, date, temp, sno_tot, plot_filename)
+    plot_filename = '{0}Semsvann MET with EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
+    pts.plotIcecoverEB(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename,
+                       prec=prec, wind=wind, clouds=cloud_cover)
+
 
 
 def runSemsvann(startDate, endDate):
@@ -386,6 +426,9 @@ def runStorvannetHammerfest(startDate, endDate):
 
 
 if __name__ == "__main__":
+
+
+    runSemsvannEB('2014-11-15', '2015-06-20')
 
     runOrovannEB('2014-11-15', '2015-06-20')
 

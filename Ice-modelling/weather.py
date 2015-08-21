@@ -243,6 +243,10 @@ class EnergyBalanceElement():
     def __init__(self, date_inn):
         self.date = date_inn
 
+        self.iterations = None
+
+
+
 
     def add_model_input(self, utm33_x_inn, utm33_y_inn, snow_depth_inn, snow_density_inn,
                         temp_surface_inn, is_ice_inn,
@@ -266,6 +270,9 @@ class EnergyBalanceElement():
         self.time_span_in_sec = time_span_in_sec_inn
 
         return
+
+    def add_iterations(self, iterations_inn):
+        self.iterations = iterations_inn
 
 
     def add_no_energy_balance(self, is_ice_inn):

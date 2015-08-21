@@ -614,7 +614,7 @@ def temp_surface_from_eb(
             temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
 
         eb = eb_obj.EB
-        delta_t = 0.01 * abs(eb)/error
+        delta_t = 0.01 * abs(eb)/100
 
         if eb > 0.:   # to much energy coming inn.
             temp_sfc += delta_t
@@ -627,8 +627,7 @@ def temp_surface_from_eb(
 
         num_iterations += 1
 
-
-    eb_obj.num_iterations = num_iterations
+    eb_obj.add_iterations(num_iterations)
 
     return eb_obj
 

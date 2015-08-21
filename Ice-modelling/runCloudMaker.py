@@ -428,7 +428,7 @@ def testCloudMaker(stnr, startDate, endDate, method):
     # plot total snowdepth on land
     plt.bar(date, prec, width=1, color="0.4")
 
-    # plot the estimated cloudcover
+    # plot the estimated cloud cover
     for i in range(0, len(estClouds) - 1, 1):
         if estClouds[i] > 0:
             plt.hlines(max(prec) * 1.2, date[i], date[i + 1], lw=45, color=str(-(estClouds[i] - 1.)))
@@ -437,7 +437,7 @@ def testCloudMaker(stnr, startDate, endDate, method):
         else:
             plt.hlines(max(prec) * 1.2, date[i], date[i + 1], lw=45, color=str(-(estClouds[i] - 1.)))
 
-    # plot cloudcover from met
+    # plot cloud cover from met
     for i in range(0, len(clouds) - 1, 1):
         if clouds[i] > 0:
             plt.hlines(max(prec) * 1.1, date[i], date[i + 1], lw=45, color=str(-(clouds[i] - 1.)))
@@ -446,7 +446,7 @@ def testCloudMaker(stnr, startDate, endDate, method):
         else:
             plt.hlines(max(prec) * 1.1, date[i], date[i + 1], lw=45, color=str(-(clouds[i] - 1.)))
 
-    # this plots temperature on separate rightside axis
+    # this plots temperature on separate right side axis
     plt.twinx()
     temp_pluss = []
     temp_minus = []

@@ -1,0 +1,37 @@
+Temperatur	TAM_K	Middeltemperatur beregnet med Køppens formel	ºC	2012-07-01 00:00:00	None	Middeltemperatur beregnet med Køppens formel
+Temperatur	TAMRR	Middeltemperatur i nedbørdøgnet	ºC	1957-01-02 00:00:00	None	Døgnverdi: Aritmetisk middel av 24 timeverdier (evt formelbasert middelverdi) for kl 06-06 utc
+Vind	FXX	Kraftigste middelvind	m/s	1957-01-01 00:00:00	2012-04-30 00:00:00	Døgnverdi: Høyeste verdi av høyeste timinutters middelvind (FX) i sekstimersperiodene før kl 0, 6, 12 og 18 utc. Månedsverdi: Høyeste verdi av døgn-FXX
+Temperatur	TD	Duggpunktstemperatur	ºC	1957-01-01 00:00:00	None	Duggpunktstemperatur (den temperaturen lufta må avkjøles til før skydannelse (metning) inntreffer)
+Temperatur	TAM	Middeltemperatur	ºC	1957-01-01 00:00:00	None	"Timeverdi: Aritmetisk middel av minuttverdier Døgnverdi: Aritmetisk middel av 24 timeverdier (kl 00-00), evt formelbasert middelverdi ut fra færre observasjoner (kl 18-18)Månedsverdi: Aritmetisk middel av døgn-TAM "
+Temperatur	TAN	Minimumstemperatur	ºC	1957-01-01 00:00:00	None	Laveste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+Temperatur	TAX	Maksimumstemperatur	ºC	1957-01-01 00:00:00	None	Høyeste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+Snø	SD	Snødekke	kodetall	1957-01-01 00:00:00	2012-06-30 00:00:00	Oppgis med kodetall 1 - 4: 1 - 3 betyr at deler av marka er snødekt, og 4 at området rundt stasjonen er helt snødekt. Kode = -1 betyr "ikke snø", presenterast som "."
+Vind	DD18	Vindretning kl. 18 UTC	grader	1957-01-01 00:00:00	2012-06-30 00:00:00	Retning vinden kommer fra ved observasjon kl 18 utc
+Vind	FXN	Laveste av høyeste middelvindverdier	m/s	1957-01-01 00:00:00	2012-04-30 00:00:00	Døgnverdi: Laveste verdi av høyeste timinutters middelvind (FX) i sekstimersperiodene før kl 0, 6, 12 og 18 utc. Månedsverdi: Laveste verdi av døgn-FXN
+Vind	DD06	Vindretning kl. 06 UTC	grader	1957-01-01 00:00:00	2012-06-30 00:00:00	Retning vinden kommer fra ved observasjon kl 06 utc
+Temperatur	VEKST	Vekstgradtall	graddager	1957-01-01 00:00:00	None	Tall som avledes av døgnmiddeltemperaturen (antall grader > 5 ºC)
+Nedbør	SLAG	Nedbørslag	kode	1957-01-03 00:00:00	2012-04-30 00:00:00	Døgnverdi: Sammendrag av nedbørtyper i døgnet: 02 (alle typer snø), 03 (alle typer regn), 30 (kombinasjon av 02 og 03), 31 (dugg, rim, tåke)
+Fuktighet	UUM	Midlere relativ luftfuktighet	prosent	1957-01-01 00:00:00	None	Midlere relativ luftfuktighet for en periode (aritmetisk middel av målte verdier)
+Fuktighet	UUN	Minimum relativ luftfuktighet	prosent	1957-01-01 00:00:00	None	Laveste observerte relative luftfuktighet i en periode
+Fuktighet	UUX	Maksimum relativ luftfuktighet	prosent	1957-01-01 00:00:00	None	Høyeste observerte relative luftfuktighet i en periode
+Nedbør	RRTA	Nedbør i temperaturdøgnet	mm	2008-12-09 00:00:00	None	Døgn- eller månedssum for nedbør (temperaturdøgn 19-19)
+Skyer	NNM	Midlere skydekke	åttedeler	1957-01-01 00:00:00	2012-06-30 00:00:00	Aritmetisk middel av NN-verdier (skydekke) fra observasjoner kl 06, 12 og 18 utc
+Skyer	NNX	Største skydekke	åttedeler	1957-01-01 00:00:00	2012-05-31 00:00:00	Høyeste NN-verdi (skydekke) fra observasjoner kl 06, 12 og 18 utc
+Lufttrykk	VP	Vanndamptrykk	hPa	1957-01-01 00:00:00	None	Trykk utledet av relativ fuktighet og aktuell temperatur
+Snø	SA	Snødybde	cm	1957-01-01 00:00:00	None	Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres som ".", -3 = "umulig å måle"
+Temperatur	GD17	Energigradtall (basis 17)	graddager	1957-01-01 00:00:00	None	Også kalt graddagstall eller fyringsgrader. Tallet avledes av døgnmiddeltemperaturen (antall grader < 17 ºC)
+Temperatur	VSUM	Varmesum	graddager	1957-01-01 00:00:00	None	Tall som avledes av døgnmiddeltemperaturen (antall grader > 0 ºC)
+Vind	DD12	Vindretning kl. 12 UTC	grader	1957-01-01 00:00:00	2012-06-30 00:00:00	Retning vinden kommer fra ved observasjon kl 12 utc
+Vind	FFX	Høyeste vindhastighet (hovedobservasjoner)	m/s	1957-01-01 00:00:00	2012-06-30 00:00:00	Døgnverdi: Høyeste verdi av vindhastighet (timinutters middel, FF) for kl 0, 6, 12 og 18 utc.Månedsverdi: Høyeste verdi av døgn-FFX
+Vind	FFN	Laveste vindhastighet (hovedobservasjoner)	m/s	1957-01-01 00:00:00	2012-06-30 00:00:00	Døgnverdi: Laveste verdi av vindhastighet (timinutters middel, FF) for kl 0, 6, 12 og 18 utc. Månedsverdi: Laveste verdi av døgn-FFN
+Vind	FXM	Middel av høyeste middelvindverdier (hovedobservasjoner)	m/s	1957-01-01 00:00:00	2012-04-30 00:00:00	Døgnverdi: Aritmetisk middel av høyeste timinutters middelvind (FX) i sekstimersperiodene før kl 0, 6, 12 og 18 utc. Månedsverdi: Aritmetisk middel av døgn-FXM
+Skyer	NN04	Klarvær	sum	1957-01-01 00:00:00	2012-05-31 00:00:00	"Døgnverdi: Dersom summen av NN kl 6, 12 og 18 utc er 4 eller lavere, blir NN04=1, ellers 0.Månedsverdi: Sum av døgn-NN04 (antall dager med klarvær)."
+Skyer	NN20	Overskyet vær	sum	1957-01-01 00:00:00	2012-06-30 00:00:00	"Døgnverdi: Dersom summen av NN kl 6, 12 og 18 utc er 20 eller høyere, blir NN20=1, ellers 0.Månedsverdi: Sum av døgn-NN20 (antall dager med overskyet vær)."
+Skyer	NN09	Pent vær (Birkelands formel)	sum	1957-01-01 00:00:00	2012-06-30 00:00:00	"Døgnverdi: Dersom summen av NN kl 6, 12 og 18 utc er 9 eller lavere (og ingen NN er høyere enn 4), blir NN09=1, ellers 0.Månedsverdi: Sum av døgn-NN09 (antall dager med pent vær)."
+Temperatur	TAND	Lufttemperatur	ºC	2012-07-01 00:00:00	None	Laveste registrerte temperatur i timen/døgnet (kl 00-23)
+Temperatur	TAXD	Lufttemperatur	ºC	2012-07-01 00:00:00	None	Høyeste registrerte temperatur i timen/døgnet (kl 00-23)
+Snø	EM	Markas tilstand (E')	kodetall	1983-01-01 00:00:00	2012-06-30 00:00:00	Markas tilstand (snø- og isdekke)
+Vind	FFM	Middel av vindhastigheter (hovedobservasjoner)	m/s	1957-01-01 00:00:00	2012-06-30 00:00:00	Døgnverdi: Aritmetisk middel av vindhastighet (timinutters middel, FF) for kl 0, 6, 12 og 18 utc. Månedsverdi: Aritmetisk middel av døgn-FFM
+Skyer	NNN	Minste skydekke	åttedeler	1957-01-01 00:00:00	2012-05-31 00:00:00	Minste NN-verdi (skydekke) fra observasjoner kl 06, 12 og 18 utc
+Nedbør	RR	Nedbør	mm	1957-01-01 00:00:00	None	Døgn- eller månedssum for nedbør (nedbørdøgn 07-07)
+Nedbør	RR_720	Nedbør 720 timer (siste 30 døgn)	mm	1957-01-30 00:00:00	None	Nedbør for en løpende måned (30 døgn)

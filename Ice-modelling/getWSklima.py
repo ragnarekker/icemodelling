@@ -250,18 +250,18 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
 if __name__ == "__main__":
 
     ### Examles ###
-    getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'xml')
-    getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'csv')
-    list = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
+    #getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'xml')
+    #getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'csv')
+    #list = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
     # temp = getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'list')
     # sno = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
     # CC = getMetData(19710, 'NNM',  '2011-10-01', '2012-07-01', 0, 'list')
     # rr = getMetData(19710, 'RR',  '2011-10-01', '2012-06-01', 0, 'list')
     # elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
     # elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
-    elementsOnEvenes = getElementsFromTimeserieTypeStation(84970, 0, 'list')
-    getElementsFromTimeserieTypeStation(84970, 0, 'xml')
-    getElementsFromTimeserieTypeStation(84970, 0, 'csv')
+    #elementsOnEvenes = getElementsFromTimeserieTypeStation(84970, 0, 'list')
+    #getElementsFromTimeserieTypeStation(84970, 0, 'xml')
+    getElementsFromTimeserieTypeStation(19710, 0, 'csv')
 
 
     a = 0
