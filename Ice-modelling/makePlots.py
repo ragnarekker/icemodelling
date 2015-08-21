@@ -255,8 +255,6 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     R = []
     G = []
 
-
-
     if energy_balance[0].date > date[0]:
         i = 0
         while energy_balance[0].date > date[i]:
@@ -354,13 +352,13 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     #############################
     pplt.subplot2grid((11, 1), (7, 0), rowspan=4)
     plb.plot(date, EB, "gray")
-    plb.plot(date, S, "yellow")
-    plb.plot(date, L, "orange")
     plb.plot(date, H, "blue")
     plb.plot(date, LE, "navy")
     plb.plot(date, R, "turquoise")
     plb.plot(date, G, "crimson")
-    plb.ylim(-7000, 20000)
+    plb.plot(date, L, "red")
+    plb.plot(date, S, "gold")
+    plb.ylim(-7000, 25000)
     plb.xlim(date[0], date[-1])
      #fig.tight_layout()
 

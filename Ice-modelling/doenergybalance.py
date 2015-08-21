@@ -110,6 +110,9 @@ def energy_balance_from_temp_sfc(
 
     EB = S + (L_a - L_t) + (H + LE) + G + R         # - CC
 
+    if EB > 20000.:
+        print("{0}: EB > 20000.".format(date))
+
     energy_balance.add_short_wave(S, s_inn, albedo, albedo_prim, age_factor_tau)
     energy_balance.add_long_wave(L_a, L_t)
     energy_balance.add_sensible_and_latent_heat(H, LE)
@@ -479,11 +482,12 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, press
     zh = 0.0002                 # varme og damp ruhets
     k = const.von_karmans_const  # von Karmans konstant
 
-    common = k**2/( log( (zu-d)/zm ,10) )**2
+    # common = k**2/( log((zu-d)/zm,10) )**2
+    common = k**2/(log( (zu-d)/zm ))**2
 
     # Sensible heat exchange
-    H = c_air*rho_air*common*wind*(temp_atm-temp_surface) # Sensible heat. Positivt hvis temp_surface < temp_atm
-    H = H * time_span_in_sec
+    H = c_air*rho_air*common*wind*(temp_atm-temp_surface)  # Sensible heat. Positivt hvis temp_surface < temp_atm
+    H *= time_span_in_sec
 
     # Latent heat exchange
     # e_a and e_s [kPa] are saturation vapor pressure in the atmosphere and at the surface respectively.
@@ -505,6 +509,9 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, press
         LE = lambda_V * 0.622 * (rho_air/pressure_atm) * common * wind *(ea-es)
 
     LE = LE * time_span_in_sec
+
+    if H > 15000. or LE > 15000.:
+        print("{0}: H or LE > 15000 kJ/m2/day")
 
     return H, LE
 

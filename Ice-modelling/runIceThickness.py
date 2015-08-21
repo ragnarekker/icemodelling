@@ -427,8 +427,11 @@ def runStorvannetHammerfest(startDate, endDate):
 
 if __name__ == "__main__":
 
-
+    runSemsvannEB('2012-11-15', '2013-06-20')
+    runSemsvannEB('2013-11-15', '2014-06-20')
     runSemsvannEB('2014-11-15', '2015-06-20')
+
+
 
     runOrovannEB('2014-11-15', '2015-06-20')
 
