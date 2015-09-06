@@ -213,7 +213,7 @@ def runOrovannEB(startDate, endDate):
 
 
 def runSemsvannEB(startDate, endDate):
-
+    # TODO: get coordinates from the ObsLocation in regObs
     location_name = 'Semsvannet v/Lo 145 moh'
 
     wsTemp = gws.getMetData(19710, 'TAM', startDate, endDate, 0, 'list')
@@ -232,11 +232,10 @@ def runSemsvannEB(startDate, endDate):
     cloud_cover = we.strip_metadata(wsCC)
     wind = we.strip_metadata(wsWind)
 
-    # available_elements = gws.getElementsFromTimeserieTypeStation(54710, 0, 'csv')
     observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
 
     ice_cover, energy_balance = calculateIceCoverEB2(
-        utm33_x, utm33_y, date, temp,prec, prec_snow, cloud_cover=cloud_cover, wind=wind,
+        utm33_x, utm33_y, date, temp, prec, prec_snow, cloud_cover=cloud_cover, wind=wind,
         inn_column=copy.deepcopy(observed_ice[0]))
 
     # Need datetime objects from now on
@@ -427,11 +426,10 @@ def runStorvannetHammerfest(startDate, endDate):
 
 if __name__ == "__main__":
 
-    runSemsvannEB('2012-11-15', '2013-06-20')
+    runSemsvannEB('2012-12-01', '2013-05-20')
+    runSemsvann('2012-11-01', '2013-06-01')
     runSemsvannEB('2013-11-15', '2014-06-20')
     runSemsvannEB('2014-11-15', '2015-06-20')
-
-
 
     runOrovannEB('2014-11-15', '2015-06-20')
 

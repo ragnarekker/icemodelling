@@ -239,6 +239,8 @@ class WeatherElement():
 class EnergyBalanceElement():
     """
     Class for containing all variables and terms in the energy balance calculations.
+    TODO: Energybalance object needs comments
+
     """
     def __init__(self, date_inn):
         self.date = date_inn
@@ -318,6 +320,14 @@ class EnergyBalanceElement():
         self.SS = SS_inn
 
         return
+
+
+    def add_surface_heat_conduction(self, SC_inn, conductance_inn):
+        self.SC = SC_inn
+        self.conductance = conductance_inn
+
+        return
+
 
     def add_energy_budget(self, EB_inn):
         self.EB = EB_inn

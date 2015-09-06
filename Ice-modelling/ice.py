@@ -25,6 +25,7 @@ class IceColumn:
         self.column = 0  # Ice column with [IceLayers].
         self.water_line = -1  # Distance from bottom of ice column to the water surface. Negative number meens not initiallized
         self.draft_thickness = -1  # This is ice, slush ice and slush layers. I.e. not snow layers
+        self.total_column_height = None
         self.metadata = {}  # Metadata given as dictionary {key:value , key:value, ... }
         self.top_layer_is_slush = None  # [Bool] True if top layer is slush. False if not.
         self.column_average_temperature = 0  # avg temperature used in energy balance calculations
@@ -72,6 +73,137 @@ class IceColumn:
                 self.column.append(layer)
             else:
                 self.column.insert(index, layer)
+
+
+    def get_snow_height(self):
+
+        snow_height = 0.
+
+        if self.column[0].type == "snow":
+            snow_height = self.column[0].height
+
+        return snow_height
+
+
+    def get_layer_at_z(self, depth_inn):
+        """
+
+        :param depth_inn: [m]
+        :return layer_out:          the actual laye object
+                depth_layer_top:    the depth of the topp of the layer
+                rest_height:        to the requested depth, ho far is it from the top of the layer?
+        """
+
+        current_depth = 0.
+        layer_out = None
+        depth_layer_top = None
+        rest_height  = None
+
+        for l in self.column:
+            if current_depth < depth_inn:
+                if current_depth + l.height > depth_inn:
+                    layer_out = l
+                    depth_layer_top = current_depth
+                    rest_height = depth_inn-current_depth
+                    break
+                current_depth += l.height
+
+        return layer_out, depth_layer_top, rest_height
+
+
+    def get_conductance_at_z(self, depth_inn=None):
+        """Retruns conductance from surface to a certain depth.
+
+        Conductance is conductivity pr unit lenght.
+        I.e. U = k/h where k is conductivity and h is height of icelayer
+        Sum of conductance follows the rule 1/U = 1/U1 + 1/U2 + ... + 1/Un
+
+        From https://en.wikipedia.org/wiki/Thermal_conductivity:
+        thermal conductivity = k,           measured in W/(m·K)
+        thermal conductance = kA/L,         measured in W·K−1
+        thermal resistance = L/(kA),        measured in K·W−1 (equivalent to: °C/W)
+        heat transfer coefficient = k/L,    measured in W·K−1·m−2
+        thermal insulance = L/k, measured in K·m2·W−1.
+
+        where k is thermal conductivity, A is area and L is thickness.
+
+
+        :param depth_inn: [m] If None total column height is used. I.e. No water conductance below
+        :return:
+        """
+
+        current_depth = 0.
+        U_total = 0.
+
+        if depth_inn is None:
+            if self.total_column_height is None:
+                self.update_total_column_height()
+            depth_inn = self.total_column_height
+
+        for l in self.column:
+            if U_total == 0.: # case for the first layer
+                if l.height > depth_inn:
+                    U_total = l.conductivity / (depth_inn-current_depth)
+                    current_depth = depth_inn
+                    break
+                U_total = l.conductivity/l.height
+                current_depth += l.height
+                continue
+            if current_depth < depth_inn:
+                if current_depth + l.height > depth_inn:
+                    U_total = 1/ (1/U_total+(depth_inn-current_depth)/l.conductivity)
+                    current_depth = depth_inn
+                    break
+                U_total = 1/ (1/U_total+l.height/l.conductivity)
+                current_depth += l.height
+            else:
+                break
+
+
+        # if requested depth is deeper than the column, add water conductance
+        if current_depth < depth_inn:
+            U_total = 1/ (1/U_total+(depth_inn-current_depth)/const.k_water)
+
+        return U_total
+
+
+    def get_depth_at_conductance(self, conductance_limit):
+        """Given a desired conductance, this method returns the height from the surface to get this
+        conductance
+
+        :param conductance_limit:
+        :return:
+        """
+
+        current_depth = 0.
+        resistivity_limit = 1/conductance_limit
+        current_restitivity = 0.
+
+        for l in self.column:
+            if current_restitivity < resistivity_limit:
+                # if were not at the limit, keep adding
+                delta_resistivity = l.height / l.conductivity
+                if current_restitivity + delta_resistivity > resistivity_limit:
+                    # if only part of the layer is added
+                    rest_depth = l.height * (resistivity_limit - current_restitivity)/delta_resistivity
+                    current_depth += rest_depth
+                    current_restitivity = resistivity_limit
+                else:
+                    current_depth += l.height
+                    current_restitivity += delta_resistivity
+            else:
+                # else stop
+                break
+
+        # if not enougfht heit in the ice column make sure water contributes
+        if current_restitivity < resistivity_limit:
+            rest_depth_in_water = (resistivity_limit - current_restitivity) * const.k_water
+            current_depth += rest_depth_in_water
+            current_restitivity = resistivity_limit
+
+        self.active_depth = current_depth
+
+        return current_depth
 
 
     def remove_layer_at_index(self, index):
@@ -164,7 +296,7 @@ class IceColumn:
             return self.temp_surface
         except Exception as e:
             print e
-            print "Try using the get_surface_temperature_estimate function."
+            print "No surface temperature on object. Try using the get_surface_temperature_estimate function."
 
 
     def get_surface_temperature_estimate(self, temp_atm):
@@ -257,6 +389,8 @@ class IceColumn:
             # layer temp is average of the boundary temps
             for i in range(0, len(boundary_temps)-1, 1):
                 self.column[i].set_temperature((boundary_temps[i]+boundary_temps[i+1])/2)
+                self.column[i].set_temperature_top(boundary_temps[i])
+                self.column[i].set_temperature_bottom(boundary_temps[i+1])
 
         return
 
@@ -413,7 +547,8 @@ class IceColumn:
 
     def update_draft_thickness(self):
         '''
-        Method updates the iceColumns draft_thickness variable. The draft height given by summing ice, slush ice and
+        Method updates the iceColumns draft_thickness variable.
+        The draft height given by summing ice, slush ice and
         slush layers. I.e. not snow layers (and not the surface slush layer)
         '''
 
@@ -428,6 +563,18 @@ class IceColumn:
                 draft_thickness = draft_thickness + layer.height
 
         self.draft_thickness = draft_thickness
+
+
+    def update_total_column_height(self):
+        """Sum  of all layers in column. also snow.
+        :return:
+        """
+        total_height = 0.
+
+        for l in self.column:
+            total_height += l.height
+
+        self.total_column_height = total_height
 
 
     def update_water_line(self):
@@ -542,6 +689,11 @@ class IceLayer:
         # Avarage temp of layer
         self.temperature = temperature_inn
 
+    def set_temperature_top(self, temperature_top_inn):
+        self.temperature_top = temperature_top_inn
+
+    def set_temperature_bottom(self, temperature_bottom_inn):
+        self.temperature_bottom = temperature_bottom_inn
 
     def add_metadata(self, key, value):
         self.metadata[key] = value
@@ -613,6 +765,32 @@ class IceLayer:
         else: return -1
 
 
+    def get_thermal_diffusivity(self):
+        """returns heat capacity given the type of layer
+
+        Thermal diffusivity (alpha) [m^2/sek]
+
+            alpha = k / rho / c
+
+            k   is thermal conductivity (W/(m·K))
+            rho is density (kg/m³)
+            c   is specific heat capacity (J/(kg·K))
+
+        From https://en.wikipedia.org/wiki/Thermal_diffusivity
+
+        """
+
+        if self.type == 'new_snow':         return const.k_new_snow     /self.density/   const.c_snow
+        elif self.type == 'snow':           return const.k_snow         /self.density/   const.c_snow
+        elif self.type == 'drained_snow':   return const.k_drained_snow /self.density/   const.c_snow
+        elif self.type == 'slush':          return const.k_slush        /self.density/   const.c_slush
+        elif self.type == 'slush_ice':      return const.k_slush_ice    /self.density/   const.c_ice
+        elif self.type == 'black_ice':      return const.k_black_ice    /self.density/   const.c_ice
+        elif self.type == 'water':          return const.k_water        /self.density/   const.c_water
+        elif self.type == 'unknown':        return const.k_black_ice    /self.density/   const.c_ice
+        else: return -1
+
+
 class IceCover:
 
     def __init__(self, date_inn, iceCoverName_inn, iceCoverBeforeName_inn, locationName_inn):
@@ -645,8 +823,17 @@ if __name__ == "__main__":
     icecols = gfd.importColumns("{0}Semsvann observasjoner 2012-2013.csv".format(data_path))
     icecol = icecols[3]
     icecol.update_column_temperatures(-15)
+    icecol.update_total_column_height()
+    layer = icecol.get_layer_at_z(0.9)
 
+    conductance = icecol.get_conductance_at_z()
+    height = icecol.get_depth_at_conductance(const.U_surface)
 
+    R13 = 0.3/0.11+0.18/1.12+0.28/2.24
+    U11 = 0.11/0.30
+    U12 = 1 / (1/0.3667 + 0.18/1.12)
+    U13 = 1 / (1/0.346 + 0.28/2.24)
+    R13_2 = 1/U13
 
     a = 1
 

@@ -137,7 +137,8 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     """
 
     fsize = (16, 16)
-    fig = pplt.figure(figsize=fsize)
+    pplt.figure(figsize=fsize)
+    #fig = pplt.figure(figsize=fsize)
     pplt.clf()
 
 
@@ -254,6 +255,10 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     LE = []
     R = []
     G = []
+    s_inn = []
+    albedo = []
+    SC = []
+
 
     if energy_balance[0].date > date[0]:
         i = 0
@@ -269,6 +274,9 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
             LE.append(np.nan)
             R.append(np.nan)
             G.append(np.nan)
+            s_inn.append(np.nan)
+            albedo.append(np.nan)
+            SC.append(np.nan)
             i += 1
 
     for eb in energy_balance:
@@ -284,6 +292,10 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
             LE.append(np.nan)
             R.append(np.nan)
             G.append(np.nan)
+            s_inn.append(np.nan)
+            albedo.append(np.nan)
+            SC.append(np.nan)
+
         else:
             temp_atm.append(eb.temp_atm)
             temp_surf.append(eb.temp_surface)
@@ -296,40 +308,62 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
             LE.append(eb.LE)
             R.append(eb.R)
             G.append(eb.G)
+            s_inn.append(eb.s_inn)
+            albedo.append(eb.albedo)
+            SC.append(eb.SC)
 
 
-    #############################
+    #########################################
     pplt.subplot2grid((11, 1), (3, 0), rowspan=1)
-    plb.bar(date, itterations, color="black")
+    plb.bar(date, itterations, label="Iterations for T_sfc", color="gray")
     plb.xlim(date[0], date[-1])
     plb.xticks([])
+    plb.ylabel("#")
+    # l = plb.legend()
+    # l.set_zorder(20)
 
 
     ########################################
-    pplt.subplot2grid((11, 1), (4, 0), rowspan=3)
-    #plb.plot(date, temp_atm, "darkblue")
-    #plb.plot(date, temp_surf, "slateblue")
-    #plb.plot(date, atm_minus_surf, "darkslategrey")
-    #plb.plot(date, clouds, "gray")
+    pplt.subplot2grid((11, 1), (4, 0), rowspan=1)
+
+    # plot precipitation
+    prec_mm = [p*1000. for p in prec]
+    plb.bar(date, prec_mm, width=1, lw=0.5, label="Precipitation", color="deepskyblue", zorder=10)
+    plb.ylabel("RR [mm]")
+    plb.xlim(date[0], date[-1])
+    plb.xticks([])
 
     # plot cloud cover
     for i in range(0, len(clouds) - 1, 1):
         if clouds[i] > 0:
-            plb.hlines(0.13, date[i], date[i + 1], lw=45, color=str(-(clouds[i] - 1.)))
+            plb.hlines(0, date[i], date[i + 1], lw=190, color=str(-(clouds[i] - 1.)))
         elif clouds[i] == np.nan:
-            plb.hlines(0.13, date[i], date[i + 1], lw=45, color="pink")
+            plb.hlines(0, date[i], date[i + 1], lw=190, color="pink")
         else:
-            plb.hlines(0.13, date[i], date[i + 1], lw=45, color=str(-(clouds[i] - 1.)))
+            plb.hlines(0, date[i], date[i + 1], lw=190, color=str(-(clouds[i] - 1.)))
 
-    # plot precipitation
-    plb.bar(date, prec, width=1, lw=0.1, color="cyan")
-    plb.xlim(date[0], date[-1])
-    plb.ylim(0, 0.14)
+    plb.twinx()
+    plb.plot(date, wind, color="greenyellow", label="Wind 2m", lw=2, zorder=15)
+    plb.ylabel("FFM [m/s]")
+
+
+
+    #########################################
+    pplt.subplot2grid((11, 1), (5, 0), rowspan=2)
+
+    plb.plot(date, temp_atm, "black", zorder=5)
+    plb.plot(date, temp, "blue", zorder=10)
+    plb.plot(date, temp_surf, "green")
+    area = np.minimum(temp_atm, temp_surf)
+
+    plb.fill_between(date, temp_atm, area, color='red') #, alpha='0.5')
+    plb.fill_between(date, temp_surf, area, color='blue') #, alpha='0.5')
+    plb.ylim(-50, 20)
+    plb.ylabel("[C]")
+
 
     # this plots temperature on separate right side axis
     plb.twinx()
-
-    plb.plot(date, wind, "green",  lw=1)
 
     temp_pluss = []
     temp_minus = []
@@ -343,25 +377,41 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     plb.plot(date, atm_minus_surf, "black",  lw=2)
     plb.plot(date, temp_pluss, "red",  lw=2)
     plb.plot(date, temp_minus, "blue",  lw=2)
-
-    plb.ylim(-4, 12)
+    plb.xlim(date[0], date[-1])
+    plb.xticks([])
+    plb.ylim(-3, 10)
+    plb.ylabel("delta [C]")
 
 
 
 
     #############################
     pplt.subplot2grid((11, 1), (7, 0), rowspan=4)
+
+
+    # plot surface albedo
+    for i in range(0, len(albedo) - 1, 1):
+        if albedo[i] > 0.:
+            plb.hlines(-8000, date[i], date[i + 1], lw=25, color=str(albedo[i]))
+        elif clouds[i] == np.nan:
+            plb.hlines(-8000, date[i], date[i + 1], lw=25, color="1.0")
+
+
     plb.plot(date, EB, "gray")
     plb.plot(date, H, "blue")
     plb.plot(date, LE, "navy")
     plb.plot(date, R, "turquoise")
     plb.plot(date, G, "crimson")
-    plb.plot(date, L, "red")
-    plb.plot(date, S, "gold")
-    plb.ylim(-7000, 25000)
+    plb.plot(date, L, "green", lw=1)
+    plb.plot(date, S, "gold", lw=1)
+    #plb.plot(date, s_inn, "gold", lw=1)
+    plb.plot(date, SC, "red", lw=1)
+
+
+    plb.ylim(-12000, 13000)
     plb.xlim(date[0], date[-1])
      #fig.tight_layout()
-
+    plb.ylabel("Q [kJ/m2/24hrs]")
 
 
     plb.savefig(filename)

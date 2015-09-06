@@ -18,8 +18,7 @@ eps_water = eps_snow
 
 
 # Boltzmann constants
-sigma_day = 4.89*10**-6                         # pr day [kJ/m^2/day/K^4]
-sigma_pr_second = (sigma_day/(24*60*60))        # pr second [kJ/m^2/s/K^4]
+sigma_pr_second = 5.6704*10**-8          # pr second [J/s/m2/K4]
 
 
 # Misc constants
@@ -27,8 +26,10 @@ temp_f = 0.                     # [degC] freezing temp for fresh water
 absolute_zero = -273.15         # [degC] 0K is -273.15C
 temp_rain_snow = 0.5            # [degC] Threshold where precipitation falls as snow or rain.
 von_karmans_const = 0.41        # [-] von Karmans constant
-avg_wind_const = 1.75            # [m/s] if nothing else is given
+avg_wind_const = 1.75           # [m/s] if nothing else is given
 pressure_atm = 101.1            # [kPa] if nothing else is given
+solar_constant = 1.3608 *10**3  # J/s/m2 - https://en.wikipedia.org/wiki/Solar_constant
+g = 9.81                        # m/s2
 
 
 # Thermal Conductivities [W/m/K]
@@ -55,24 +56,34 @@ rho_air = 1.29                  # kg/m3
 
 
 # Latent heat of fusion [J kg-1]
-L_black_ice = 333500            # latent heat of freezing water to black ice
+L_black_ice = 333.5 * 10**3     # latent heat of fusion
+#L_vapour = 2470. * 10**3         # latent heat of vapoour
+L_vapour = 2260. * 10**3
+
 part_ice_in_slush = 0.5         # How big part of sluh is frozen? This number is probably to low. Slush is probably 20-30% ice only?
 
+# Specific heat capacities [J/kg/K]
+c_air = 1.01 * 10**3            # heat capacity of air
+c_water = 4.19 * 10**3          # heat capacity of water
+c_snow = 2.102 * 10**3          # heat capacity of snow from Dingman p. 189
+c_ice = c_snow                  # at 0C. http://www.engineeringtoolbox.com/ice-thermal-properties-d_576.html
+c_slush = (c_water + c_ice)/2   # Assume slush is half/half water and ice
 
 
-# Specific heat capacities [kJ/kg/K]
-c_air = 1.01                    # heat capacity of air
-c_water = 4.19                  # heat capacity of water
-c_snow = 2.102                  # heat capacity of snow from Dingman p. 189
-c_ice = c_snow            # at 0C. http://www.engineeringtoolbox.com/ice-thermal-properties-d_576.html
-c_slush = (c_water + c_ice)/2  # Assume slush is half/half water and ice
+# Surface effective temperature depth (Z) over temperature variations over 24hrs [m]
+Z_snow = 0.3                    # guessing
+Z_new_snow = Z_snow
+Z_water = 1.                    #
+Z_slush = Z_water               #
+Z_black_ice = Z_snow * 3        # density is 3 times larger
+Z_slush_ice = Z_black_ice
 
 
 # Albedo in values [0,1]
-alfa_black_ice = 0.35             # from http://en.wikipedia.org/wiki/Albedo
-alfa_slush_ice = alfa_black_ice
+alfa_black_ice = 0.5 #0.35             # from http://en.wikipedia.org/wiki/Albedo
 alfa_snow_new = 0.85              # from http://en.wikipedia.org/wiki/Albedo
-alfa_snow_old = 0.45              # from http://en.wikipedia.org/wiki/Albedo
+alfa_snow_old = 0.45
+alfa_slush_ice = 0.75 #alfa_black_ice   # from http://en.wikipedia.org/wiki/Albedo
 alfa_max = 0.95
 alfa_bare_ground = 0.25           # Generic albedo for snow less ground (Campell, 1977)
 
@@ -86,6 +97,10 @@ meltingcoeff_black_ice = -0.02 /(60*60*24) / 5  # 2cm melting pr day at 5degC
 
 # melting energy from eb calculations when surface temp is forced to 0C is way to efficient.
 melt_energy_coefficient = 1.0
+
+
+# Conductance = thermal conductivity over height (k/h) [W/K/m2]
+U_surface = k_snow/0.01          # surface conductance defined by the active part of column during 24hrs temperature oscylations
 
 
 # Constants affecting how surface water interacts with snow on an ice cover

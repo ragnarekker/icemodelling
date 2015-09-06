@@ -81,6 +81,7 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
     dh_snow = float(dh_snow)
 
     # temp = dp.temperature_from_temperature_and_snow(temp, dh_snow)
+    # Clouds dont come with  the energy balance aproach. Thus this is only applied if I do the temp surface = temp atm apprach
     if cloud_cover is not None:
         temp = dp.temperature_from_temperature_and_clouds(temp, cloud_cover)
 
@@ -221,6 +222,7 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
     ic.update_water_line()
     ic.update_column_average_temperature(temp)
     ic.update_column_temperatures(temp)
+    ic.update_total_column_height()
     ic.set_surface_temperature(temp)
 
     return ic
