@@ -126,8 +126,8 @@ def energy_balance_from_temp_sfc(
     energy_balance.add_ground_heat(G)
     energy_balance.add_prec_heat(R)
     #energy_balance.add_cold_content(CC)
-    energy_balance.add_energy_budget(EB)
     energy_balance.add_surface_heat_conduction(SC, conductance)
+    energy_balance.add_energy_budget(EB)
 
     return energy_balance
 
