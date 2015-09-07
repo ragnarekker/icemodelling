@@ -44,7 +44,7 @@ def energy_balance_from_temp_sfc(
 
     For reference:  1 kWh is 3600 kJ.
                     10 000 kJ can melt 30kg ice or (3cm/m2 ice).
-                    300 W/m2 is approx 26000kJ/m2/24hrs
+                    300 W/m2 is on avarage approx 26000kJ/m2/24hrs
 
     """
 
@@ -130,6 +130,172 @@ def energy_balance_from_temp_sfc(
     energy_balance.add_surface_heat_conduction(SC, conductance)
 
     return energy_balance
+
+
+def energy_balance_from_temp_sfc_value(
+        utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+        temp_surface=None, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
+    """
+    Same as energy_balance_from_temp_sfc but this method returns only the value eb
+    """
+
+    obj = energy_balance_from_temp_sfc(
+        utm33_x=utm33_x, utm33_y=utm33_y, ice_column=ice_column, temp_atm=temp_atm, prec=prec, prec_snow=prec_snow,
+        albedo_prim=albedo_prim, time_span_in_sec=time_span_in_sec,
+        temp_surface=temp_surface, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+        pressure_atm=pressure_atm)
+
+    return obj.EB
+
+
+def temp_surface_from_eb(
+        utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+        error=1., age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None,
+        iteration_method="Newton-Raphson"):
+    """Solves surface temperature from the criteria that the energy budget has to be zero.
+    This method iterates surface temperatures so that the error goes below a requested threshold.
+
+    Two iteration methods possible:
+
+    Newton-Raphson:
+        based on Newton Raphson method of root finding. Methos itteates to p/m 1 in energy balance in 3-6 iterations.
+        x_{n+1} = x_{n} - f(x_{n})/ df(x_{n})/dx
+
+    Step-delta_t:
+        iterates with a temperature step proportional with the error in energy balance. For large temperature
+        difference between surface and air temp (~10C) this method uses 4-600 iterations to get an accuracy in
+        energy baalnce of p/m 100. If I had larger temp steps (fewer iterations) the method some times did
+        not reach the requested error in eb.
+
+    :param utm33_x:
+    :param utm33_y:
+    :param ice_column:
+    :param temp_atm:
+    :param prec:
+    :param prec_snow:
+    :param albedo_prim:
+    :param time_span_in_sec:
+    :param age_factor_tau:
+    :param error:
+    :param cloud_cover:
+    :param wind:
+    :param pressure_atm:
+    :param iteration_method
+    :return:
+    """
+
+    temp_sfc = temp_atm     # initial value
+    num_iterations = 0
+    eb_obj = None
+    eb_condition = error + 1    # initial value to start while loop
+    melting = False
+
+    # calculate energy balances around surface temp to se developement.
+    debug = False
+    #if (ice_column.date).date() == dt.date(2013, 2, 24): debug = True
+    if debug == True:
+        import numpy as np
+        temps_sfc = np.linspace(temp_sfc-10., temp_sfc+10.)
+        ebs = []
+        for t in temps_sfc:
+            eb_check = energy_balance_from_temp_sfc(
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            temp_surface=t, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+            ebs.append(eb_check.EB)
+        a = 1
+
+    if iteration_method == "Step-delta_t":
+        while abs(eb_condition) > error:
+            if temp_sfc > 0.:
+                # in this case EB(T_sfc = 0) = Q_melt
+                if melting is True:     # if the melting condition is true already (from previous iteration)
+                    break
+                temp_sfc = 0.
+                melting = True          # condition to avoid calculating EB at surf_temp multiple times-
+
+            eb_obj = energy_balance_from_temp_sfc(
+                utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+                temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+                pressure_atm=pressure_atm)
+            eb = eb_obj.EB
+            delta_t = abs(eb)/50000
+
+            if eb > 0.:   # to much energy coming inn.
+                temp_sfc += delta_t
+            if eb < 0.:   # to much energy going out.
+                temp_sfc -= delta_t
+                # The melting condition is no longer valid and surface temp can be lowered
+                if melting:
+                    melting = False
+
+            num_iterations += 1
+            eb_condition = eb
+
+    if iteration_method == "Newton-Raphson":
+
+        temp_prev = temp_sfc
+        eb_prev = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp_prev, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+
+        # if eb is positive, to much energy is coming inn and thus the surface temp is to low.
+        delta_t = eb_prev/50000
+        temp = temp_prev + delta_t
+        eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+        d_eb = (eb-eb_prev)/(temp-temp_prev)
+        eb_sign = abs(eb)/eb
+
+        eb_condition = eb_prev
+
+        while abs(eb_condition) > error:
+
+            # Update previous iteration values
+            eb_sign_prev = abs(eb_prev)/eb_prev
+            temp_temp_prev = temp_prev
+            temp_prev = temp
+            eb_prev = eb
+            d_eb_prev = d_eb
+
+            # if surface temp is above zero, force to zero. Also set the melting condition to True
+            if temp > 0.:
+                melting = True
+                # calculate new eb with temp equalz freezing
+                temp = 0.
+                eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+                eb_sign = abs(eb)/eb
+                d_eb = (eb-eb_prev)/(temp-temp_prev)
+            else:
+                melting = False
+                # if eb sign changes, half the temp step and get new eb
+                if eb_sign_prev != eb_sign:
+                    temp = (temp_prev + temp_temp_prev)/2
+                    eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+                    eb_sign = abs(eb)/eb
+                    d_eb = (eb-eb_prev)/(temp-temp_prev)
+
+                # else use the newton raphson with derivative
+                else:
+                    temp = temp_prev - eb_prev/d_eb_prev
+                    eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,  temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+                    eb_sign = abs(eb)/eb
+                    d_eb = (eb-eb_prev)/(temp-temp_prev)
+
+            num_iterations += 1
+            eb_condition = eb
+
+            # If we have a positive eb and the melting condition (temp=0) is true it is time to break.
+            if eb >= 0.:
+                if melting == True:
+                    break
+            else:
+                melting = False
+
+        eb_obj = energy_balance_from_temp_sfc(
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+            pressure_atm=pressure_atm)
+
+    eb_obj.add_iterations(num_iterations)
+
+    return eb_obj
 
 
 def get_albedo_walter(prec_snow, snow_depth, snow_density, temp_atm, albedo_prim, time_span_in_sec, time_hour):
@@ -646,134 +812,6 @@ def get_surface_heat_conduction(ice_column, temp_surface, time_span_in_sec):
 
     return SC, surface_conductance
 
-
-def temp_surface_from_eb(
-        utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-        error=100., age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None, iteration_method="Step-delta_t"):
-    """Solves surface temperature from the criteria that the energy budget has to be zero.
-    This method iterates surface temperatures so that the error goes below a requested threshold.
-
-    INCOMPLETE: method needs iterations in the case that surface temp is at melting temp (0C)
-
-    based on Newton Raphson method of root finding, based on
-    x_{n+1} = x_{n} - f(x_{n})/ df(x_{n})/dx
-
-    :param utm33_x:
-    :param utm33_y:
-    :param ice_column:
-    :param temp_atm:
-    :param prec:
-    :param prec_snow:
-    :param albedo_prim:
-    :param time_span_in_sec:
-    :param age_factor_tau:
-    :param error:
-    :param cloud_cover:
-    :param wind:
-    :param pressure_atm:
-    :param iteration_method
-    :return:
-    """
-
-    temp_sfc = temp_atm     # initail value
-    num_iterations = 0
-    eb_obj = None
-    eb_condition = error + 1    # initial value to start while loop
-
-    if iteration_method == "Step-delta_t":
-        melting = False
-
-        while abs(eb_condition) > error:
-            if temp_sfc > 0.:
-                # in this case EB(T_sfc = 0) = Q_melt
-                if melting is True:     # if the melting condition is true already (from previous iteration)
-                    break
-                temp_sfc = 0.
-                melting = True      # condition to avoid calculating EB at surf_temp multiple times-
-
-            eb_obj = energy_balance_from_temp_sfc(
-                utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-                temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
-            eb = eb_obj.EB
-            delta_t = abs(eb)/50000
-
-            if eb > 0.:   # to much energy coming inn.
-                temp_sfc += delta_t
-            if eb < 0.:   # to much energy going out.
-                temp_sfc -= delta_t
-                # The melting condition is no longer valid and surface temp can be lowered
-                if melting:
-                    melting = False
-
-            num_iterations += 1
-            eb_condition = eb
-
-
-    if iteration_method == "Newton-Raphson":
-
-        eb_obj = energy_balance_from_temp_sfc(
-            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
-            pressure_atm=pressure_atm)
-        eb = eb_obj.EB
-
-        eb_prev = None
-        temp_sfc_prev = None
-
-        while abs(eb_condition) > error:
-            # calculate the derivative with forward difference. EB(temp+delta_temp) calculatet seperately.
-            delta_t = 0.05      # [C]
-            eb_diff_obj = energy_balance_from_temp_sfc(
-                utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-                temp_surface=(temp_sfc+delta_t), age_factor_tau=age_factor_tau, cloud_cover=cloud_cover,
-                wind=wind, pressure_atm=pressure_atm)
-            eb_diff = eb_diff_obj.EB
-            d_temp_sfc = (eb_diff - eb)/delta_t
-
-            # get the new surface temp and first energy balance
-            temp_sfc = temp_sfc_prev - eb_prev/d_temp_sfc
-            eb_obj = energy_balance_from_temp_sfc(
-                utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-                temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
-                pressure_atm=pressure_atm)
-            eb = eb_obj.EB
-
-            # If we have melting conditions test if temp_surf=0 gives
-            if temp_sfc > 0:
-                temp_sfc = 0.
-                if eb < 0:
-                    break
-                else:
-                    eb_obj = energy_balance_from_temp_sfc(
-                             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-                             temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
-                             pressure_atm=pressure_atm)
-                    eb = eb_obj.EB
-                    if eb < 0:
-                        break
-
-            num_iterations += 1
-            eb_condition = eb
-
-
-    # calculate energy balances around surface temp to se developement.
-    debug = False
-    #if (ice_column.date).date() == dt.date(2013, 3, 6): debug = True
-
-    if debug is True:
-        import numpy as np
-        temps_sfc = np.linspace(temp_sfc-10., temp_sfc+10.)
-        ebs = []
-        for t in temps_sfc:
-            eb_check = energy_balance_from_temp_sfc(
-            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            temp_surface=t, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
-            ebs.append(eb_check.EB)
-        a = 1
-
-    eb_obj.add_iterations(num_iterations)
-
-    return eb_obj
 
 if __name__ == "__main__":
 

@@ -239,9 +239,6 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     plb.ylim(-4*(max(temp)-min(temp)), max(temp))
 
 
-
-
-
     ########################################
 
     temp_atm = []
