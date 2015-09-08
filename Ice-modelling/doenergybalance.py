@@ -1,6 +1,7 @@
 __author__ = 'raek'
 # -*- coding: utf-8 -*-
 
+import copy
 import datetime as dt
 import constants as const
 import doconversions as dc
@@ -11,15 +12,11 @@ from math import log, exp, sin, cos, pi, fabs, sqrt, acos
 
 def energy_balance_from_temp_sfc(
         utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-        temp_surface=None, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
+        temp_surface, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
     """
-    The daily energy budget of a column of snow is expressed as (Walter et al. 2005):
+    The daily energy budget of a column of snow is expressed as:
 
-    EB = λ_F * ρ_w * ΔSWE = S + (L_a - L_t) + (H + LE) + G + R - CC
-
-    Where λ_F is the latent heat of fusion (λ_F=335 kJ (kg)^(-1))
-    ρ_w [1000kgm^(-3)] is the density of water
-    ΔSWE is the change in the snow pack’s water equivalent [m]
+    EB = S + (L_a - L_t) + (LE + H) + G + R - CC - SC
 
     INCOMPLETE: Need to implement shortwave attuenation in the colomn topp layers.
     Use q_s(z,t) in eq 10 in Yang et al (2012)
@@ -33,9 +30,9 @@ def energy_balance_from_temp_sfc(
     :param prec_snow:
     :param albedo_prim:
     :param time_span_in_sec:
+    :param temp_surface:
 
     Optional
-    :param temp_surface:        If surface temp not given, one will be estimated. Should be avoided!
     :param age_factor_tau:
     :param cloud_cover:
     :param wind:
@@ -77,12 +74,13 @@ def energy_balance_from_temp_sfc(
     if cloud_cover is None:
         cloud_cover = dp.clouds_from_precipitation(prec, method='Binary')
 
+
     # This scenario should be avoided but I keep it for now because it it the method used in senorge_eb
-    if temp_surface is None:
-        temp_surface = ice_column.get_surface_temperature_estimate(temp_atm)
+    #if temp_surface is None:
+    #    temp_surface = ice_column.get_surface_temperature_estimate(temp_atm)
 
 
-    # Define an energy balance object to put it all in
+    # Define an energy balance object to put inn all input data.
     energy_balance = ebe(date)
     energy_balance.add_model_input(
         utm33_x_inn=utm33_x, utm33_y_inn=utm33_y, snow_depth_inn=snow_depth, snow_density_inn=snow_density,
@@ -100,7 +98,7 @@ def energy_balance_from_temp_sfc(
     L_a, L_t = \
         get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_span_in_sec)
 
-    H, LE = \
+    H, LE, R_i, stability_correction = \
          get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_column,
                                       pressure_atm=pressure_atm, wind=wind)
 
@@ -108,24 +106,22 @@ def energy_balance_from_temp_sfc(
 
     R = get_prec_heat(temp_atm, prec)
 
-    # CC should be ldifference in coldcontent fro yesturday to today.
-    # Should be subtracted from SC?
-    #CC = get_cold_content(ice_column, temp_atm, prec_snow)
+    CC = get_cold_content(ice_column, temp_surface)
 
-    # it is SC that drives ive generation. At temp_surf = 0 => SC = 0. Thus EB melts.
     SC, conductance = get_surface_heat_conduction(ice_column, temp_surface, time_span_in_sec)
 
-    EB = S + (L_a - L_t) + (H + LE) + G + R - SC        # - CC
+    EB = S + (L_a - L_t) + (LE + H) + G + R - CC - SC
 
-    if EB > 20000.:
-        print("{0}: EB > 20000.".format(date))
+    # For debugging it is useful to get the date of unnormal activity
+    #if EB > 20000.:
+    #    print("{0}: EB > 20000.".format(date))
 
     energy_balance.add_short_wave(S, s_inn, albedo, albedo_prim, age_factor_tau)
     energy_balance.add_long_wave(L_a, L_t)
-    energy_balance.add_sensible_and_latent_heat(H, LE)
+    energy_balance.add_sensible_and_latent_heat(H, LE, R_i, stability_correction)
     energy_balance.add_ground_heat(G)
     energy_balance.add_prec_heat(R)
-    #energy_balance.add_cold_content(CC)
+    energy_balance.add_cold_content(CC)
     energy_balance.add_surface_heat_conduction(SC, conductance)
     energy_balance.add_energy_budget(EB)
 
@@ -135,8 +131,7 @@ def energy_balance_from_temp_sfc(
 def energy_balance_from_temp_sfc_value(
         utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
         temp_surface=None, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
-    """
-    Same as energy_balance_from_temp_sfc but this method returns only the value eb
+    """Same as energy_balance_from_temp_sfc but this method returns only the value EB.
     """
 
     obj = energy_balance_from_temp_sfc(
@@ -152,10 +147,11 @@ def temp_surface_from_eb(
         utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
         error=1., age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None,
         iteration_method="Newton-Raphson"):
-    """Solves surface temperature from the criteria that the energy budget has to be zero.
-    This method iterates surface temperatures so that the error goes below a requested threshold.
+    """Solves surface temperature from the criteria that the energy budget has to be zero. In case of melting the
+    energy budget is balanced with a surface melting so that the sum of energy fluxes are 0.
 
-    Two iteration methods possible:
+    This method iterates surface temperatures so that the error goes below a requested threshold. Two iteration
+    methods possible:
 
     Newton-Raphson:
         based on Newton Raphson method of root finding. Methos itteates to p/m 1 in energy balance in 3-6 iterations.
@@ -175,13 +171,17 @@ def temp_surface_from_eb(
     :param prec_snow:
     :param albedo_prim:
     :param time_span_in_sec:
-    :param age_factor_tau:
+
+    Optional
     :param error:
+    :param age_factor_tau:
     :param cloud_cover:
     :param wind:
     :param pressure_atm:
     :param iteration_method
-    :return:
+
+    :return eb_obj:             EnergyBalanceElement given in the weather module.
+
     """
 
     temp_sfc = temp_atm     # initial value
@@ -190,7 +190,7 @@ def temp_surface_from_eb(
     eb_condition = error + 1    # initial value to start while loop
     melting = False
 
-    # calculate energy balances around surface temp to se developement.
+    # calculate energy balances around surface temp to se development.
     debug = False
     #if (ice_column.date).date() == dt.date(2013, 2, 24): debug = True
     if debug == True:
@@ -271,7 +271,7 @@ def temp_surface_from_eb(
                     eb_sign = abs(eb)/eb
                     d_eb = (eb-eb_prev)/(temp-temp_prev)
 
-                # else use the newton raphson with derivative
+                # else use the Newton Raphson with derivative
                 else:
                     temp = temp_prev - eb_prev/d_eb_prev
                     eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,  temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
@@ -288,12 +288,20 @@ def temp_surface_from_eb(
             else:
                 melting = False
 
+        # Get the full object. Note that in earlier steps only the energy balance value is requested.
         eb_obj = energy_balance_from_temp_sfc(
             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
             temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
             pressure_atm=pressure_atm)
 
     eb_obj.add_iterations(num_iterations)
+
+    # transfer energy to surface melt if we have melting conditions
+    if eb_obj.temp_surface == 0.:
+        eb_obj.add_surface_melt(eb_obj.EB)
+        eb_obj.EB = 0.
+    else:
+        eb_obj.add_surface_melt(0.)
 
     return eb_obj
 
@@ -458,6 +466,7 @@ def get_short_wave(
     :param prec_snow:           [m] New snow in meter
     :param albedo_prim:         Primary albedo from last time step. Used in the albedo_walters routine.
     :param age_factor_tau:      [-] Age factor in the UEB albedo routine.
+    :param albedo_method:
 
     :return:    S, s_inn, albedo, albedo_prim, age_factor_tau
 
@@ -654,7 +663,7 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
 
     c_air = const.c_air         # specific heatcapacity air
     rho_air = const.rho_air     # density of air
-    zu = 10                      # Høyde på vind målinger
+    zu = 10                     # Høyde på vind målinger
     zt = 2                      # Høyde på lufttemperatur målinger
     zm = 0.001                  # ruhetsparameter for snø
     d = ice_column.get_snow_height()    # Zeroplane displecement for snow. I.e correction for snowdepth.
@@ -673,6 +682,7 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
         stability_correction = 1/(1+10*R_i)
     elif R_i < 0:           # for unstable conditions
         stability_correction = (1-16*R_i)**0.75
+    stability_correction = min(stability_correction, 3.)
 
     common *= stability_correction
 
@@ -709,7 +719,7 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
     if H > 10000. or LE > 10000.:
         print("{0}: H or LE > 15000 kJ/m2/day")
 
-    return H, LE
+    return H, LE, R_i, stability_correction
 
 
 def get_ground_heat(time_span_in_sec):
@@ -752,33 +762,45 @@ def get_prec_heat(temp_atm, prec):
     return R
 
 
-def get_cold_content(ice_column, temp_atm, prec_snow):
-    """
-    Heat storage (cold content) of the snow and ice.
+def get_cold_content(ice_column, temp_surf):
+    """Change in heat storage (cold content) of the snow and ice. This is the difference in
+    cold content from yesterday to today.
+
+    Note: In solving the energy balance equations for surface temperature this dampens the temperature difference
+    between air and surface.
 
     :param ice_column:  From previous time step. The column variable has layers with layer.density, layer.height and layer.temp.
+    :param temp_surf:   [C] surface temperature.
+    :param temp_atm:    [C] air temperature for estimating new snow temp.
     :param prec_snow:   [m] Prec as snow from this time step (new snow)
-    :param temp_atm:    [C] air temperature. We assume the new snow has this temp.
 
     :return CC:         [kJm^-2]
 
-    Dimensions:     kg m^-3 * kJ kg^-1 K^-1 * m * K = kJm^-2
+    Dimensions:     kg m^-3 * J kg^-1 K^-1 * m * K = Jm^-2
     """
 
-    CC = 0.      # kan kun bli negativ eller 0.
+    CC_prev = 0.
+    CC_this = 0.
 
     for layer in ice_column.column:
-        CC += layer.rho * layer.heat_capacity * layer.height * layer.temperature
+        CC_prev += layer.density * layer.heat_capacity() * layer.height * (layer.temperature - const.absolute_zero)
 
-    # Add also the new snow
-    CC += const.rho_new_snow * const.c_snow * prec_snow * temp_atm
+    ice_column_copy = copy.deepcopy(ice_column)
+    ice_column_copy.set_surface_temperature(temp_surf)
+    ice_column_copy.update_column_temperatures()
+
+    for layer in ice_column_copy.column:
+        CC_this += layer.density * layer.heat_capacity() * layer.height * (layer.temperature - const.absolute_zero)
+
+    CC = CC_this - CC_prev
+    CC /= 1000              # J to kJ
 
     return CC
 
 
 def get_surface_heat_conduction(ice_column, temp_surface, time_span_in_sec):
     """Heat conduction driven by the temperature difference between surface temp and the avarage temperature
-    in an effective surface thickness.
+    in an effective surface thickness. It is SC that drives ice generation. At temp_surf = 0 => SC = 0. Thus EB melts.
 
         SC = alpha * rho * C * (temp_surf - temp_avg) / Z
 

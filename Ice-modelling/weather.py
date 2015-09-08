@@ -219,9 +219,6 @@ class WeatherElement():
                 self.Value = self.Value/8.
                 self.Metadata.append({'Converted':'from okta to unit'})
 
-
-
-
         # datacorrections. I found errors in data Im using from met
         if (self.Date).date() == datetime.date(2012, 02, 02) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
             self.Value = 0.45
@@ -244,10 +241,7 @@ class EnergyBalanceElement():
     """
     def __init__(self, date_inn):
         self.date = date_inn
-
         self.iterations = None
-
-
 
 
     def add_model_input(self, utm33_x_inn, utm33_y_inn, snow_depth_inn, snow_density_inn,
@@ -273,6 +267,7 @@ class EnergyBalanceElement():
 
         return
 
+
     def add_iterations(self, iterations_inn):
         self.iterations = iterations_inn
 
@@ -282,51 +277,52 @@ class EnergyBalanceElement():
         self.EB = None
 
 
-
     def add_short_wave(self, S_inn, s_inn_inn, albedo_inn, albedo_prim_inn, age_factor_tau_inn):
         self.S = S_inn
         self.s_inn = s_inn_inn
         self.albedo = albedo_inn
         self.albedo_prim = albedo_prim_inn
         self.age_factor_tau = age_factor_tau_inn
-
         return
 
 
     def add_long_wave(self, L_a_inn, L_t_inn):
         self.L_a = L_a_inn
         self.L_t = L_t_inn
-
         return
 
 
-    def add_sensible_and_latent_heat(self, H_inn, LE_inn):
+    def add_sensible_and_latent_heat(self, H_inn, LE_inn, R_i_inn, stability_correction_inn):
         self.H = H_inn
         self.LE = LE_inn
-
+        self.R_i = R_i_inn
+        self.stability_correction = stability_correction_inn
         return
+
 
     def add_ground_heat(self, G_inn):
         self.G = G_inn
-
         return
+
 
     def add_prec_heat(self, R_inn):
         self.R = R_inn
-
         return
 
-    def add_cold_content(self, SS_inn):
-        self.SS = SS_inn
 
+    def add_cold_content(self, CC_inn):
+        self.CC = CC_inn
         return
 
 
     def add_surface_heat_conduction(self, SC_inn, conductance_inn):
         self.SC = SC_inn
         self.conductance = conductance_inn
-
         return
+
+
+    def add_surface_melt(self, SM_inn):
+        self.SM = SM_inn
 
 
     def add_energy_budget(self, EB_inn):

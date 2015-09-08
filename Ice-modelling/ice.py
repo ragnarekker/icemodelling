@@ -75,137 +75,6 @@ class IceColumn:
                 self.column.insert(index, layer)
 
 
-    def get_snow_height(self):
-
-        snow_height = 0.
-
-        if self.column[0].type == "snow":
-            snow_height = self.column[0].height
-
-        return snow_height
-
-
-    def get_layer_at_z(self, depth_inn):
-        """
-
-        :param depth_inn: [m]
-        :return layer_out:          the actual laye object
-                depth_layer_top:    the depth of the topp of the layer
-                rest_height:        to the requested depth, ho far is it from the top of the layer?
-        """
-
-        current_depth = 0.
-        layer_out = None
-        depth_layer_top = None
-        rest_height  = None
-
-        for l in self.column:
-            if current_depth < depth_inn:
-                if current_depth + l.height > depth_inn:
-                    layer_out = l
-                    depth_layer_top = current_depth
-                    rest_height = depth_inn-current_depth
-                    break
-                current_depth += l.height
-
-        return layer_out, depth_layer_top, rest_height
-
-
-    def get_conductance_at_z(self, depth_inn=None):
-        """Retruns conductance from surface to a certain depth.
-
-        Conductance is conductivity pr unit lenght.
-        I.e. U = k/h where k is conductivity and h is height of icelayer
-        Sum of conductance follows the rule 1/U = 1/U1 + 1/U2 + ... + 1/Un
-
-        From https://en.wikipedia.org/wiki/Thermal_conductivity:
-        thermal conductivity = k,           measured in W/(m·K)
-        thermal conductance = kA/L,         measured in W·K−1
-        thermal resistance = L/(kA),        measured in K·W−1 (equivalent to: °C/W)
-        heat transfer coefficient = k/L,    measured in W·K−1·m−2
-        thermal insulance = L/k, measured in K·m2·W−1.
-
-        where k is thermal conductivity, A is area and L is thickness.
-
-
-        :param depth_inn: [m] If None total column height is used. I.e. No water conductance below
-        :return:
-        """
-
-        current_depth = 0.
-        U_total = 0.
-
-        if depth_inn is None:
-            if self.total_column_height is None:
-                self.update_total_column_height()
-            depth_inn = self.total_column_height
-
-        for l in self.column:
-            if U_total == 0.: # case for the first layer
-                if l.height > depth_inn:
-                    U_total = l.conductivity / (depth_inn-current_depth)
-                    current_depth = depth_inn
-                    break
-                U_total = l.conductivity/l.height
-                current_depth += l.height
-                continue
-            if current_depth < depth_inn:
-                if current_depth + l.height > depth_inn:
-                    U_total = 1/ (1/U_total+(depth_inn-current_depth)/l.conductivity)
-                    current_depth = depth_inn
-                    break
-                U_total = 1/ (1/U_total+l.height/l.conductivity)
-                current_depth += l.height
-            else:
-                break
-
-
-        # if requested depth is deeper than the column, add water conductance
-        if current_depth < depth_inn:
-            U_total = 1/ (1/U_total+(depth_inn-current_depth)/const.k_water)
-
-        return U_total
-
-
-    def get_depth_at_conductance(self, conductance_limit):
-        """Given a desired conductance, this method returns the height from the surface to get this
-        conductance
-
-        :param conductance_limit:
-        :return:
-        """
-
-        current_depth = 0.
-        resistivity_limit = 1/conductance_limit
-        current_restitivity = 0.
-
-        for l in self.column:
-            if current_restitivity < resistivity_limit:
-                # if were not at the limit, keep adding
-                delta_resistivity = l.height / l.conductivity
-                if current_restitivity + delta_resistivity > resistivity_limit:
-                    # if only part of the layer is added
-                    rest_depth = l.height * (resistivity_limit - current_restitivity)/delta_resistivity
-                    current_depth += rest_depth
-                    current_restitivity = resistivity_limit
-                else:
-                    current_depth += l.height
-                    current_restitivity += delta_resistivity
-            else:
-                # else stop
-                break
-
-        # if not enougfht heit in the ice column make sure water contributes
-        if current_restitivity < resistivity_limit:
-            rest_depth_in_water = (resistivity_limit - current_restitivity) * const.k_water
-            current_depth += rest_depth_in_water
-            current_restitivity = resistivity_limit
-
-        self.active_depth = current_depth
-
-        return current_depth
-
-
     def remove_layer_at_index(self, index):
         # Removes a layer at a given index
         self.column.pop(index)
@@ -287,6 +156,95 @@ class IceColumn:
                     condition = False
 
 
+    def merge_snow_layers_and_compress(self, temp_atm):
+        '''
+        Merges the snow layers and compresses the snow. This method updates the snow density in the object and the
+        conductivity of the snow in the object.
+
+        Snow compaction may be referenced in article in literature folder or evernote.
+
+        :param temp_atm: [float] Temperature in Celsius used in the compaction routine.
+        :return:
+        '''
+
+        # If no layers, compaction of snow is not needed
+        if len(self.column) > 0:
+            # declare the new snow layer (index = 0) as normal snow layer
+            if self.column[0].type == 'new_snow':
+                self.column[0].type = 'snow'
+
+            self.merge_and_remove_excess_layers()
+
+            # if no snow, no compaction
+            if self.column[0].type == 'snow':
+                # we use a formula for compaction only if air temperature is below freezing and there is snow on top
+                if temp_atm < const.temp_f:
+
+                    # ice & snow parameter values
+                    C1 = 7.0 * 1e-3 * 12  # snow compaction coefficient #1
+                    C2 = -21.0 * 1e-3  # snow compaction coefficient #2
+                    C3 = -0.04  # snow compaction coefficient #3
+
+                    # this is one strange fromula. Would be good to change it with something more familiar..
+                    delta_rho_snow = self.column[0].density ** 2 * C1 * self.column[0].height * math.exp(
+                        C2 * self.column[0].density) * math.exp(C3 * temp_atm)
+
+                    rho_snow_old = self.column[0].density
+                    rho_snow_new = rho_snow_old + delta_rho_snow
+                    k_snow_new = pz.k_snow_from_rho_snow(rho_snow_new)
+
+                # Else we have melting conditions and the snow conductivity and density is sett to max
+                else:
+                    rho_snow_old = self.column[0].density
+                    rho_snow_new = const.rho_snow_max
+                    k_snow_new = const.k_snow_max
+
+                self.column[0].density = min([rho_snow_new, const.rho_snow_max])
+                self.column[0].conductivity = min([k_snow_new, const.k_snow_max])
+
+                h_snow_new = self.column[0].height / self.column[
+                    0].density * rho_snow_old  # Asume a inverse linear correlation between density and the height (preservation og mass?)
+                self.column[0].height = h_snow_new
+
+        return
+
+
+    def get_snow_height(self):
+
+        snow_height = 0.
+
+        if self.column[0].type == "snow":
+            snow_height = self.column[0].height
+
+        return snow_height
+
+
+    def get_layer_at_z(self, depth_inn):
+        """
+
+        :param depth_inn: [m]
+        :return layer_out:          the actual laye object
+                depth_layer_top:    the depth of the topp of the layer
+                rest_height:        to the requested depth, ho far is it from the top of the layer?
+        """
+
+        current_depth = 0.
+        layer_out = None
+        depth_layer_top = None
+        rest_height  = None
+
+        for l in self.column:
+            if current_depth < depth_inn:
+                if current_depth + l.height > depth_inn:
+                    layer_out = l
+                    depth_layer_top = current_depth
+                    rest_height = depth_inn-current_depth
+                    break
+                current_depth += l.height
+
+        return layer_out, depth_layer_top, rest_height
+
+
     def get_surface_temperature(self):
         """
         Retruns surface temperature if on exists.
@@ -299,26 +257,7 @@ class IceColumn:
             print "No surface temperature on object. Try using the get_surface_temperature_estimate function."
 
 
-    def get_surface_temperature_estimate(self, temp_atm):
-        """
-        Surface temperature
-
-        :param temp_atm:
-        :return:
-        """
-
-        temp_surface = (self.column_average_temperature + temp_atm)/2
-
-        # THS approach
-        #temp_surface = self.column_average_temperature * 2
-
-        if temp_surface > 0.:
-            temp_surface = 0.
-
-        return temp_surface
-
-
-    def update_column_temperatures(self, temp_atm):
+    def update_column_temperatures(self, temp_sfc=None):
         '''Column temperatures calculated under the assumption that over 24hrs temperature
         reaches steady state. Calculation hold the boundary conditions of bottom at 0C and
         top at temperature of atmosphere.
@@ -329,11 +268,14 @@ class IceColumn:
 
         Possible extension: Effect of temp from precious days weight inn, in the end.
 
-        :param temp_atm:        Temp in atmosphere
+        :param temp_sfc:        Temp in atmosphere
         :return:
         '''
 
         import numpy as np
+
+        if temp_sfc is None:
+            temp_sfc = self.temp_surface
 
         # only continuous dry layers from surface can be below freezing (0C)
         num_dry_layers = 0
@@ -344,22 +286,29 @@ class IceColumn:
                 break
 
         num_boundaries = num_dry_layers - 1
-        temp_top = temp_atm
+        temp_top = temp_sfc
         temp_bottom = const.temp_f      # freezing temp
 
         # case surface layer is wet, we assume all is 0C
         if num_boundaries == -1:
             for l in self.column:
+                l.set_temperature_top(0.)
+                l.set_temperature_bottom(0.)
                 l.set_temperature(0.)
 
-        # case only one layer or only the top layer is dry, this layer is avg of air temp and 0C
+        # case only one layer or only the top layer is dry, this layer is avg of surface temp and 0C
         elif num_boundaries == 0:
             self.column[0].set_temperature((temp_top+temp_bottom)/2)
+            self.column[0].set_temperature_top(temp_top)
+            self.column[0].set_temperature_bottom(temp_bottom)
+            # the rest is 0C
             for l in self.column[1:]:
+                l.set_temperature_top(0.)
+                l.set_temperature_bottom(0.)
                 l.set_temperature(0.)
 
         # case more dry layers, solve numerically
-        else:
+        elif num_boundaries > 0:
             AA = np.zeros([num_boundaries, num_boundaries])
 
             for i in range(num_boundaries):
@@ -372,8 +321,9 @@ class IceColumn:
 
             bb = np.zeros([num_boundaries])
             bb[0] = temp_top * self.column[0].conductivity * self.column[0].height
-            bb[num_boundaries-1] = temp_bottom * self.column[num_boundaries].conductivity \
-                                  * self.column[num_boundaries].height
+            if num_boundaries > 1:
+                bb[num_boundaries-1] = temp_bottom * self.column[num_boundaries].conductivity \
+                                     * self.column[num_boundaries].height
 
             xx = np.linalg.solve(AA, bb)
 
@@ -392,79 +342,11 @@ class IceColumn:
                 self.column[i].set_temperature_top(boundary_temps[i])
                 self.column[i].set_temperature_bottom(boundary_temps[i+1])
 
-        return
-
-
-    def update_column_average_temperature(self, temp_atm):
-        '''Average temperature of the column. The theory is:
-
-                temp_avg = ( sum_n(temp_atm * weight_n) / sum_n(weight_n) )/2
-
-        We devide by 2 from the asumption that there is a linear temperature gradient in the column and
-        at thte botonm it is water at 0C.
-
-        Method takes into account column thickness to how quick its temperature shifts according to
-        the atmospheric temperature.
-
-        I do calculations in Kelvin so that days with 0C in are taken into account.
-
-        :param temp_atm:
-        :return:
-
-        '''
-
-        max_h_thin_layer = 0.3  # in meter
-        medium_weights = [5, 2]
-        max_h_medium_layer = 1.  # in meter
-        thick_weighs = [5, 3, 2, 1]
-
-        # first index is avg temp. The next indexes are todays temperature, yesturdays temp, etc.
-        self.last_days_temp_atm.insert(0, temp_atm)
-        self.last_days_temp_atm.pop(-1)
-
-        # effect of temperature o column is depending on column thickness
-        total_thick = 0
-        for layer in self.column:
-            total_thick = total_thick + layer.height
-
-        avg_temp = 0
-
-        # no sno or ice. Avarage temp set to feezing temp in water
-        if total_thick == 0:
-            avg_temp = 0
-
-        # Thin layer case. Temperature in snow and ice is same as temp in atm.
-        elif total_thick < max_h_thin_layer:
-            avg_temp = temp_atm - const.absolute_zero
-
-        # Medium layer case
-        elif (total_thick >= max_h_thin_layer) and (total_thick < max_h_medium_layer):
-            weight = medium_weights
-            weight_sum = sum(weight)
-            for i in range(0, len(weight), 1):
-                w_i = weight[i]
-                temp_i = self.last_days_temp_atm[i] - const.absolute_zero
-                avg_temp = avg_temp + temp_i * w_i
-            avg_temp = avg_temp / weight_sum
-
-        # Thick layer case
-        else:
-            weight = thick_weighs
-            weight_sum = sum(weight)
-            for i in range(0, len(weight), 1):
-                w_i = weight[i]
-                temp_i = self.last_days_temp_atm[i] - const.absolute_zero
-                avg_temp = avg_temp + temp_i * w_i
-            avg_temp = avg_temp / weight_sum
-
-        # avg_temp is also effected by water temp (0C)
-        avg_temp_out = (avg_temp + const.absolute_zero) / 2
-
-        # snow and ice isnt above 0C
-        if avg_temp_out > 0.:
-            avg_temp_out = 0.
-
-        self.column_average_temperature = avg_temp_out
+            # the lower layers are 0C
+            for i in range(len(boundary_temps)-1, len(self.column), 1):
+                self.column[i].set_temperature(0.)
+                self.column[i].set_temperature_top(0.)
+                self.column[i].set_temperature_bottom(0.)
 
         return
 
@@ -611,55 +493,195 @@ class IceColumn:
                 return False
 
 
-    def merge_snow_layers_and_compress(self, temp_atm):
-        '''
-        Merges the snow layers and compresses the snow. This method updates the snow density in the object and the
-        conductivity of the snow in the object.
+    def get_conductance_at_z(self, depth_inn=None):
+        """Retruns conductance from surface to a certain depth.
 
-        Snow compaction may be referenced in article in literature folder or evernote.
+        Conductance is conductivity pr unit lenght.
+        I.e. U = k/h where k is conductivity and h is height of icelayer
+        Sum of conductance follows the rule 1/U = 1/U1 + 1/U2 + ... + 1/Un
 
-        :param temp_atm: [float] Temperature in Celsius used in the compaction routine.
+        From https://en.wikipedia.org/wiki/Thermal_conductivity:
+        thermal conductivity = k,           measured in W/(m·K)
+        thermal conductance = kA/L,         measured in W·K−1
+        thermal resistance = L/(kA),        measured in K·W−1 (equivalent to: °C/W)
+        heat transfer coefficient = k/L,    measured in W·K−1·m−2
+        thermal insulance = L/k, measured in K·m2·W−1.
+
+        where k is thermal conductivity, A is area and L is thickness.
+
+
+        :param depth_inn: [m] If None total column height is used. I.e. No water conductance below
         :return:
+        """
+
+        current_depth = 0.
+        U_total = 0.
+
+        if depth_inn is None:
+            if self.total_column_height is None:
+                self.update_total_column_height()
+            depth_inn = self.total_column_height
+
+        for l in self.column:
+            if U_total == 0.: # case for the first layer
+                if l.height > depth_inn:
+                    U_total = l.conductivity / (depth_inn-current_depth)
+                    current_depth = depth_inn
+                    break
+                U_total = l.conductivity/l.height
+                current_depth += l.height
+                continue
+            if current_depth < depth_inn:
+                if current_depth + l.height > depth_inn:
+                    U_total = 1/ (1/U_total+(depth_inn-current_depth)/l.conductivity)
+                    current_depth = depth_inn
+                    break
+                U_total = 1/ (1/U_total+l.height/l.conductivity)
+                current_depth += l.height
+            else:
+                break
+
+
+        # if requested depth is deeper than the column, add water conductance
+        if current_depth < depth_inn:
+            U_total = 1/ (1/U_total+(depth_inn-current_depth)/const.k_water)
+
+        return U_total
+
+
+    def get_depth_at_conductance(self, conductance_limit):
+        """Given a desired conductance, this method returns the height from the surface to get this
+        conductance
+
+        :param conductance_limit:
+        :return:
+        """
+
+        current_depth = 0.
+        resistivity_limit = 1/conductance_limit
+        current_restitivity = 0.
+
+        for l in self.column:
+            if current_restitivity < resistivity_limit:
+                # if were not at the limit, keep adding
+                delta_resistivity = l.height / l.conductivity
+                if current_restitivity + delta_resistivity > resistivity_limit:
+                    # if only part of the layer is added
+                    rest_depth = l.height * (resistivity_limit - current_restitivity)/delta_resistivity
+                    current_depth += rest_depth
+                    current_restitivity = resistivity_limit
+                else:
+                    current_depth += l.height
+                    current_restitivity += delta_resistivity
+            else:
+                # else stop
+                break
+
+        # if not enougfht heit in the ice column make sure water contributes
+        if current_restitivity < resistivity_limit:
+            rest_depth_in_water = (resistivity_limit - current_restitivity) * const.k_water
+            current_depth += rest_depth_in_water
+            current_restitivity = resistivity_limit
+
+        self.active_depth = current_depth
+
+        return current_depth
+
+
+    def delete_get_surface_temperature_estimate(self, temp_atm):
+        """Method part of an atemt to estimate surface temp without energy
+        balance. Dead end and method can be deleted.
+
+        Surface temperature
+
+        :param temp_atm:
+        :return:
+        """
+
+        temp_surface = (self.column_average_temperature + temp_atm)/2
+
+        # THS approach
+        #temp_surface = self.column_average_temperature * 2
+
+        if temp_surface > 0.:
+            temp_surface = 0.
+
+        return temp_surface
+
+
+    def delete_update_column_average_temperature(self, temp_atm):
+        '''Method part of an atemt to estimate surface temp without energy
+        balance. Dead end and method can be deleted.
+
+        Average temperature of the column. The theory is:
+
+                temp_avg = ( sum_n(temp_atm * weight_n) / sum_n(weight_n) )/2
+
+        We devide by 2 from the asumption that there is a linear temperature gradient in the column and
+        at thte botonm it is water at 0C.
+
+        Method takes into account column thickness to how quick its temperature shifts according to
+        the atmospheric temperature.
+
+        I do calculations in Kelvin so that days with 0C in are taken into account.
+
+        :param temp_atm:
+        :return:
+
         '''
 
-        # If no layers, compaction of snow is not needed
-        if len(self.column) > 0:
-            # declare the new snow layer (index = 0) as normal snow layer
-            if self.column[0].type == 'new_snow':
-                self.column[0].type = 'snow'
+        max_h_thin_layer = 0.3  # in meter
+        medium_weights = [5, 2]
+        max_h_medium_layer = 1.  # in meter
+        thick_weighs = [5, 3, 2, 1]
 
-            self.merge_and_remove_excess_layers()
+        # first index is avg temp. The next indexes are todays temperature, yesturdays temp, etc.
+        self.last_days_temp_atm.insert(0, temp_atm)
+        self.last_days_temp_atm.pop(-1)
 
-            # if no snow, no compaction
-            if self.column[0].type == 'snow':
-                # we use a formula for compaction only if air temperature is below freezing and there is snow on top
-                if temp_atm < const.temp_f:
+        # effect of temperature o column is depending on column thickness
+        total_thick = 0
+        for layer in self.column:
+            total_thick = total_thick + layer.height
 
-                    # ice & snow parameter values
-                    C1 = 7.0 * 1e-3 * 12  # snow compaction coefficient #1
-                    C2 = -21.0 * 1e-3  # snow compaction coefficient #2
-                    C3 = -0.04  # snow compaction coefficient #3
+        avg_temp = 0
 
-                    # this is one strange fromula. Would be good to change it with something more familiar..
-                    delta_rho_snow = self.column[0].density ** 2 * C1 * self.column[0].height * math.exp(
-                        C2 * self.column[0].density) * math.exp(C3 * temp_atm)
+        # no sno or ice. Avarage temp set to feezing temp in water
+        if total_thick == 0:
+            avg_temp = 0
 
-                    rho_snow_old = self.column[0].density
-                    rho_snow_new = rho_snow_old + delta_rho_snow
-                    k_snow_new = pz.k_snow_from_rho_snow(rho_snow_new)
+        # Thin layer case. Temperature in snow and ice is same as temp in atm.
+        elif total_thick < max_h_thin_layer:
+            avg_temp = temp_atm - const.absolute_zero
 
-                # Else we have melting conditions and the snow conductivity and density is sett to max
-                else:
-                    rho_snow_old = self.column[0].density
-                    rho_snow_new = const.rho_snow_max
-                    k_snow_new = const.k_snow_max
+        # Medium layer case
+        elif (total_thick >= max_h_thin_layer) and (total_thick < max_h_medium_layer):
+            weight = medium_weights
+            weight_sum = sum(weight)
+            for i in range(0, len(weight), 1):
+                w_i = weight[i]
+                temp_i = self.last_days_temp_atm[i] - const.absolute_zero
+                avg_temp = avg_temp + temp_i * w_i
+            avg_temp = avg_temp / weight_sum
 
-                self.column[0].density = min([rho_snow_new, const.rho_snow_max])
-                self.column[0].conductivity = min([k_snow_new, const.k_snow_max])
+        # Thick layer case
+        else:
+            weight = thick_weighs
+            weight_sum = sum(weight)
+            for i in range(0, len(weight), 1):
+                w_i = weight[i]
+                temp_i = self.last_days_temp_atm[i] - const.absolute_zero
+                avg_temp = avg_temp + temp_i * w_i
+            avg_temp = avg_temp / weight_sum
 
-                h_snow_new = self.column[0].height / self.column[
-                    0].density * rho_snow_old  # Asume a inverse linear correlation between density and the height (preservation og mass?)
-                self.column[0].height = h_snow_new
+        # avg_temp is also effected by water temp (0C)
+        avg_temp_out = (avg_temp + const.absolute_zero) / 2
+
+        # snow and ice isnt above 0C
+        if avg_temp_out > 0.:
+            avg_temp_out = 0.
+
+        self.column_average_temperature = avg_temp_out
 
         return
 
@@ -820,8 +842,8 @@ if __name__ == "__main__":
     #icecol.merge_and_remove_excess_layers()
     #icecol.merge_snow_layers_and_compress(-5)
 
-    icecols = gfd.importColumns("{0}Semsvann observasjoner 2012-2013.csv".format(data_path))
-    icecol = icecols[3]
+    icecols = gfd.importColumns("{0}test ice columns.csv".format(data_path))
+    icecol = icecols[4]
     icecol.update_column_temperatures(-15)
     icecol.update_total_column_height()
     layer = icecol.get_layer_at_z(0.9)

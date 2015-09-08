@@ -1,0 +1,71 @@
+################
+#
+#  Observed icecolumns on Semsvann winter 2012-2013.
+#  Values given as [value; type].
+#  Valid values are: 'date', 'water_line' and all the ice types: 'black_ice', 'slush_ice', 'slush', 'snow'.
+#  Hashtags are omitted and ' ', \n and such are removed when reading the file.
+#  An observation with only date is of "no ice".
+#  water_line is the distance from the bottom of the iceflow to the waterline in [m]. water_line is sum(icelayers)-ice_height_after.
+#
+##################
+
+2012-12-08; date
+
+##################
+
+2013-01-05; date
+0.01; snow
+0.15; slush_ice
+0.04; slush
+0.12; black_ice
+0.28; water_line
+
+##################
+
+2013-02-01; date
+0.25; snow
+0.17; slush_ice
+0.30; black_ice
+0.46; water_line
+
+##################
+
+2013-02-21; date
+0.30; snow
+0.18; slush_ice
+0.28; black_ice
+0.47; water_line
+
+##################
+
+2013-03-04; date
+0.15; snow
+0.02; slush_ice
+0.01; slush
+0.01; slush_ice
+0.02; slush
+0.17; slush_ice
+0.31; black_ice
+0.53; water_line
+
+##################
+
+2013-04-06; date
+0.12; snow
+0.27; slush_ice
+0.29; black_ice
+0.54; water_line
+
+##################
+
+2013-04-21; date
+0.0;  snow
+0.10; slush_ice
+0.32; black_ice
+0.39; water_line
+
+##################
+
+2013-05-07; date
+
+##################

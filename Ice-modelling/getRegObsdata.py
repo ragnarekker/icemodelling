@@ -193,6 +193,9 @@ def get_ice_thickness(LocationName, fromDate, toDate):
 
             ice_column.water_line = ice_column.draft_thickness - float(iha)
 
+            if ice_column.top_layer_is_slush is True:
+                ice_column.water_line -= ice_column.column[0].height
+
             ice_columns.append(ice_column)
 
     return ice_columns

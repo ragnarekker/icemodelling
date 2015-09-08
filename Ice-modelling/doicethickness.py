@@ -38,8 +38,7 @@ def get_ice_thickness_from_energy_balance(
     if len(ice_column.column) == 0:
         energy_balance = we.EnergyBalanceElement(ice_column.date)
         energy_balance.add_no_energy_balance(is_ice_inn=False)
-        out_column = get_ice_thickness_from_surface_temp(
-                ice_column, time_span_in_sec, prec_snow, temp_atm)
+        out_column = get_ice_thickness_from_surface_temp(ice_column, time_span_in_sec, prec_snow, temp_atm)
     else:
         energy_balance = deb.temp_surface_from_eb(
             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
@@ -53,7 +52,7 @@ def get_ice_thickness_from_energy_balance(
             out_column = get_ice_thickness_from_surface_temp(
                 ice_column, time_span_in_sec, prec_snow, surface_temp)
         elif surface_temp == 0.:
-            melt_energy = energy_balance.EB
+            melt_energy = energy_balance.SM
             out_column = get_ice_thickness_from_surface_temp(
                 ice_column, time_span_in_sec, prec_snow, surface_temp, melt_energy=melt_energy)
         else:
@@ -221,7 +220,6 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
     ic.merge_snow_layers_and_compress(temp)
     ic.update_draft_thickness()
     ic.update_water_line()
-    ic.update_column_average_temperature(temp)
     ic.update_column_temperatures(temp)
     ic.update_total_column_height()
     ic.set_surface_temperature(temp)
