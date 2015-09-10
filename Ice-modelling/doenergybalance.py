@@ -298,7 +298,7 @@ def temp_surface_from_eb(
 
     # transfer energy to surface melt if we have melting conditions
     if eb_obj.temp_surface == 0.:
-        eb_obj.add_surface_melt(eb_obj.EB)
+        eb_obj.add_surface_melt(-eb_obj.EB)
         eb_obj.EB = 0.
     else:
         eb_obj.add_surface_melt(0.)
@@ -664,13 +664,13 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
     c_air = const.c_air         # specific heatcapacity air
     rho_air = const.rho_air     # density of air
     zu = 10                     # Høyde på vind målinger
-    zt = 2                      # Høyde på lufttemperatur målinger
-    zm = 0.001                  # ruhetsparameter for snø
+    zt = 10                     # Høyde på lufttemperatur målinger
+    zm = const.z_snow           # ruhetsparameter for snø
     d = ice_column.get_snow_height()    # Zeroplane displecement for snow. I.e correction for snowdepth.
-    zh = 0.0002                 # varme og damp ruhets
+    zh = const.z_vapour          # varme og damp ruhets
     k = const.von_karmans_const  # von Karmans konstant
 
-    common = k**2/(log((zu-d)/zm, 10))**2
+    common = k**2/(log((zu-d)/zm, 10))/(log((zt-d)/zm, 10))
 
     # Correction when temperature gradient near surface.
     # Eqs 7-11 in "Modelling the snow surface temperature with a one-layer energybalance model"

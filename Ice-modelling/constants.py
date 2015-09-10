@@ -71,12 +71,20 @@ c_slush = (c_water + c_ice)/2   # Assume slush is half/half water and ice
 
 
 # Surface effective temperature depth (Z) over temperature variations over 24hrs [m]
-Z_snow = 0.3                    # guessing
-Z_new_snow = Z_snow
-Z_water = 1.                    #
-Z_slush = Z_water               #
-Z_black_ice = Z_snow * 3        # density is 3 times larger
-Z_slush_ice = Z_black_ice
+# Z_snow = 0.3                    # guessing
+# Z_new_snow = Z_snow
+# Z_water = 1.                    #
+# Z_slush = Z_water               #
+# Z_black_ice = Z_snow * 3        # density is 3 times larger
+# Z_slush_ice = Z_black_ice
+
+# Surface roughness [m] as used to calculate turbulent fluxes
+z_new_snow
+z_snow = 10**-3            # surface roughness for snow
+z_slush_ice = 0.
+z_black_ice = 0.
+z_water = 0.
+z_vapour = 2.*10**-4
 
 
 # Albedo in values [0,1]
