@@ -8,6 +8,7 @@ import doenergybalance as deb
 import ice as ice
 import constants as const
 import weather as we
+import datetime as dt
 
 
 def get_ice_thickness_from_energy_balance(
@@ -42,8 +43,8 @@ def get_ice_thickness_from_energy_balance(
     else:
         energy_balance = deb.temp_surface_from_eb(
             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            error=1., age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm,
-            iteration_method="Newton-Raphson")
+            error=100., age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm,
+            iteration_method="Newton-Raphson-II")
 
         surface_temp = energy_balance.temp_surface
         out_column = None
@@ -57,6 +58,9 @@ def get_ice_thickness_from_energy_balance(
                 ice_column, time_span_in_sec, prec_snow, surface_temp, melt_energy=melt_energy)
         else:
             print "get_ice_thickness_from_energy_balance: Surface temp cant be above 0C in the method get_ice_thickness_from_energy_balance"
+
+    if (ice_column.date).date() == dt.date(2014, 2, 04):
+        debug = True
 
     return out_column, energy_balance
 
@@ -197,7 +201,7 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
                 else:
                     # energy available to melt used with latent heat of fusion (delta_h = Q/L/rho)
                     L_ice = const.L_black_ice/1000.    # Joule to Kilo Joule
-                    dh = const.melt_energy_coefficient * -1 * melt_energy / L_ice / ic.column[0].density * time_step/24/60/60
+                    dh = -1 * melt_energy / L_ice / ic.column[0].density * time_step/24/60/60
 
                     # if layer is thinner than total melting the layer is removed and the rest of melting occurs
                     # in the layer below for the reminder of time. melting (dh) and time are proportional in the degreeday equation

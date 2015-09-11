@@ -192,7 +192,7 @@ def temp_surface_from_eb(
 
     # calculate energy balances around surface temp to se development.
     debug = False
-    #if (ice_column.date).date() == dt.date(2013, 2, 24): debug = True
+    if (ice_column.date).date() == dt.date(2012, 12, 16):    debug = True
     if debug == True:
         import numpy as np
         temps_sfc = np.linspace(temp_sfc-10., temp_sfc+10.)
@@ -231,6 +231,7 @@ def temp_surface_from_eb(
             num_iterations += 1
             eb_condition = eb
 
+
     if iteration_method == "Newton-Raphson":
 
         temp_prev = temp_sfc
@@ -243,7 +244,50 @@ def temp_surface_from_eb(
         d_eb = (eb-eb_prev)/(temp-temp_prev)
         eb_sign = abs(eb)/eb
 
-        eb_condition = eb_prev
+        while abs(eb_condition) > error:
+
+            # Update previous iteration values
+            eb_sign_prev = abs(eb_prev)/eb_prev
+            temp_temp_prev = temp_prev
+            temp_prev = temp
+            eb_prev = eb
+            d_eb_prev = d_eb
+
+            # if eb sign changes, half the temp step and get new eb
+            if eb_sign_prev != eb_sign:
+                temp = (temp_prev + temp_temp_prev)/2
+
+            # else use the Newton Raphson with derivative
+            else:
+                temp = temp_prev - eb_prev/d_eb_prev
+
+            eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+            eb_sign = abs(eb)/eb
+            d_eb = (eb-eb_prev)/(temp-temp_prev)
+
+            num_iterations += 1
+            eb_condition = eb
+
+        # Get the full object. Note that in earlier steps only the energy balance value is requested.
+        eb_obj = energy_balance_from_temp_sfc(
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+            pressure_atm=pressure_atm)
+
+
+    if iteration_method == "Newton-Raphson-II":
+
+        temp_prev = temp_sfc
+        eb_prev = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp_prev, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+
+        # if eb is positive, to much energy is coming inn and thus the surface temp is to low.
+        delta_t = eb_prev/50000
+        temp = temp_prev + delta_t
+        eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+        d_eb = (eb-eb_prev)/(temp-temp_prev)
+        eb_sign = abs(eb)/eb
+
+        #eb_condition = eb_prev
 
         while abs(eb_condition) > error:
 
@@ -259,24 +303,21 @@ def temp_surface_from_eb(
                 melting = True
                 # calculate new eb with temp equalz freezing
                 temp = 0.
-                eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
-                eb_sign = abs(eb)/eb
-                d_eb = (eb-eb_prev)/(temp-temp_prev)
+
             else:
                 melting = False
+
                 # if eb sign changes, half the temp step and get new eb
                 if eb_sign_prev != eb_sign:
                     temp = (temp_prev + temp_temp_prev)/2
-                    eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
-                    eb_sign = abs(eb)/eb
-                    d_eb = (eb-eb_prev)/(temp-temp_prev)
 
                 # else use the Newton Raphson with derivative
                 else:
                     temp = temp_prev - eb_prev/d_eb_prev
-                    eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,  temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
-                    eb_sign = abs(eb)/eb
-                    d_eb = (eb-eb_prev)/(temp-temp_prev)
+
+            eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+            eb_sign = abs(eb)/eb
+            d_eb = (eb-eb_prev)/(temp-temp_prev)
 
             num_iterations += 1
             eb_condition = eb
@@ -297,8 +338,9 @@ def temp_surface_from_eb(
     eb_obj.add_iterations(num_iterations)
 
     # transfer energy to surface melt if we have melting conditions
-    if eb_obj.temp_surface == 0.:
-        eb_obj.add_surface_melt(-eb_obj.EB)
+    if eb_obj.temp_surface > 0.:
+        eb_obj.add_surface_melt(-1 * eb_obj.EB)
+        eb_obj.temp_surface = 0.
         eb_obj.EB = 0.
     else:
         eb_obj.add_surface_melt(0.)
@@ -661,19 +703,21 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
     if wind is None:
         wind = const.avg_wind_const
 
-    c_air = const.c_air         # specific heatcapacity air
-    rho_air = const.rho_air     # density of air
-    zu = 10                     # Høyde på vind målinger
-    zt = 10                     # Høyde på lufttemperatur målinger
-    zm = const.z_snow           # ruhetsparameter for snø
+    c_air = const.c_air             # specific heatcapacity air
+    rho_air = const.rho_air         # density of air
+    k = const.von_karmans_const     # von Karmans konstant
+    zu = 10                         # Høyde på vind målinger
+    zt = 10                         # Høyde på lufttemperatur målinger
+    #z_0 = const.z_snow              # ruhetsparameter for snø
+    z_0 = ice_column.column[0].get_surface_roughness()
+    z_tau = z_0 * 10**-3            # surf roughness for sensible heat
     d = ice_column.get_snow_height()    # Zeroplane displecement for snow. I.e correction for snowdepth.
-    zh = const.z_vapour          # varme og damp ruhets
-    k = const.von_karmans_const  # von Karmans konstant
+    zh = const.z_vapour             # varme og damp ruhets
 
-    common = k**2/(log((zu-d)/zm, 10))/(log((zt-d)/zm, 10))
+    common = k**2/(log((zu-d)/z_0, 10))/(log((zu-d)/z_tau, 10))
 
     # Correction when temperature gradient near surface.
-    # Eqs 7-11 in "Modelling the snow surface temperature with a one-layer energybalance model"
+    # Eqs 7-11 in "Modelling the snow surface temperature with a one-layer energy balance model"
     # Richardsonns number
     R_i = const.g * zu * (temp_atm-temp_surface) / (0.5 * (temp_atm + temp_surface - const.absolute_zero*2) * wind**2)
 

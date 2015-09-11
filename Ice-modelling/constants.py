@@ -78,12 +78,14 @@ c_slush = (c_water + c_ice)/2   # Assume slush is half/half water and ice
 # Z_black_ice = Z_snow * 3        # density is 3 times larger
 # Z_slush_ice = Z_black_ice
 
-# Surface roughness [m] as used to calculate turbulent fluxes
-z_new_snow
+# Surface roughness [m] for momentum as used to calculate turbulent fluxes
 z_snow = 10**-3            # surface roughness for snow
-z_slush_ice = 0.
-z_black_ice = 0.
-z_water = 0.
+z_new_snow = z_snow
+z_drained_snow = z_snow
+z_black_ice = 10**-4
+z_slush_ice = z_black_ice
+z_water = z_black_ice
+z_slush = z_water                #
 z_vapour = 2.*10**-4
 
 
@@ -101,10 +103,6 @@ meltingcoeff_snow = -0.10 /(60*60*24) / 5       # 10cm melting pr day at 5degC
 meltingcoeff_slush_ice = -0.04 /(60*60*24) / 5  # 4cm melting pr day at 5degC
 meltingcoeff_slush = meltingcoeff_slush_ice*2   # slush is partly melted
 meltingcoeff_black_ice = -0.02 /(60*60*24) / 5  # 2cm melting pr day at 5degC
-
-
-# melting energy from eb calculations when surface temp is forced to 0C is way to efficient.
-melt_energy_coefficient = 1.0
 
 
 # Conductance = thermal conductivity over height (k/h) [W/K/m2]

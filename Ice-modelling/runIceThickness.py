@@ -27,6 +27,8 @@ def calculateIceCoverSimple(inn_column, date, temp, sno, cloud_cover=None):
 
     icecover = []
     timestep = 60*60*24     # fixed timestep of 24hrs given in seconds
+    inn_column.remove_metadata()
+    inn_column.remove_time()
     icecover.append(copy.deepcopy(inn_column))
 
     for i in range(0, len(date), 1):
@@ -59,6 +61,8 @@ def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec
 
     icecover = []
     time_span_in_sec = 60*60*24     # fixed timestep of 24hrs given in seconds
+    inn_column.remove_metadata()
+    inn_column.remove_time()
     icecover.append(copy.deepcopy(inn_column))
     energy_balance = []
 
@@ -89,10 +93,12 @@ def calculateIceCoverEB(utm33_x, utm33_y, inn_column, date, temp_atm, prec, prec
 def calculateIceCoverEB2(utm33_x, utm33_y, date, temp_atm, prec, prec_snow, cloud_cover, wind=None, inn_column=None):
 
     if inn_column is None:
-        inn_column = ice.IceColumn(date[0], []),
+        inn_column = ice.IceColumn(date[0], [])
 
     icecover = []
     time_span_in_sec = 60*60*24     # fixed timestep of 24hrs given in seconds
+    inn_column.remove_metadata()
+    inn_column.remove_time()
     icecover.append(copy.deepcopy(inn_column))
     energy_balance = []
 

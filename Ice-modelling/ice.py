@@ -49,6 +49,9 @@ class IceColumn:
         """
         self.metadata[key] = value
 
+    def remove_metadata(self):
+        self.metadata.clear()
+
 
     def set_water_line(self, water_line_inn):
         self.water_line = water_line_inn
@@ -87,6 +90,17 @@ class IceColumn:
         :return:
         '''
         self.date = self.date + datetime.timedelta(seconds=time_step)
+
+
+    def remove_time(self):
+        """
+        When using observations as initial values the observations normaly have a time.
+        For further modelling the dayly values are calculatet so the hour and minutes can be removed.
+        :return:
+        """
+        new_time = self.date.replace(hour=00, minute=0)
+        self.date = new_time
+        return
 
 
     def merge_and_remove_excess_layers(self):
@@ -689,7 +703,7 @@ class IceColumn:
 class IceLayer:
     '''
     height      float in m
-    type       string
+    type        string
     temp        float in C
     '''
 
@@ -787,9 +801,21 @@ class IceLayer:
         else: return -1
 
 
-    def get_thermal_diffusivity(self):
-        """returns heat capacity given the type of layer
+    def get_surface_roughness(self):
+        # Surface roughness [m] as used to calculate turbulent fluxes
+        if self.type == 'new_snow': return const.z_new_snow
+        elif self.type == 'snow': return const.z_snow
+        elif self.type == 'drained_snow': return const.z_drained_snow
+        elif self.type == 'slush': return const.z_slush
+        elif self.type == 'slush_ice': return const.z_slush_ice
+        elif self.type == 'black_ice': return const.z_black_ice
+        elif self.type == 'water': return const.z_water
+        elif self.type == 'unknown': return const.z_black_ice
+        else: return -1
 
+
+    def get_thermal_diffusivity(self):
+        """returns Thermal diffusivity given the type of layer
         Thermal diffusivity (alpha) [m^2/sek]
 
             alpha = k / rho / c
@@ -799,7 +825,6 @@ class IceLayer:
             c   is specific heat capacity (J/(kg·K))
 
         From https://en.wikipedia.org/wiki/Thermal_diffusivity
-
         """
 
         if self.type == 'new_snow':         return const.k_new_snow     /self.density/   const.c_snow

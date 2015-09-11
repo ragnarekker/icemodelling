@@ -319,10 +319,10 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
             G.append(eb.G)
             s_inn.append(eb.s_inn)
             albedo.append(eb.albedo)
-            SC.append(eb.SC)
+            SC.append(-eb.SC)
             R_i.append(eb.R_i)
             stability_correction.append(eb.stability_correction)
-            CC.append(eb.CC)
+            CC.append(-eb.CC)
             SM.append(eb.SM)
 
 
