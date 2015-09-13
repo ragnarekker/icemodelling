@@ -106,11 +106,11 @@ def energy_balance_from_temp_sfc(
 
     R = get_prec_heat(temp_atm, prec)
 
-    CC = get_cold_content(ice_column, temp_surface)
+    CC = get_cold_content_change(ice_column, temp_surface)
 
     SC, conductance = get_surface_heat_conduction(ice_column, temp_surface, time_span_in_sec)
 
-    EB = S + (L_a - L_t) + (LE + H) + G + R - CC - SC
+    EB = S + (L_a + L_t) + (LE + H) + G + R + (CC + SC)
 
     # For debugging it is useful to get the date of unnormal activity
     #if EB > 20000.:
@@ -157,7 +157,7 @@ def temp_surface_from_eb(
         based on Newton Raphson method of root finding. Methos itteates to p/m 1 in energy balance in 3-6 iterations.
         x_{n+1} = x_{n} - f(x_{n})/ df(x_{n})/dx
 
-    Step-delta_t:
+    Delta_T:
         iterates with a temperature step proportional with the error in energy balance. For large temperature
         difference between surface and air temp (~10C) this method uses 4-600 iterations to get an accuracy in
         energy baalnce of p/m 100. If I had larger temp steps (fewer iterations) the method some times did
@@ -184,18 +184,16 @@ def temp_surface_from_eb(
 
     """
 
-    temp_sfc = temp_atm     # initial value
+    temp = temp_atm     # initial value
     num_iterations = 0
-    eb_obj = None
     eb_condition = error + 1    # initial value to start while loop
-    melting = False
 
     # calculate energy balances around surface temp to se development.
     debug = False
-    if (ice_column.date).date() == dt.date(2012, 12, 16):    debug = True
+    #if ice_column.date.date() == dt.date(2013, 5, 1):   debug = True
     if debug == True:
         import numpy as np
-        temps_sfc = np.linspace(temp_sfc-10., temp_sfc+10.)
+        temps_sfc = np.linspace(temp-10., temp+10.)
         ebs = []
         for t in temps_sfc:
             eb_check = energy_balance_from_temp_sfc(
@@ -204,37 +202,28 @@ def temp_surface_from_eb(
             ebs.append(eb_check.EB)
         a = 1
 
-    if iteration_method == "Step-delta_t":
+    if iteration_method == "Delta_T":
         while abs(eb_condition) > error:
-            if temp_sfc > 0.:
-                # in this case EB(T_sfc = 0) = Q_melt
-                if melting is True:     # if the melting condition is true already (from previous iteration)
-                    break
-                temp_sfc = 0.
-                melting = True          # condition to avoid calculating EB at surf_temp multiple times-
 
-            eb_obj = energy_balance_from_temp_sfc(
+            eb = energy_balance_from_temp_sfc_value(
                 utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-                temp_surface=temp_sfc, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+                temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
                 pressure_atm=pressure_atm)
-            eb = eb_obj.EB
-            delta_t = abs(eb)/50000
+            delta_t = abs(eb)/10000
 
             if eb > 0.:   # to much energy coming inn.
-                temp_sfc += delta_t
+                temp += delta_t
             if eb < 0.:   # to much energy going out.
-                temp_sfc -= delta_t
+                temp -= delta_t
                 # The melting condition is no longer valid and surface temp can be lowered
-                if melting:
-                    melting = False
 
             num_iterations += 1
             eb_condition = eb
 
 
-    if iteration_method == "Newton-Raphson":
+    if iteration_method == "Newton_Raphson":
 
-        temp_prev = temp_sfc
+        temp_prev = temp
         eb_prev = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp_prev, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
 
         # if eb is positive, to much energy is coming inn and thus the surface temp is to low.
@@ -244,19 +233,26 @@ def temp_surface_from_eb(
         d_eb = (eb-eb_prev)/(temp-temp_prev)
         eb_sign = abs(eb)/eb
 
+        dedt_condition = True       # start with finding new and better temps with derivative.
+
         while abs(eb_condition) > error:
 
             # Update previous iteration values
             eb_sign_prev = abs(eb_prev)/eb_prev
-            temp_temp_prev = temp_prev
+            #temp_temp_prev = temp_prev
             temp_prev = temp
             eb_prev = eb
             d_eb_prev = d_eb
 
             # if eb sign changes, half the temp step and get new eb
             if eb_sign_prev != eb_sign:
-                temp = (temp_prev + temp_temp_prev)/2
+                dedt_condition = False
 
+            if dedt_condition is False:
+                ##### if sign cahnges use last step
+                ##### else keep the "temp on the other side"
+                if eb_sign_prev != eb_sign:
+                    temp = (temp + temp_prev)/2
             # else use the Newton Raphson with derivative
             else:
                 temp = temp_prev - eb_prev/d_eb_prev
@@ -268,16 +264,10 @@ def temp_surface_from_eb(
             num_iterations += 1
             eb_condition = eb
 
-        # Get the full object. Note that in earlier steps only the energy balance value is requested.
-        eb_obj = energy_balance_from_temp_sfc(
-            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
-            pressure_atm=pressure_atm)
 
+    if iteration_method == "Newton_Raphson_kopi":
 
-    if iteration_method == "Newton-Raphson-II":
-
-        temp_prev = temp_sfc
+        temp_prev = temp
         eb_prev = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp_prev, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
 
         # if eb is positive, to much energy is coming inn and thus the surface temp is to low.
@@ -329,21 +319,24 @@ def temp_surface_from_eb(
             else:
                 melting = False
 
+    # if temp surf is above freezing temp, get energy balance at freezing and
+    # transfer energy to surface melt.
+    if temp > const.temp_f:
+        eb_obj = energy_balance_from_temp_sfc(
+           utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+           temp_surface=const.temp_f, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+           pressure_atm=pressure_atm)
+        eb_obj.add_surface_melt(-1 * eb_obj.EB)
+        eb_obj.EB = 0.
+    else:
         # Get the full object. Note that in earlier steps only the energy balance value is requested.
         eb_obj = energy_balance_from_temp_sfc(
             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
             temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
             pressure_atm=pressure_atm)
+        eb_obj.add_surface_melt(0.)
 
     eb_obj.add_iterations(num_iterations)
-
-    # transfer energy to surface melt if we have melting conditions
-    if eb_obj.temp_surface > 0.:
-        eb_obj.add_surface_melt(-1 * eb_obj.EB)
-        eb_obj.temp_surface = 0.
-        eb_obj.EB = 0.
-    else:
-        eb_obj.add_surface_melt(0.)
 
     return eb_obj
 
@@ -671,7 +664,7 @@ def get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_
         eps_surface = const.eps_water         # water emissivity is the same as snow emidsitivity
 
     L_a = eps_atm * sigma * (temp_atm - const.absolute_zero)**4            # temp_atm skal være i Celsisus. Atmosfærisk innstsåling
-    L_t = eps_surface * sigma * (temp_surface - const.absolute_zero)**4    # terrestrisk utstråling emmisivity for snø er 0.97, er ogsÂ brukt for bar bakke, se Dingman p.583
+    L_t = -1 * eps_surface * sigma * (temp_surface - const.absolute_zero)**4    # terrestrisk utstråling emmisivity for snø er 0.97, er ogsÂ brukt for bar bakke, se Dingman p.583
 
     L_a *= time_span_in_sec
     L_t *= time_span_in_sec
@@ -710,7 +703,7 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
     zt = 10                         # Høyde på lufttemperatur målinger
     #z_0 = const.z_snow              # ruhetsparameter for snø
     z_0 = ice_column.column[0].get_surface_roughness()
-    z_tau = z_0 * 10**-3            # surf roughness for sensible heat
+    z_tau = z_0 * 10**-3  # surf roughness for sensible heat
     d = ice_column.get_snow_height()    # Zeroplane displecement for snow. I.e correction for snowdepth.
     zh = const.z_vapour             # varme og damp ruhets
 
@@ -806,7 +799,7 @@ def get_prec_heat(temp_atm, prec):
     return R
 
 
-def get_cold_content(ice_column, temp_surf):
+def get_cold_content_change(ice_column, temp_surf):
     """Change in heat storage (cold content) of the snow and ice. This is the difference in
     cold content from yesterday to today.
 
@@ -843,38 +836,23 @@ def get_cold_content(ice_column, temp_surf):
 
 
 def get_surface_heat_conduction(ice_column, temp_surface, time_span_in_sec):
-    """Heat conduction driven by the temperature difference between surface temp and the avarage temperature
-    in an effective surface thickness. It is SC that drives ice generation. At temp_surf = 0 => SC = 0. Thus EB melts.
-
-        SC = alpha * rho * C * (temp_surf - temp_avg) / Z
-
-        alpha: thermal diffusivity
-        rho:   density
-        C:     specific heat capasciuty
-        Z:     surf effektive temp depth
-
-    I believe this was the calculation in the original UEB model.
-    Should probably do something with max conductance pr 24hs which defines max depth...
+    """Heat conduction driven by the temperature difference between surface temp and freezing temp
+    at the bottom of the ice. This assumes that the temperature gradient is at steady state, which
+    is the assumption for cahning the ice ticknes in the doicethickness module.
+    At temp_surf = 0 => SC = 0.
+    At temp_surf < 0, SC > 0. I.e. when it is freezing enegy goes from water due to freezing.
 
     :param ice_column:
     :param temp_surface:
+    :param time_span_in_sec
     :return:
     """
 
-    # find the active height of the current column; given by the surface conductance.
-    # get layer object properties with heith of the layers top and distance to active height
-    # get conductance over the active height
-
-    #active_height = ice_column.get_depth_at_conductance(const.U_surface)
-    #layer, layer_top, rest = ice_column.get_layer_at_z(active_height)
-
     surface_conductance = ice_column.get_conductance_at_z()  # should return U_surface
 
-    #temp_eff = layer.temperature_top + (layer.temperature_bottom-layer.temperature_top) * rest/layer.height
-
-    SC = (temp_surface)*surface_conductance
-    SC *= time_span_in_sec  # energy over 24hrs
-    SC /= 1000              # J to kJ
+    SC = -temp_surface*surface_conductance   # freezing temp is 0C
+    SC *= time_span_in_sec                  # energy over 24hrs
+    SC /= 1000                              # J to kJ
 
     return SC, surface_conductance
 

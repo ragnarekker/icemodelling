@@ -312,17 +312,17 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
             itterations.append(eb.iterations)
             EB.append(eb.EB)
             S.append(eb.S)
-            L.append(eb.L_a-eb.L_t)
+            L.append(eb.L_a+eb.L_t)
             H.append(eb.H)
             LE.append(eb.LE)
             R.append(eb.R)
             G.append(eb.G)
             s_inn.append(eb.s_inn)
             albedo.append(eb.albedo)
-            SC.append(-eb.SC)
+            SC.append(eb.SC)
             R_i.append(eb.R_i)
             stability_correction.append(eb.stability_correction)
-            CC.append(-eb.CC)
+            CC.append(eb.CC)
             SM.append(eb.SM)
 
 
@@ -439,7 +439,7 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
             plb.hlines(-8000, date[i], date[i + 1], lw=25, color="1.0")
 
 
-    plb.plot(date, SM, "gray")
+    plb.plot(date, SM, "gray", lw=2)
     plb.plot(date, H, "blue")
     plb.plot(date, LE, "navy")
     plb.plot(date, R, "turquoise")
@@ -447,7 +447,7 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     plb.plot(date, L, "green", lw=1)
     plb.plot(date, S, "gold", lw=1)
     #plb.plot(date, s_inn, "gold", lw=1)
-    plb.plot(date, SC, "red", lw=1)
+    plb.plot(date, SC, "red", lw=2)
     plb.plot(date, CC, "pink", lw=1)
     plb.plot(date, EB, "black")
 
