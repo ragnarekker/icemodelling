@@ -222,6 +222,13 @@ def temp_surface_from_eb(
 
 
     if iteration_method == "Newton_Raphson":
+        """
+        Finding EB=0 with Newton Raphson method of root finding. If it passes the x-axis it starts itterating by
+        averaging the last value to the right and left of the root.
+
+        Newton Raphs:
+        x_{n+1} = x_{n} - f(x_{n})/ df(x_{n})/dx
+        """
 
         temp_prev = temp
         eb_prev = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp_prev, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
@@ -234,32 +241,35 @@ def temp_surface_from_eb(
         eb_sign = abs(eb)/eb
 
         dedt_condition = True       # start with finding new and better temps with derivative.
+        temp_minus = None
+        temp_plus = None
 
         while abs(eb_condition) > error:
 
             # Update previous iteration values
-            eb_sign_prev = abs(eb_prev)/eb_prev
-            #temp_temp_prev = temp_prev
+            eb_sign_prev = eb_sign
             temp_prev = temp
             eb_prev = eb
             d_eb_prev = d_eb
 
-            # if eb sign changes, half the temp step and get new eb
-            if eb_sign_prev != eb_sign:
-                dedt_condition = False
-
-            if dedt_condition is False:
-                ##### if sign cahnges use last step
-                ##### else keep the "temp on the other side"
-                if eb_sign_prev != eb_sign:
-                    temp = (temp + temp_prev)/2
-            # else use the Newton Raphson with derivative
-            else:
+            if dedt_condition is True:
+                # use the Newton Raphson with derivative
                 temp = temp_prev - eb_prev/d_eb_prev
+            else:  # if dedt_condition is False:
+                temp_plus = min(temp_plus, temp)
+                temp_minus = max(temp_minus, temp)
+                temp = (temp_plus + temp_minus)/2
 
             eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
             eb_sign = abs(eb)/eb
             d_eb = (eb-eb_prev)/(temp-temp_prev)
+
+            # if eb sign changes, start halfing the temp step and get new eb
+            if eb_sign_prev != eb_sign:
+                if dedt_condition is True:
+                    dedt_condition = False
+                    temp_plus = max(temp, temp_prev)
+                    temp_minus = min(temp, temp_prev)
 
             num_iterations += 1
             eb_condition = eb
@@ -711,7 +721,7 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
 
     # Correction when temperature gradient near surface.
     # Eqs 7-11 in "Modelling the snow surface temperature with a one-layer energy balance model"
-    # Richardsonns number
+    # Richardsons number
     R_i = const.g * zu * (temp_atm-temp_surface) / (0.5 * (temp_atm + temp_surface - const.absolute_zero*2) * wind**2)
 
     stability_correction = 1
