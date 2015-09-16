@@ -13,13 +13,11 @@ from math import log, exp, sin, cos, pi, fabs, sqrt, acos
 def energy_balance_from_temp_sfc(
         utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
         temp_surface, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
-    """
-    The daily energy budget of a column of snow is expressed as:
+    """Given surface temperature, the daily energy budget of a column of snow is expressed as:
 
     EB = S + (L_a - L_t) + (LE + H) + G + R - CC - SC
 
-    INCOMPLETE: Need to implement shortwave attuenation in the colomn topp layers.
-    Use q_s(z,t) in eq 10 in Yang et al (2012)
+    TODO: Need to implement shortwave attenuation in the column top layers. Use q_s(z,t) in eq 10 in Yang et al (2012)
 
     Mandatory
     :param utm33_x:
@@ -45,12 +43,10 @@ def energy_balance_from_temp_sfc(
 
     """
 
-
     date = ice_column.date
     day_no = ice_column.date.timetuple().tm_yday
     # time given as the end of the time span
     time_hour = (ice_column.date + dt.timedelta(seconds=time_span_in_sec)).hour
-
 
     # Variables picked out from ice_column
     is_ice = True
@@ -69,16 +65,13 @@ def energy_balance_from_temp_sfc(
         if ice_column.column[0].type == "slush_ice":
             albedo_prim = const.alfa_slush_ice
 
-
     # Calculate some parameters
     if cloud_cover is None:
         cloud_cover = dp.clouds_from_precipitation(prec, method='Binary')
 
-
     # This scenario should be avoided but I keep it for now because it it the method used in senorge_eb
     #if temp_surface is None:
     #    temp_surface = ice_column.get_surface_temperature_estimate(temp_atm)
-
 
     # Define an energy balance object to put inn all input data.
     energy_balance = ebe(date)
@@ -88,7 +81,6 @@ def energy_balance_from_temp_sfc(
         prec_inn=prec, prec_snow_inn=prec_snow, cloud_cover_inn=cloud_cover,
         age_factor_tau_inn=age_factor_tau, albedo_prim_inn=albedo_prim,
         day_no_inn=day_no, time_hour_inn=time_hour, time_span_in_sec_inn=time_span_in_sec)
-
 
     # Calculate the energy balance terms
     S, s_inn, albedo, albedo_prim, age_factor_tau = \
@@ -188,19 +180,31 @@ def temp_surface_from_eb(
     num_iterations = 0
     eb_condition = error + 1    # initial value to start while loop
 
-    # calculate energy balances around surface temp to se development.
+    # Start debug. Calculate energy balances around surface temp to se development.
     debug = False
-    #if ice_column.date.date() == dt.date(2013, 5, 1):   debug = True
+
+    #if ice_column.date.date() == dt.date(2012, 12, 1): debug = True
+    #if ice_column.date.date() == dt.date(2013, 1, 1): debug = True
+    #if ice_column.date.date() == dt.date(2013, 2, 1): debug = True
+    #if ice_column.date.date() == dt.date(2013, 3, 1): debug = True
+    #if ice_column.date.date() == dt.date(2013, 4, 1): debug = True
+    #if ice_column.date.date() == dt.date(2013, 4, 15): debug = True
+
     if debug == True:
+
         import numpy as np
-        temps_sfc = np.linspace(temp-10., temp+10.)
+        import makePlots as mp
+
+        temps_sfc = np.linspace(temp-15., temp+15.)
         ebs = []
         for t in temps_sfc:
             eb_check = energy_balance_from_temp_sfc(
             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
             temp_surface=t, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
             ebs.append(eb_check.EB)
-        a = 1
+
+        mp.debug_plot_eb(temps_sfc, ebs, ice_column.date)
+    # End debug
 
     if iteration_method == "Delta_T":
         while abs(eb_condition) > error:
@@ -219,7 +223,6 @@ def temp_surface_from_eb(
 
             num_iterations += 1
             eb_condition = eb
-
 
     if iteration_method == "Newton_Raphson":
         """
@@ -256,94 +259,45 @@ def temp_surface_from_eb(
                 # use the Newton Raphson with derivative
                 temp = temp_prev - eb_prev/d_eb_prev
             else:  # if dedt_condition is False:
-                temp_plus = min(temp_plus, temp)
-                temp_minus = max(temp_minus, temp)
+                if first_halving is True:           # first iteration is different.
+                    first_halving = False
+                else:
+                    if eb < 0:
+                        temp_plus = min(temp_plus, temp)
+                    else:
+                        temp_minus = max(temp_minus, temp)
+
                 temp = (temp_plus + temp_minus)/2
 
             eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
             eb_sign = abs(eb)/eb
             d_eb = (eb-eb_prev)/(temp-temp_prev)
 
-            # if eb sign changes, start halfing the temp step and get new eb
+            # if eb sign changes, start halving the temp step and get new eb
             if eb_sign_prev != eb_sign:
                 if dedt_condition is True:
                     dedt_condition = False
                     temp_plus = max(temp, temp_prev)
                     temp_minus = min(temp, temp_prev)
+                    first_halving = True        # first iteration by halving is different because values ate initiated.
 
             num_iterations += 1
+            if num_iterations > 50:
+                date_as_string = dt.datetime.strftime(ice_column.date, "%Y-%m-%d")
+                print('doenergybalance -> temp_surf_from_eb -> newton_raphson: '
+                      'Number of iterations exceeded 50. Breaking with eb = {0} kJ/m2/24hr on {1}'
+                      .format(eb, date_as_string))
+                break
             eb_condition = eb
 
-
-    if iteration_method == "Newton_Raphson_kopi":
-
-        temp_prev = temp
-        eb_prev = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp_prev, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
-
-        # if eb is positive, to much energy is coming inn and thus the surface temp is to low.
-        delta_t = eb_prev/50000
-        temp = temp_prev + delta_t
-        eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
-        d_eb = (eb-eb_prev)/(temp-temp_prev)
-        eb_sign = abs(eb)/eb
-
-        #eb_condition = eb_prev
-
-        while abs(eb_condition) > error:
-
-            # Update previous iteration values
-            eb_sign_prev = abs(eb_prev)/eb_prev
-            temp_temp_prev = temp_prev
-            temp_prev = temp
-            eb_prev = eb
-            d_eb_prev = d_eb
-
-            # if surface temp is above zero, force to zero. Also set the melting condition to True
-            if temp > 0.:
-                melting = True
-                # calculate new eb with temp equalz freezing
-                temp = 0.
-
-            else:
-                melting = False
-
-                # if eb sign changes, half the temp step and get new eb
-                if eb_sign_prev != eb_sign:
-                    temp = (temp_prev + temp_temp_prev)/2
-
-                # else use the Newton Raphson with derivative
-                else:
-                    temp = temp_prev - eb_prev/d_eb_prev
-
-            eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
-            eb_sign = abs(eb)/eb
-            d_eb = (eb-eb_prev)/(temp-temp_prev)
-
-            num_iterations += 1
-            eb_condition = eb
-
-            # If we have a positive eb and the melting condition (temp=0) is true it is time to break.
-            if eb >= 0.:
-                if melting == True:
-                    break
-            else:
-                melting = False
-
-    # if temp surf is above freezing temp, get energy balance at freezing and
-    # transfer energy to surface melt.
+    # If temp_surf is above freezing temp, get energy balance at freezing and transfer energy to surface melt.
+    # Also, get the full object. Note that in earlier steps only the energy balance value is requested.
     if temp > const.temp_f:
-        eb_obj = energy_balance_from_temp_sfc(
-           utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-           temp_surface=const.temp_f, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
-           pressure_atm=pressure_atm)
+        eb_obj = energy_balance_from_temp_sfc(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=const.temp_f, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
         eb_obj.add_surface_melt(-1 * eb_obj.EB)
         eb_obj.EB = 0.
     else:
-        # Get the full object. Note that in earlier steps only the energy balance value is requested.
-        eb_obj = energy_balance_from_temp_sfc(
-            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
-            pressure_atm=pressure_atm)
+        eb_obj = energy_balance_from_temp_sfc(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
         eb_obj.add_surface_melt(0.)
 
     eb_obj.add_iterations(num_iterations)
@@ -830,14 +784,14 @@ def get_cold_content_change(ice_column, temp_surf):
     CC_this = 0.
 
     for layer in ice_column.column:
-        CC_prev += layer.density * layer.heat_capacity() * layer.height * (layer.temperature - const.absolute_zero)
+        CC_prev += layer.density * layer.get_heat_capacity() * layer.height * (layer.temperature - const.absolute_zero)
 
     ice_column_copy = copy.deepcopy(ice_column)
     ice_column_copy.set_surface_temperature(temp_surf)
     ice_column_copy.update_column_temperatures()
 
     for layer in ice_column_copy.column:
-        CC_this += layer.density * layer.heat_capacity() * layer.height * (layer.temperature - const.absolute_zero)
+        CC_this += layer.density * layer.get_heat_capacity() * layer.height * (layer.temperature - const.absolute_zero)
 
     CC = CC_this - CC_prev
     CC /= 1000              # J to kJ

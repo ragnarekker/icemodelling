@@ -9,7 +9,147 @@ import constants as const
 import getRegObsdata as gro
 
 
+class IceLayer:
+    '''Each layer in the ice column is given its own IceLayer object. The constructor takes as minimum
+    height and type and sets conductivity and density from constants.
+    '''
+
+
+    def __init__(self, height_inn, type_inn):
+
+        self.type = type_inn
+        self.height = height_inn
+        if height_inn: self.height = float(height_inn)  # If height_inn has value make sure it is a float
+        self.set_conductivity()
+        self.set_density()
+
+        self.temperature = None
+        self.metadata = {} # Metadata given as dictionary {key:value , key:value, ... }
+
+
+    def set_temperature(self, temperature_inn):
+        # Avarage temp of layer
+        self.temperature = temperature_inn
+
+
+    def set_temperature_top(self, temperature_top_inn):
+        self.temperature_top = temperature_top_inn
+
+
+    def set_temperature_bottom(self, temperature_bottom_inn):
+        self.temperature_bottom = temperature_bottom_inn
+
+
+    def set_conductivity(self):
+        # sets conductivity for a given snow or ice type
+        # Method should only be used when initialising a new IceLayer
+        if self.type == 'new_snow':     self.conductivity = const.k_new_snow
+        elif self.type == 'snow':       self.conductivity = const.k_snow
+        elif self.type == 'drained_snow': self.conductivity = const.k_drained_snow
+        elif self.type == 'slush':      self.conductivity = const.k_slush
+        elif self.type == 'slush_ice':  self.conductivity = const.k_slush_ice
+        elif self.type == 'black_ice':  self.conductivity = const.k_black_ice
+        elif self.type == 'water':      self.conductivity = const.k_water
+        elif self.type == 'unknown':    self.conductivity = const.k_slush_ice
+
+
+    def set_density(self):
+        # Desities [kg m-3]
+        # Method should only be used when initialising a new IceLayer
+        if self.type == 'new_snow':     self.density = const.rho_new_snow
+        elif self.type == 'snow':       self.density = const.rho_snow
+        elif self.type == 'drained_snow': self.density = const.rho_drained_snow
+        elif self.type == 'slush':      self.density = const.rho_slush
+        elif self.type == 'slush_ice':  self.density = const.rho_slush_ice
+        elif self.type == 'black_ice':  self.density = const.rho_black_ice
+        elif self.type == 'water':      self.density = const.rho_water
+        elif self.type == 'unknown':    self.density = const.rho_slush_ice
+
+
+    def add_metadata(self, key, value):
+        self.metadata[key] = value
+
+
+    def get_colour(self):
+        # returns the color used for plotting a given snow or ice type
+        if self.type == 'new_snow': return "0.9"
+        elif self.type == 'snow': return "0.8"
+        elif self.type == 'drained_snow': return "0.7"
+        elif self.type == 'slush': return "blue"
+        elif self.type == 'slush_ice': return "0.4"
+        elif self.type == 'black_ice': return "0.1"
+        elif self.type == 'water': return "red"
+        elif self.type == 'unknown': return "orange"
+        else: return "yellow"
+
+
+    def get_enum(self):
+        # returns the get_enum used for a given snow or ice type
+        # LayerTypes given as enums. Values 0-9 are liquids, 10-19 are ice, 20-29 are snow
+        if self.type == 'new_snow': return 20
+        elif self.type == 'snow': return 21
+        elif self.type == 'drained_snow': return 22
+        elif self.type == 'slush': return 2
+        elif self.type == 'slush_ice': return 11
+        elif self.type == 'black_ice': return 10
+        elif self.type == 'water': return 1
+        elif self.type == 'unknown': return 11
+        else: return -1
+
+
+    def get_heat_capacity(self):
+        # returns heat capacity given the type of layer
+        if self.type == 'new_snow': return const.c_snow
+        elif self.type == 'snow': return const.c_snow
+        elif self.type == 'drained_snow': return const.c_snow
+        elif self.type == 'slush': return const.c_slush
+        elif self.type == 'slush_ice': return const.c_ice
+        elif self.type == 'black_ice': return const.c_ice
+        elif self.type == 'water': return const.c_water
+        elif self.type == 'unknown': return const.c_ice
+        else: return -1
+
+
+    def get_surface_roughness(self):
+        # Surface roughness [m] as used to calculate turbulent fluxes
+        if self.type == 'new_snow': return const.z_new_snow
+        elif self.type == 'snow': return const.z_snow
+        elif self.type == 'drained_snow': return const.z_drained_snow
+        elif self.type == 'slush': return const.z_slush
+        elif self.type == 'slush_ice': return const.z_slush_ice
+        elif self.type == 'black_ice': return const.z_black_ice
+        elif self.type == 'water': return const.z_water
+        elif self.type == 'unknown': return const.z_black_ice
+        else: return -1
+
+
+    def get_thermal_diffusivity(self):
+        """returns Thermal diffusivity given the type of layer
+        Thermal diffusivity (alpha) [m^2/sek]
+
+            alpha = k / rho / c
+
+            k   is thermal conductivity (W/(m·K))
+            rho is density (kg/m³)
+            c   is specific heat capacity (J/(kg·K))
+
+        From https://en.wikipedia.org/wiki/Thermal_diffusivity
+        """
+
+        if self.type == 'new_snow':         return const.k_new_snow     /self.density/   const.c_snow
+        elif self.type == 'snow':           return const.k_snow         /self.density/   const.c_snow
+        elif self.type == 'drained_snow':   return const.k_drained_snow /self.density/   const.c_snow
+        elif self.type == 'slush':          return const.k_slush        /self.density/   const.c_slush
+        elif self.type == 'slush_ice':      return const.k_slush_ice    /self.density/   const.c_ice
+        elif self.type == 'black_ice':      return const.k_black_ice    /self.density/   const.c_ice
+        elif self.type == 'water':          return const.k_water        /self.density/   const.c_water
+        elif self.type == 'unknown':        return const.k_black_ice    /self.density/   const.c_ice
+        else: return -1
+
+
 class IceColumn:
+
+
     def __init__(self, date_inn, column_inn):
         '''
         This initializes the object
@@ -21,15 +161,13 @@ class IceColumn:
         :return:
         '''
 
-        self.date = date_inn  # Date
-        self.column = 0  # Ice column with [IceLayers].
-        self.water_line = -1  # Distance from bottom of ice column to the water surface. Negative number meens not initiallized
-        self.draft_thickness = -1  # This is ice, slush ice and slush layers. I.e. not snow layers
+        self.date = date_inn                # Date
+        self.column = 0                     # Ice column with [IceLayers].
+        self.water_line = -1                # Distance from bottom of ice column to the water surface. Negative number meens not initiallized
+        self.draft_thickness = -1           # This is ice, slush ice and slush layers. I.e. not snow layers
         self.total_column_height = None
-        self.metadata = {}  # Metadata given as dictionary {key:value , key:value, ... }
-        self.top_layer_is_slush = None  # [Bool] True if top layer is slush. False if not.
-        self.column_average_temperature = 0  # avg temperature used in energy balance calculations
-        self.last_days_temp_atm = [0, 0, 0, 0, 0]  # index zero is current and 1 is yesterday etc.
+        self.metadata = {}                  # Metadata given as dictionary {key:value , key:value, ... }
+        self.top_layer_is_slush = None      # [Bool] True if top layer is slush. False if not.
 
         if column_inn == 0:  # the case of no ice
             self.column = list()
@@ -48,6 +186,7 @@ class IceColumn:
         :param value:
         """
         self.metadata[key] = value
+
 
     def remove_metadata(self):
         self.metadata.clear()
@@ -294,7 +433,7 @@ class IceColumn:
         # only continuous dry layers from surface can be below freezing (0C)
         num_dry_layers = 0
         for l in self.column:
-            if l.enum() > 9:
+            if l.get_enum() > 9:
                 num_dry_layers += 1
             else:
                 break
@@ -387,7 +526,7 @@ class IceColumn:
             # find index of deepest snow layer. Slush forms at the bottom of this layer.
             index = 0
             for i in range(len(self.column)):
-                if self.column[i].enum() >= 20:  # material types >= 20 are snow
+                if self.column[i].get_enum() >= 20:  # material types >= 20 are snow
                     index = i  # keep counting the index until we reach bottom of the snow.
 
             # reduce the deepest snow layer with the dh_slush and if snowlayer isnt big enough go to the
@@ -451,9 +590,9 @@ class IceColumn:
         draft_thickness = 0
 
         for layer in self.column:
-            if draft_thickness == 0 and layer.enum() > 20:  # material types >= 20 are snow
+            if draft_thickness == 0 and layer.get_enum() > 20:  # material types >= 20 are snow
                 continue
-            # elif draft_thickness == 0 and layer.enum() == 2:    # slush over the ice does not count
+            # elif draft_thickness == 0 and layer.get_enum() == 2:    # slush over the ice does not count
             #    continue
             else:
                 draft_thickness = draft_thickness + layer.height
@@ -497,9 +636,9 @@ class IceColumn:
         '''
 
         for layer in self.column:
-            if layer.enum() > 20:  # material types >= 20 are snow
+            if layer.get_enum() > 20:  # material types >= 20 are snow
                 continue
-            elif layer.enum() == 2:  # slush over the ice does not count
+            elif layer.get_enum() == 2:  # slush over the ice does not count
                 self.top_layer_is_slush = True
                 return True
             else:
@@ -573,272 +712,37 @@ class IceColumn:
 
         current_depth = 0.
         resistivity_limit = 1/conductance_limit
-        current_restitivity = 0.
+        current_resistivity = 0.
 
         for l in self.column:
-            if current_restitivity < resistivity_limit:
+            if current_resistivity < resistivity_limit:
                 # if were not at the limit, keep adding
                 delta_resistivity = l.height / l.conductivity
-                if current_restitivity + delta_resistivity > resistivity_limit:
+                if current_resistivity + delta_resistivity > resistivity_limit:
                     # if only part of the layer is added
-                    rest_depth = l.height * (resistivity_limit - current_restitivity)/delta_resistivity
+                    rest_depth = l.height * (resistivity_limit - current_resistivity)/delta_resistivity
                     current_depth += rest_depth
-                    current_restitivity = resistivity_limit
+                    current_resistivity = resistivity_limit
                 else:
                     current_depth += l.height
-                    current_restitivity += delta_resistivity
+                    current_resistivity += delta_resistivity
             else:
                 # else stop
                 break
 
         # if not enougfht heit in the ice column make sure water contributes
-        if current_restitivity < resistivity_limit:
-            rest_depth_in_water = (resistivity_limit - current_restitivity) * const.k_water
+        if current_resistivity < resistivity_limit:
+            rest_depth_in_water = (resistivity_limit - current_resistivity) * const.k_water
             current_depth += rest_depth_in_water
-            current_restitivity = resistivity_limit
+            current_resistivity = resistivity_limit
 
         self.active_depth = current_depth
 
         return current_depth
 
 
-    def delete_get_surface_temperature_estimate(self, temp_atm):
-        """Method part of an atemt to estimate surface temp without energy
-        balance. Dead end and method can be deleted.
-
-        Surface temperature
-
-        :param temp_atm:
-        :return:
-        """
-
-        temp_surface = (self.column_average_temperature + temp_atm)/2
-
-        # THS approach
-        #temp_surface = self.column_average_temperature * 2
-
-        if temp_surface > 0.:
-            temp_surface = 0.
-
-        return temp_surface
-
-
-    def delete_update_column_average_temperature(self, temp_atm):
-        '''Method part of an atemt to estimate surface temp without energy
-        balance. Dead end and method can be deleted.
-
-        Average temperature of the column. The theory is:
-
-                temp_avg = ( sum_n(temp_atm * weight_n) / sum_n(weight_n) )/2
-
-        We devide by 2 from the asumption that there is a linear temperature gradient in the column and
-        at thte botonm it is water at 0C.
-
-        Method takes into account column thickness to how quick its temperature shifts according to
-        the atmospheric temperature.
-
-        I do calculations in Kelvin so that days with 0C in are taken into account.
-
-        :param temp_atm:
-        :return:
-
-        '''
-
-        max_h_thin_layer = 0.3  # in meter
-        medium_weights = [5, 2]
-        max_h_medium_layer = 1.  # in meter
-        thick_weighs = [5, 3, 2, 1]
-
-        # first index is avg temp. The next indexes are todays temperature, yesturdays temp, etc.
-        self.last_days_temp_atm.insert(0, temp_atm)
-        self.last_days_temp_atm.pop(-1)
-
-        # effect of temperature o column is depending on column thickness
-        total_thick = 0
-        for layer in self.column:
-            total_thick = total_thick + layer.height
-
-        avg_temp = 0
-
-        # no sno or ice. Avarage temp set to feezing temp in water
-        if total_thick == 0:
-            avg_temp = 0
-
-        # Thin layer case. Temperature in snow and ice is same as temp in atm.
-        elif total_thick < max_h_thin_layer:
-            avg_temp = temp_atm - const.absolute_zero
-
-        # Medium layer case
-        elif (total_thick >= max_h_thin_layer) and (total_thick < max_h_medium_layer):
-            weight = medium_weights
-            weight_sum = sum(weight)
-            for i in range(0, len(weight), 1):
-                w_i = weight[i]
-                temp_i = self.last_days_temp_atm[i] - const.absolute_zero
-                avg_temp = avg_temp + temp_i * w_i
-            avg_temp = avg_temp / weight_sum
-
-        # Thick layer case
-        else:
-            weight = thick_weighs
-            weight_sum = sum(weight)
-            for i in range(0, len(weight), 1):
-                w_i = weight[i]
-                temp_i = self.last_days_temp_atm[i] - const.absolute_zero
-                avg_temp = avg_temp + temp_i * w_i
-            avg_temp = avg_temp / weight_sum
-
-        # avg_temp is also effected by water temp (0C)
-        avg_temp_out = (avg_temp + const.absolute_zero) / 2
-
-        # snow and ice isnt above 0C
-        if avg_temp_out > 0.:
-            avg_temp_out = 0.
-
-        self.column_average_temperature = avg_temp_out
-
-        return
-
-
-class IceLayer:
-    '''
-    height      float in m
-    type        string
-    temp        float in C
-    '''
-
-    def __init__(self, height_inn, type_inn):
-
-        self.type = type_inn
-
-        self.height = height_inn
-        if height_inn: self.height = float(height_inn)  # If height_inn has value make sure it is a float
-
-        self.set_conductivity()
-        self.set_density()
-
-        self.temperature = None
-        self.metadata = {} # Metadata given as dictionary {key:value , key:value, ... }
-
-
-    def set_temperature(self, temperature_inn):
-        # Avarage temp of layer
-        self.temperature = temperature_inn
-
-    def set_temperature_top(self, temperature_top_inn):
-        self.temperature_top = temperature_top_inn
-
-    def set_temperature_bottom(self, temperature_bottom_inn):
-        self.temperature_bottom = temperature_bottom_inn
-
-    def add_metadata(self, key, value):
-        self.metadata[key] = value
-
-
-    def set_conductivity(self):
-        # sets conductivity for a given snow or ice type
-        # Method should only be used when initialising a new IceLayer
-        if self.type == 'new_snow':     self.conductivity = const.k_new_snow
-        elif self.type == 'snow':       self.conductivity = const.k_snow
-        elif self.type == 'drained_snow': self.conductivity = const.k_drained_snow
-        elif self.type == 'slush':      self.conductivity = const.k_slush
-        elif self.type == 'slush_ice':  self.conductivity = const.k_slush_ice
-        elif self.type == 'black_ice':  self.conductivity = const.k_black_ice
-        elif self.type == 'water':      self.conductivity = const.k_water
-        elif self.type == 'unknown':    self.conductivity = const.k_slush_ice
-
-
-    def set_density(self):
-        # Desities [kg m-3]
-        # Method should only be used when initialising a new IceLayer
-        if self.type == 'new_snow':     self.density = const.rho_new_snow
-        elif self.type == 'snow':       self.density = const.rho_snow
-        elif self.type == 'drained_snow': self.density = const.rho_drained_snow
-        elif self.type == 'slush':      self.density = const.rho_slush
-        elif self.type == 'slush_ice':  self.density = const.rho_slush_ice
-        elif self.type == 'black_ice':  self.density = const.rho_black_ice
-        elif self.type == 'water':      self.density = const.rho_water
-        elif self.type == 'unknown':    self.density = const.rho_slush_ice
-
-
-    def colour(self):
-        # returns the color used for plotting a given snow or ice type
-        if self.type == 'new_snow': return "0.9"
-        elif self.type == 'snow': return "0.8"
-        elif self.type == 'drained_snow': return "0.7"
-        elif self.type == 'slush': return "blue"
-        elif self.type == 'slush_ice': return "0.4"
-        elif self.type == 'black_ice': return "0.1"
-        elif self.type == 'water': return "red"
-        elif self.type == 'unknown': return "orange"
-        else: return "yellow"
-
-
-    def enum(self):
-        # returns the enum used for a given snow or ice type
-        # LayerTypes given as enums. Values 0-9 are liquids, 10-19 are ice, 20-29 are snow
-        if self.type == 'new_snow': return 20
-        elif self.type == 'snow': return 21
-        elif self.type == 'drained_snow': return 22
-        elif self.type == 'slush': return 2
-        elif self.type == 'slush_ice': return 11
-        elif self.type == 'black_ice': return 10
-        elif self.type == 'water': return 1
-        elif self.type == 'unknown': return 11
-        else: return -1
-
-
-    def heat_capacity(self):
-        # returns heat capacity given the type of layer
-        if self.type == 'new_snow': return const.c_snow
-        elif self.type == 'snow': return const.c_snow
-        elif self.type == 'drained_snow': return const.c_snow
-        elif self.type == 'slush': return const.c_slush
-        elif self.type == 'slush_ice': return const.c_ice
-        elif self.type == 'black_ice': return const.c_ice
-        elif self.type == 'water': return const.c_water
-        elif self.type == 'unknown': return const.c_ice
-        else: return -1
-
-
-    def get_surface_roughness(self):
-        # Surface roughness [m] as used to calculate turbulent fluxes
-        if self.type == 'new_snow': return const.z_new_snow
-        elif self.type == 'snow': return const.z_snow
-        elif self.type == 'drained_snow': return const.z_drained_snow
-        elif self.type == 'slush': return const.z_slush
-        elif self.type == 'slush_ice': return const.z_slush_ice
-        elif self.type == 'black_ice': return const.z_black_ice
-        elif self.type == 'water': return const.z_water
-        elif self.type == 'unknown': return const.z_black_ice
-        else: return -1
-
-
-    def get_thermal_diffusivity(self):
-        """returns Thermal diffusivity given the type of layer
-        Thermal diffusivity (alpha) [m^2/sek]
-
-            alpha = k / rho / c
-
-            k   is thermal conductivity (W/(m·K))
-            rho is density (kg/m³)
-            c   is specific heat capacity (J/(kg·K))
-
-        From https://en.wikipedia.org/wiki/Thermal_diffusivity
-        """
-
-        if self.type == 'new_snow':         return const.k_new_snow     /self.density/   const.c_snow
-        elif self.type == 'snow':           return const.k_snow         /self.density/   const.c_snow
-        elif self.type == 'drained_snow':   return const.k_drained_snow /self.density/   const.c_snow
-        elif self.type == 'slush':          return const.k_slush        /self.density/   const.c_slush
-        elif self.type == 'slush_ice':      return const.k_slush_ice    /self.density/   const.c_ice
-        elif self.type == 'black_ice':      return const.k_black_ice    /self.density/   const.c_ice
-        elif self.type == 'water':          return const.k_water        /self.density/   const.c_water
-        elif self.type == 'unknown':        return const.k_black_ice    /self.density/   const.c_ice
-        else: return -1
-
-
 class IceCover:
+
 
     def __init__(self, date_inn, iceCoverName_inn, iceCoverBeforeName_inn, locationName_inn):
         self.date = date_inn
@@ -849,6 +753,7 @@ class IceCover:
         self.locationName = locationName_inn
 
         self.RegID = None
+
 
     def set_regid(self, regid_inn):
         self.RegID = regid_inn

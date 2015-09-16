@@ -43,8 +43,8 @@ def get_ice_thickness_from_energy_balance(
     else:
         energy_balance = deb.temp_surface_from_eb(
             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            error=100., age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm,
-            iteration_method="Delta_T")
+            error=10., age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm,
+            iteration_method="Newton_Raphson")
 
         surface_temp = energy_balance.temp_surface
         out_column = None
@@ -58,9 +58,6 @@ def get_ice_thickness_from_energy_balance(
                 ice_column, time_span_in_sec, prec_snow, surface_temp, melt_energy=melt_energy)
         else:
             print "get_ice_thickness_from_energy_balance: Surface temp cant be above 0C in the method get_ice_thickness_from_energy_balance"
-
-    if (ice_column.date).date() == dt.date(2014, 2, 04):
-        debug = True
 
     return out_column, energy_balance
 
@@ -119,7 +116,7 @@ def get_ice_thickness_from_surface_temp(
             while time_step > 0 and i <= len(ic.column)-1:
 
                 # If the layer is a solid it only adds to the total isolation. Unless it is the last..
-                if (ic.column[i].enum()) > 9:
+                if (ic.column[i].get_enum()) > 9:
                     U_total = addLayerConductanceToTotal(U_total, ic.column[i].conductivity, ic.column[i].height)
 
                     # If the layer is the last layer of solids and thus at the bottom, we get freezing at the bottom
@@ -167,7 +164,7 @@ def get_ice_thickness_from_surface_temp(
                 if ic.column[0].type == 'water':
                     ic.remove_layer_at_index(0)
                 else:
-                    if ic.column[0].enum() >= 20: # snow
+                    if ic.column[0].get_enum() >= 20: # snow
                         meltingcoeff = const.meltingcoeff_snow
                     elif ic.column[0].type == 'slush_ice':
                         meltingcoeff = const.meltingcoeff_slush_ice

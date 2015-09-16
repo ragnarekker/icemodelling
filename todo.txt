@@ -1,8 +1,7 @@
 
 
 * implement second correction routine
-* implement momentum term in turbulent fluxes (eq 1 in On the parameterization of turbulent surface
-fluxes over heterogeneous sea ice surfaces)
+* implement momentum term in turbulent fluxes (eq 1 in On the parameterization of turbulent surface fluxes over heterogeneous sea ice surfaces)
 * plot layer temperatures
 * calculate implement shortwave atuenation in the colomn top layers in energy_balance_from_temp_sfc
 * make reference list for articles

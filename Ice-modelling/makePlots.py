@@ -1,14 +1,19 @@
 __author__ = 'raek'
 # -*- coding: utf-8 -*-
+
+
 import pylab as plb
 import matplotlib.pyplot as pplt
 import numpy as np
+import datetime as dt
+import setEnvironment as se
 
-# needs comments
-def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
-    '''
-    :param icecover:
-    :param observed_ice:    A list of icecover objects. If no observed ice use [] for input.
+
+def plot_ice_cover(ice_cover, observed_ice, date, temp, snotot, filename):
+    '''Plots ice cover over a given time period. It also plots observed data and snow and temperature data.
+
+    :param ice_cover:
+    :param observed_ice:    A list of ice_cover objects. If no observed ice use [] for input.
     :param date:
     :param temp:
     :param snotot:
@@ -22,44 +27,43 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
     plb.clf()
 
     # depending on how many days are in the plot, the lineweight of the modelled data should be adjusted
-    modelledLineWeight = 1100/len(icecover)
+    modelledLineWeight = 1100/len(ice_cover)
 
     # dont need to keep the colunm coordinates, but then again, why not..? Usefull for debuging
-    allColumnCoordinates = []
+    all_column_coordinates = []
 
     # plot total snow depth on land
     plb.plot(date, snotot, "gray")
 
-    plb.title('{0} - {1} days plotted.'.format(filename, len(icecover)))
+    plb.title('{0} - {1} days plotted.'.format(filename, len(ice_cover)))
 
-    # a variable for the lowest point on the icecover. It is used for setting the lower left y-limit .
+    # a variable for the lowest point on the ice cover. It is used for setting the lower left y-limit .
     lowest_point = 0.
 
-    # Plot icecover
-    for ic in icecover:
+    # Plot ice cover
+    for ic in ice_cover:
 
-        # some idea of progres on the plotting
+        # some idea of progress on the plotting
         if ic.date.day == 1:
             print((ic.date).strftime('%Y%m%d'))
 
-        # make data for plotting. [icelayers.. [fro, too, icetype]].
-        columncoordinates = []
+        # make data for plotting. [ice layers.. [fro, too, ice type]].
+        column_coordinates = []
         too = -ic.water_line  # water line is on xaxis
 
         for i in range(len(ic.column)-1, -1, -1):
             layer = ic.column[i]
             fro = too
             too = too + layer.height
-            columncoordinates.append([fro, too, layer.type])
+            column_coordinates.append([fro, too, layer.type])
 
             if fro < lowest_point:
                 lowest_point = fro
 
             # add coordinates to a vline plot
-            plb.vlines(ic.date, fro, too, lw=modelledLineWeight, color=layer.colour()) #ic.getColour(layer.type))
+            plb.vlines(ic.date, fro, too, lw=modelledLineWeight, color=layer.get_colour()) #ic.getColour(layer.type))
 
-        allColumnCoordinates.append(columncoordinates)
-
+        all_column_coordinates.append(column_coordinates)
 
     # plot observed ice columns
     for ic in observed_ice:
@@ -90,7 +94,7 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
                     padding_color = 'orange'
                 # add coordinates to a vline plot
                 plb.vlines(ic.date, fro-padding, too+padding, lw=6, color=padding_color)
-                plb.vlines(ic.date, fro, too, lw=4, color=layer.colour())
+                plb.vlines(ic.date, fro, too, lw=4, color=layer.get_colour())
 
     # the limits of the left side y-axis is defined relative the lowest point in the ice cover
     # and the highest point of the observed snow cover.
@@ -117,13 +121,11 @@ def plotIcecover(icecover, observed_ice, date, temp, snotot, filename):
     plb.savefig(filename)
 
 
-def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, filename,
+def plot_ice_cover_eb(ice_cover, energy_balance, observed_ice, date, temp, snotot, filename,
                    prec=None, wind=None, clouds=None):
     """
-    http://matplotlib.org/mpl_examples/color/named_colors.png
 
-
-    :param icecover:
+    :param ice_cover:
     :param energy_balance:
     :param observed_ice:
     :param date:
@@ -134,6 +136,8 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     :param wind:
     :param clouds:
     :return:
+
+    Note: http://matplotlib.org/mpl_examples/color/named_colors.png
     """
 
     fsize = (16, 16)
@@ -146,7 +150,7 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     pplt.subplot2grid((11, 1), (0, 0), rowspan=2)
 
     # depending on how many days are in the plot, the line weight of the modelled data should be adjusted
-    modelledLineWeight = 1100/len(icecover)
+    modelledLineWeight = 1100/len(ice_cover)
 
     # dont need to keep the colunm coordinates, but then again, why not..? Usefull for debuging
     allColumnCoordinates = []
@@ -154,13 +158,13 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
     # plot total snow depth on land
     plb.plot(date, snotot, "gray")
 
-    plb.title('{0} - {1} days plotted.'.format(filename, len(icecover)))
+    plb.title('{0} - {1} days plotted.'.format(filename, len(ice_cover)))
 
-    # a variable for the lowest point on the icecover. It is used for setting the lower left y-limit .
+    # a variable for the lowest point on the ice_cover. It is used for setting the lower left y-limit .
     lowest_point = 0.
 
-    # Plot icecover
-    for ic in icecover:
+    # Plot ice_cover
+    for ic in ice_cover:
 
         # some idea of progress on the plotting
         if ic.date.day == 1:
@@ -180,7 +184,7 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
                 lowest_point = fro
 
             # add coordinates to a vline plot
-            plb.vlines(ic.date, fro, too, lw=modelledLineWeight, color=layer.colour()) #ic.getColour(layer.type))
+            plb.vlines(ic.date, fro, too, lw=modelledLineWeight, color=layer.get_colour()) #ic.getColour(layer.type))
 
         allColumnCoordinates.append(columncoordinates)
 
@@ -214,7 +218,7 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
                     padding_color = 'orange'
                 # add coordinates to a vline plot
                 plb.vlines(ic.date, fro-padding, too+padding, lw=6, color=padding_color)
-                plb.vlines(ic.date, fro, too, lw=4, color=layer.colour())
+                plb.vlines(ic.date, fro, too, lw=4, color=layer.get_colour())
 
     # the limits of the left side y-axis is defined relative the lowest point in the ice cover
     # and the highest point of the observed snow cover.
@@ -463,3 +467,32 @@ def plotIcecoverEB(icecover, energy_balance, observed_ice, date, temp, snotot, f
 
     return
 
+
+def debug_plot_eb(temps_sfc, ebs, date):
+    '''Plots energy balances for different surface temperatures. Theses are used to debug iteration methods
+    for finding where energy balance is 0. Plots are also useful to understand behavior of energy balance
+    at surface and air temperature.
+
+    :param temps_sfc:
+    :param ebs:
+    :param date:
+    :return:
+    '''
+
+    fsize = (16, 10)
+    plb.figure(figsize=fsize)
+    plb.clf()
+    pplt.plot(temps_sfc, ebs)
+    pplt.axhline(y=0, color='k')
+    pplt.axvline(x=0, color='k')
+    pplt.axvline(x=np.median(temps_sfc), color='gray')
+    pplt.grid(True, which='both')
+
+    date_string = dt.datetime.strftime(date, "%Y-%m-%d")
+    file_name = "{0}energy balance plot {1}.png".format(se.plot_folder, date_string)
+
+    pplt.title(file_name)
+    pplt.xlabel('temp [C]')
+    pplt.ylabel('eb [kJ/m2/24hrs]')
+
+    plb.savefig(file_name)
