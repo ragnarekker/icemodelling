@@ -484,7 +484,7 @@ def debug_plot_eb(temps_sfc, ebs, date):
     plb.clf()
     pplt.plot(temps_sfc, ebs)
     pplt.axhline(y=0, color='k')
-    pplt.axvline(x=0, color='k')
+    #pplt.axvline(x=0, color='k')
     pplt.axvline(x=np.median(temps_sfc), color='gray')
     pplt.grid(True, which='both')
 

@@ -13,7 +13,7 @@ import datetime as dt
 
 def get_ice_thickness_from_energy_balance(
         utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, time_span_in_sec,
-        albedo_prim=None, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
+        albedo_prim=None, age_factor_tau=None, cloud_cover=None, wind=None, rel_hum=None, pressure_atm=None):
     """
 
     :param utm33_x:
@@ -43,8 +43,8 @@ def get_ice_thickness_from_energy_balance(
     else:
         energy_balance = deb.temp_surface_from_eb(
             utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            error=10., age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm,
-            iteration_method="Newton_Raphson")
+            age_factor_tau=age_factor_tau,
+            cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum, pressure_atm=pressure_atm)
 
         surface_temp = energy_balance.temp_surface
         out_column = None
@@ -57,7 +57,7 @@ def get_ice_thickness_from_energy_balance(
             out_column = get_ice_thickness_from_surface_temp(
                 ice_column, time_span_in_sec, prec_snow, surface_temp, melt_energy=melt_energy)
         else:
-            print "get_ice_thickness_from_energy_balance: Surface temp cant be above 0C in the method get_ice_thickness_from_energy_balance"
+            print "doicethicckness --> get_ice_thickness_from_energy_balance: Surface temp cant be above 0C in the method get_ice_thickness_from_energy_balance"
 
     return out_column, energy_balance
 
@@ -105,7 +105,7 @@ def get_ice_thickness_from_surface_temp(
 
         # If no ice, freeze water to ice
         if len(ic.column) == 0:
-            dh = math.sqrt(np.absolute(2 * const.k_black_ice / const.rho_black_ice / const.L_black_ice * temp * time_step))
+            dh = math.sqrt(np.absolute(2 * const.k_black_ice / const.rho_black_ice / const.L_fusion * temp * time_step))
             ic.add_layer_at_index(0, ice.IceLayer(dh, 'black_ice'))
             time_step = 0
         else:
@@ -123,14 +123,14 @@ def get_ice_thickness_from_surface_temp(
                     if i == len(ic.column)-1:
 
                         # The heat flux equation gives how much water will freeze
-                        dh = - temp * U_total * time_step / const.rho_water / const.L_black_ice
+                        dh = - temp * U_total * time_step / const.rho_water / const.L_fusion
                         ic.add_layer_at_index(i+1, ice.IceLayer(dh, 'black_ice'))
                         time_step = 0
 
                 # Else the layer is a slush layer above or in the ice column and it will freeze fully or partially
                 else:
                     time_step_used = 0
-                    L_slush_ice = const.part_ice_in_slush*const.L_black_ice
+                    L_slush_ice = const.part_ice_in_slush*const.L_fusion
                     if i == 0: # there is slush surface with no layers with conductance above
                         dh = math.sqrt(np.absolute(2 * const.k_slush_ice / const.rho_slush_ice / L_slush_ice * temp * time_step))    # formula X?
                         time_step_used = ic.column[i].height**2 * const.rho_slush_ice * L_slush_ice / 2 / -temp / const.k_slush_ice             # formula X sortet for time
@@ -198,7 +198,7 @@ def get_ice_thickness_from_surface_temp(
                     ic.remove_layer_at_index(0)
                 else:
                     # energy available to melt used with latent heat of fusion (delta_h = Q/L/rho)
-                    L_ice = const.L_black_ice/1000.    # Joule to Kilo Joule
+                    L_ice = const.L_fusion/1000.    # Joule to Kilo Joule
                     dh = melt_energy / L_ice / ic.column[0].density * time_step/24/60/60
 
                     # if layer is thinner than total melting the layer is removed and the rest of melting occurs
