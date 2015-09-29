@@ -4,6 +4,7 @@ __author__ = 'raek'
 import copy
 import datetime as dt
 import constants as const
+import defaults as defaults
 import doconversions as dc
 import doparameterization as dp
 from weather import EnergyBalanceElement as ebe
@@ -12,7 +13,7 @@ from math import log, exp, sin, cos, pi, fabs, sqrt, acos
 
 def energy_balance_from_temp_sfc(
         utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-        temp_surface, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
+        temp_surface, age_factor_tau=None, cloud_cover=None, wind=None, rel_hum=None, pressure_atm=None):
     """Given surface temperature, the daily energy budget of a column of snow is expressed as:
 
     EB = S + (L_a - L_t) + (LE + H) + G + R - CC - SC
@@ -67,7 +68,7 @@ def energy_balance_from_temp_sfc(
 
     # Calculate some parameters
     if cloud_cover is None:
-        cloud_cover = dp.clouds_from_precipitation(prec, method='Binary')
+        cloud_cover = dp.clouds_from_precipitation(prec, method=defaults.default_cloud_cover_method)
 
     # This scenario should be avoided but I keep it for now because it it the method used in senorge_eb
     #if temp_surface is None:
@@ -83,16 +84,14 @@ def energy_balance_from_temp_sfc(
         day_no_inn=day_no, time_hour_inn=time_hour, time_span_in_sec_inn=time_span_in_sec)
 
     # Calculate the energy balance terms
-    S, s_inn, albedo, albedo_prim, age_factor_tau = \
-        get_short_wave(utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, snow_density, prec_snow, time_hour,
-                       time_span_in_sec, temp_surface, albedo_prim, age_factor_tau=age_factor_tau, albedo_method="ueb")
+    S, s_inn, albedo, albedo_prim, age_factor_tau = get_short_wave(
+        utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, snow_density, prec_snow, time_hour,
+        time_span_in_sec, temp_surface, albedo_prim, age_factor_tau=age_factor_tau, albedo_method=defaults.default_albedo_method)
 
-    L_a, L_t = \
-        get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_span_in_sec)
+    L_a, L_t = get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_span_in_sec)
 
-    H, LE, R_i, stability_correction = \
-         get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_column,
-                                      pressure_atm=pressure_atm, wind=wind)
+    H, LE, R_i, stability_correction = get_turbulent_flux(
+        temp_atm, temp_surface, time_span_in_sec, ice_column, pressure_atm=pressure_atm, wind=wind, rel_hum=rel_hum)
 
     G = get_ground_heat(time_span_in_sec)
 
@@ -103,10 +102,6 @@ def energy_balance_from_temp_sfc(
     SC, conductance = get_surface_heat_conduction(ice_column, temp_surface, time_span_in_sec)
 
     EB = S + (L_a + L_t) + (LE + H) + G + R + (CC + SC)
-
-    # For debugging it is useful to get the date of unnormal activity
-    #if EB > 20000.:
-    #    print("{0}: EB > 20000.".format(date))
 
     energy_balance.add_short_wave(S, s_inn, albedo, albedo_prim, age_factor_tau)
     energy_balance.add_long_wave(L_a, L_t)
@@ -122,14 +117,14 @@ def energy_balance_from_temp_sfc(
 
 def energy_balance_from_temp_sfc_value(
         utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-        temp_surface=None, age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None):
+        temp_surface=None, age_factor_tau=None, cloud_cover=None, wind=None, rel_hum=None, pressure_atm=None):
     """Same as energy_balance_from_temp_sfc but this method returns only the value EB.
     """
 
     obj = energy_balance_from_temp_sfc(
         utm33_x=utm33_x, utm33_y=utm33_y, ice_column=ice_column, temp_atm=temp_atm, prec=prec, prec_snow=prec_snow,
         albedo_prim=albedo_prim, time_span_in_sec=time_span_in_sec,
-        temp_surface=temp_surface, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+        temp_surface=temp_surface, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum,
         pressure_atm=pressure_atm)
 
     return obj.EB
@@ -137,8 +132,8 @@ def energy_balance_from_temp_sfc_value(
 
 def temp_surface_from_eb(
         utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-        error=1., age_factor_tau=None, cloud_cover=None, wind=None, pressure_atm=None,
-        iteration_method="Newton-Raphson"):
+        error=defaults.default_iteration_error, age_factor_tau=None, cloud_cover=None, wind=None, rel_hum=None,
+        pressure_atm=None, iteration_method=defaults.default_iteration_method):
     """Solves surface temperature from the criteria that the energy budget has to be zero. In case of melting the
     energy budget is balanced with a surface melting so that the sum of energy fluxes are 0.
 
@@ -183,9 +178,9 @@ def temp_surface_from_eb(
     # Start debug. Calculate energy balances around surface temp to se development.
     debug = False
 
-    #if ice_column.date.date() == dt.date(2012, 12, 1): debug = True
-    #if ice_column.date.date() == dt.date(2013, 1, 1): debug = True
-    #if ice_column.date.date() == dt.date(2013, 2, 1): debug = True
+    #if ice_column.date.date() == dt.date(2012, 12, 24): debug = True
+    #if ice_column.date.date() == dt.date(2012, 12, 29): debug = True
+    #if ice_column.date.date() == dt.date(2013, 2, 16): debug = True
     #if ice_column.date.date() == dt.date(2013, 3, 1): debug = True
     #if ice_column.date.date() == dt.date(2013, 4, 1): debug = True
     #if ice_column.date.date() == dt.date(2013, 4, 15): debug = True
@@ -195,12 +190,13 @@ def temp_surface_from_eb(
         import numpy as np
         import makePlots as mp
 
-        temps_sfc = np.linspace(temp-15., temp+15.)
+        temps_sfc = np.linspace(temp-2., temp+2.)
         ebs = []
         for t in temps_sfc:
             eb_check = energy_balance_from_temp_sfc(
-            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            temp_surface=t, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+                utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+                temp_surface=t, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum,
+                pressure_atm=pressure_atm)
             ebs.append(eb_check.EB)
 
         mp.debug_plot_eb(temps_sfc, ebs, ice_column.date)
@@ -211,9 +207,9 @@ def temp_surface_from_eb(
 
             eb = energy_balance_from_temp_sfc_value(
                 utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-                temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+                temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum,
                 pressure_atm=pressure_atm)
-            delta_t = abs(eb)/10000
+            delta_t = abs(eb)/defaults.delta_t_eb_fraction
 
             if eb > 0.:   # to much energy coming inn.
                 temp += delta_t
@@ -229,17 +225,26 @@ def temp_surface_from_eb(
         Finding EB=0 with Newton Raphson method of root finding. If it passes the x-axis it starts itterating by
         averaging the last value to the right and left of the root.
 
+        If the chande in temperature from one step to another is to large or we have exceeded a max number of
+        iterations a delta T method is used.
+
         Newton Raphs:
         x_{n+1} = x_{n} - f(x_{n})/ df(x_{n})/dx
         """
 
         temp_prev = temp
-        eb_prev = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp_prev, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+        eb_prev = energy_balance_from_temp_sfc_value(
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            temp_surface=temp_prev, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+            rel_hum=rel_hum, pressure_atm=pressure_atm)
 
         # if eb is positive, to much energy is coming inn and thus the surface temp is to low.
-        delta_t = eb_prev/50000
+        delta_t = eb_prev/defaults.init_d_t_eb_fraction
         temp = temp_prev + delta_t
-        eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+        eb = energy_balance_from_temp_sfc_value(
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+            rel_hum=rel_hum, pressure_atm=pressure_atm)
         d_eb = (eb-eb_prev)/(temp-temp_prev)
         eb_sign = abs(eb)/eb
 
@@ -258,6 +263,14 @@ def temp_surface_from_eb(
             if dedt_condition is True:
                 # use the Newton Raphson with derivative
                 temp = temp_prev - eb_prev/d_eb_prev
+                # if step is to large or to many iterations needed, somthing might be wrong. Do a delta-temp aproach
+                if abs(temp-temp_prev) > defaults.d_temp_max or num_iterations > defaults.num_iterations_max:
+                    temp = temp_prev
+                    delta_t = abs(eb)/defaults.d_t_eb_fraction
+                    if eb > 0.:   # to much energy coming inn.
+                        temp += delta_t
+                    if eb < 0.:   # to much energy going out.
+                        temp -= delta_t
             else:  # if dedt_condition is False:
                 if first_halving is True:           # first iteration is different.
                     first_halving = False
@@ -269,7 +282,10 @@ def temp_surface_from_eb(
 
                 temp = (temp_plus + temp_minus)/2
 
-            eb = energy_balance_from_temp_sfc_value(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+            eb = energy_balance_from_temp_sfc_value(
+                utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+                temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum,
+                pressure_atm=pressure_atm)
             eb_sign = abs(eb)/eb
             d_eb = (eb-eb_prev)/(temp-temp_prev)
 
@@ -282,22 +298,30 @@ def temp_surface_from_eb(
                     first_halving = True        # first iteration by halving is different because values ate initiated.
 
             num_iterations += 1
-            if num_iterations > 50:
+
+            num_iterations_cut_of = defaults.num_iterations_cut_of
+            if num_iterations > num_iterations_cut_of:
                 date_as_string = dt.datetime.strftime(ice_column.date, "%Y-%m-%d")
                 print('doenergybalance -> temp_surf_from_eb -> newton_raphson: '
-                      'Number of iterations exceeded 50. Breaking with eb = {0} kJ/m2/24hr on {1}'
-                      .format(eb, date_as_string))
+                      'Number of iterations exceeded {3}. Breaking with eb = {0} kJ/m2/24hr at temp_surf = {2} on {1}'
+                      .format(eb, date_as_string, temp, num_iterations_cut_of))
                 break
             eb_condition = eb
 
     # If temp_surf is above freezing temp, get energy balance at freezing and transfer energy to surface melt.
     # Also, get the full object. Note that in earlier steps only the energy balance value is requested.
     if temp > const.temp_f:
-        eb_obj = energy_balance_from_temp_sfc(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=const.temp_f, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+        eb_obj = energy_balance_from_temp_sfc(
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            temp_surface=const.temp_f, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind,
+            rel_hum=rel_hum, pressure_atm=pressure_atm)
         eb_obj.add_surface_melt(-1 * eb_obj.EB)
         eb_obj.EB = 0.
     else:
-        eb_obj = energy_balance_from_temp_sfc(utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec, temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, pressure_atm=pressure_atm)
+        eb_obj = energy_balance_from_temp_sfc(
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            temp_surface=temp, age_factor_tau=age_factor_tau, cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum,
+            pressure_atm=pressure_atm)
         eb_obj.add_surface_melt(0.)
 
     eb_obj.add_iterations(num_iterations)
@@ -638,46 +662,111 @@ def get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_
     return L_a, L_t                     # Gir verdier av riktig størrelsesorden og balanserer hverandre sånn passe
 
 
-def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_column, pressure_atm=None, wind=None):
-    '''
-    Turbulent fluxes:
-    Theory for calculations found in Dingman, 2002, p. 197.
+def get_turbulent_flux_MARTIN_1998(
+        temp_atm, temp_surface, time_span_in_sec, ice_column, pressure_atm, wind, rel_hum):
+    """
+    Latent and Sensible heatfluxes as formuleted in MARTIN 1998.
 
-    :param temp_atm:            døgnmiddeltemperatur/aktuell temperatur
-    :param temp_surface:        snøtemperatur
-    :param time_span_in_sec:    Tidsoppløsning i sekunder
-    :param wind:                Vind set constnstant if not given
-    :param pressure_atm:        atmopheric presure set constnstant if not given
-
-    :return:    H   [kJm^(-2)] Sensible heat exchange.
-                LE  [kJm^(-2)] Energy flux associated with the latent heats of vaporization and condensation at the surface.
+    :param temp_atm:
+    :param temp_surface:
+    :param time_span_in_sec:
+    :param ice_column:
+    :param pressure_atm:
+    :param wind:
+    :param rel_hum:
 
     :return:
-    '''
 
-    if pressure_atm is None:
-        pressure_atm = const.pressure_atm
-    if wind is None:
-        wind = const.avg_wind_const
+    """
 
-    c_air = const.c_air             # specific heatcapacity air
-    rho_air = const.rho_air         # density of air
-    k = const.von_karmans_const     # von Karmans konstant
-    zu = 10                         # Høyde på vind målinger
-    zt = 10                         # Høyde på lufttemperatur målinger
-    #z_0 = const.z_snow              # ruhetsparameter for snø
+    c_air = const.c_air             # Specific heat capacity air.
+    rho_air = const.rho_air         # Density of air.
+    k = const.von_karmans_const     # Von Karmans constant.
+    g = const.g
+
+    zu = 10                         # Height of wind measurements.
+    zt = 10                         # Height of temperature measurements.
+
     z_0 = ice_column.column[0].get_surface_roughness()
-    z_tau = z_0 * 10**-3  # surf roughness for sensible heat
-    d = ice_column.get_snow_height()    # Zeroplane displecement for snow. I.e correction for snowdepth.
-    zh = const.z_vapour             # varme og damp ruhets
+    z_H = z_0 * 10**-3              # Surface roughness for sensible heat.
+    z_LE = z_0                      # Heat and vapour roughness.
 
-    common = k**2/(log((zu-d)/z_0, 10))/(log((zu-d)/z_tau, 10))
+    # Turbulent flux coeficients are asumed equal for latent and sensible heat
+    coeff_H = k**2 / (log(zu/z_0)*log(zt/z_0))
+    coeff_LE = coeff_H
+    coeff_n = coeff_H
 
+    # Richardsons number relating horizontal (nominator) vs vertical (denominator) momentum in the atmosphere,
+    R_i = 2*g/(temp_atm - const.absolute_zero) * (temp_atm - temp_surface)/zt * zu/wind     # error in paper. use Z_a not Z_0
+    stability_correction = 1        # neutral case (R_i = 0)
+    if R_i > 0:                     # for stable case
+        stability_correction = rho_air * c_air * coeff_n * max( 0.75 , (1-5*R_i)**2 )       # eq 8 in paper
+    elif R_i < 0:                   # for unstable case
+        a = 0.83*coeff_n**(-0.62)
+        stability_correction = (1 + 7/a * log(1-a*R_i))
+        #stability_correction = min(stability_correction, 3.)
+
+    coeff = coeff_n * stability_correction
+
+    # SENSIBLE HEAT. Positive if temp_surface < temp_atm
+    H = rho_air * c_air * coeff * wind * (temp_atm - temp_surface)
+
+    # LATENT HEAT
+    # e_a and e_s [kPa] are saturation vapor pressure and are estimated as
+    # (Dingman, 2002, p. 586, see also Walter et al. 2005)
+    ea = 0.611 * exp( (17.3*temp_atm)/(temp_atm+273.3) )           # atmosphere [kPa] always positive
+    es = 0.611 * exp( (17.3*temp_surface)/(temp_surface+273.3) )   # surface [kPa] always positive
+
+    L_s = const.L_sublimation
+    molecular_weight_ratio = const.molecular_weight_ratio
+
+    LE = L_s*rho_air/pressure_atm * molecular_weight_ratio * coeff*wind * (ea * rel_hum - es)
+
+    # J pr 24hrs
+    H *= time_span_in_sec
+    LE *= time_span_in_sec
+
+    # J to kJ
+    H /= 1000
+    LE /= 1000
+
+    return H, LE, R_i, stability_correction
+
+
+def get_turbulent_flux_YOU_2014(
+        temp_atm, temp_surface, time_span_in_sec, ice_column, pressure_atm, wind):
+    """
+    Latent andd sensible heatfluxes as fromulated in YOU 2014.
+
+    :param temp_atm:
+    :param temp_surface:
+    :param time_span_in_sec:
+    :param ice_column:
+    :param pressure_atm:
+    :param wind:
+
+    :return:
+    """
+
+    c_air = const.c_air             # Specific heat capacity air.
+    rho_air = const.rho_air         # Density of air.
+    k = const.von_karmans_const     # Von Karmans constant.
+    g = const.g
+
+    zu = 10                         # Height of wind measurements.
+    zt = 10                         # Height of temperature measurements.
+
+    z_0 = ice_column.column[0].get_surface_roughness()
+    z_H = z_0 * 10**-3            # Surface roughness for sensible heat.
+    z_LE = z_0            # Heat and vapour roughness.
+    d = 0               # Zeroplane displecement for snow where the zero level reference is at a height between the base and the top of the roughness elements.
+
+    # common = k**2/(log((zu-d)/z_H, 10))/(log((zu-d)/z_H, 10))     # From 2012 SKAUGEN
+    common = k**2/(log(zu/z_0))**2                          # From 2014 YOU
+
+    # Richardsons number relating horizontal (nominator) vs vertical (denominator) momentum in the atmosphere,
     # Correction when temperature gradient near surface.
-    # Eqs 7-11 in "Modelling the snow surface temperature with a one-layer energy balance model"
-    # Richardsons number
-    R_i = const.g * zu * (temp_atm-temp_surface) / (0.5 * (temp_atm + temp_surface - const.absolute_zero*2) * wind**2)
-
+    R_i = g * zu * (temp_atm-temp_surface) / (0.5 * (temp_atm + temp_surface - const.absolute_zero*2) * wind**2)
     stability_correction = 1
     if R_i > 0:             # for stable conditions
         stability_correction = 1/(1+10*R_i)
@@ -687,26 +776,25 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
 
     common *= stability_correction
 
-    # Sensible heat exchange
-    H = c_air*rho_air*common*wind*(temp_atm-temp_surface)  # Sensible heat. Positivt hvis temp_surface < temp_atm
+    # Sensible heat. Positive if temp_surface < temp_atm
+    H = c_air*rho_air*common*wind*(temp_atm-temp_surface)
 
-    # Latent heat exchange
-    # e_a and e_s [kPa] are saturation vapor pressure in the atmosphere and at the surface respectively.
-    # Can be estimated as (Dingman, 2002, p. 586, see also Walter et al. 2005))
+    # Latent heat. Positive if temp_surface < temp_atm
+    # e_a and e_s [kPa] are saturation vapor pressure in the atmosphere and at the
+    # surface respectively. Are be estimated as (Dingman, 2002, p. 586, see also Walter et al. 2005))
     ea = 0.611 * exp( (17.3*temp_atm)/(temp_atm+273.3) )           # [kPa] always positive
     es = 0.611 * exp( (17.3*temp_surface)/(temp_surface+273.3) )   # [kPa] always positive
 
     # Where λ_F and λ_V are the latent heats involved in fusion and vaporization-condensation respectively
-    lambda_V = const.L_vapour     # Jkg-1 latent varme fra fordampning
-    lambda_F = const.L_black_ice      # Jkg-1 latent varme fra fusjon
+    lambda_V = const.L_vapour           # Jkg-1 latent varme fra fordampning
+    lambda_F = const.L_fusion        # Jkg-1 latent varme fra fusjon
 
-    LE = None       # Latent varme. Positivt hvis temp_surface < temp_atm
     if temp_surface < 0.:
         LE = (lambda_V+lambda_F)*0.622*(rho_air/pressure_atm)*common*wind*(ea-es)
     elif temp_surface == 0.:
         LE = lambda_V * 0.622 * (rho_air/pressure_atm) * common * wind *(ea-es)
     else:
-        # This works for temps above 0 aswel
+        # This works for temps above 0 but given a snow or ice surface, it is not a physical case
         LE = lambda_V * 0.622 * (rho_air/pressure_atm) * common * wind *(ea-es)
 
     # J pr 24hrs
@@ -717,8 +805,46 @@ def get_sensible_and_latent_heat(temp_atm, temp_surface, time_span_in_sec, ice_c
     H /= 1000
     LE /= 1000
 
-    if H > 10000. or LE > 10000.:
-        print("{0}: H or LE > 15000 kJ/m2/day")
+    return H, LE, R_i, stability_correction
+
+
+def get_turbulent_flux(
+        temp_atm, temp_surface, time_span_in_sec, ice_column, pressure_atm, wind, rel_hum,
+        method=defaults.default_turbulent_flux_method):
+    '''
+    Turbulent fluxes:
+    Theory for calculations found in Dingman, 2002, p. 197.
+
+    :param temp_atm:            døgnmiddeltemperatur/aktuell temperatur
+    :param temp_surface:        snøtemperatur
+    :param time_span_in_sec:    Tidsoppløsning i sekunder
+    :param pressure_atm:        atmopheric presure set constnstant if not given
+    :param wind:                Vind set constnstant if not given
+    :param rel_hum:
+    :param method:
+
+    :return:    H   [kJm^(-2)] Sensible heat exchange.
+                LE  [kJm^(-2)] Energy flux associated with the latent heats of vaporization and condensation at the surface.
+                R_i
+                stability_correction
+    '''
+
+    H = None            # Sensible heat. Positive if temp_surface < temp_atm
+    LE = None           # Latent heat. Positive if temp_surface < temp_atm
+    R_i = None          # Richardsons number relating horizontal (nominator) vs vertical (denominator) momentum in the atmosphere,
+    stability_correction = None     # Correction to the turbulent flux coefficient
+
+    if method == "YOU 2014":
+        H, LE, R_i, stability_correction = get_turbulent_flux_YOU_2014(
+            temp_atm, temp_surface, time_span_in_sec, ice_column, pressure_atm, wind)
+
+    elif method == "MARTIN 1998":
+        H, LE, R_i, stability_correction = get_turbulent_flux_MARTIN_1998(
+            temp_atm, temp_surface, time_span_in_sec, ice_column, pressure_atm, wind, rel_hum)
+
+    else:
+        print("doenergybalance.py -> get_turbulent_flux: No valid method given.")
+
 
     return H, LE, R_i, stability_correction
 

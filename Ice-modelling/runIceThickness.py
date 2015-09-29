@@ -39,7 +39,8 @@ def calculate_ice_cover_air_temp(inn_column, date, temp, sno, cloud_cover=None):
     return icecover
 
 
-def calculate_ice_cover_eb(utm33_x, utm33_y, date, temp_atm, prec, prec_snow, cloud_cover, wind, inn_column=None):
+def calculate_ice_cover_eb(
+        utm33_x, utm33_y, date, temp_atm, prec, prec_snow, cloud_cover, wind, rel_hum, pressure_atm, inn_column=None):
     """
 
     :param utm33_x:
@@ -75,7 +76,8 @@ def calculate_ice_cover_eb(utm33_x, utm33_y, date, temp_atm, prec, prec_snow, cl
             out_column, eb = dit.get_ice_thickness_from_energy_balance(
                 utm33_x=utm33_x, utm33_y=utm33_y, ice_column=inn_column, temp_atm=temp_atm[i],
                 prec=prec[i], prec_snow=prec_snow[i], time_span_in_sec=time_span_in_sec,
-                albedo_prim=albedo_prim, age_factor_tau=age_factor_tau, wind=wind[i], cloud_cover=cloud_cover[i])
+                albedo_prim=albedo_prim, age_factor_tau=age_factor_tau, wind=wind[i], cloud_cover=cloud_cover[i],
+                rel_hum=rel_hum[i], pressure_atm=pressure_atm[i])
 
             icecover.append(out_column)
             energy_balance.append(eb)
@@ -161,13 +163,16 @@ def runOrovannEB(startDate, endDate):
     prec_snow = dp.delta_snow_from_total_snow(sno_tot)
     prec = we.strip_metadata(wsPrec)
     cloud_cover = dp.clouds_from_precipitation(prec)
-    wind = [3.5] * len(prec)
+    wind = [const.avg_wind_const] * len(date)
+    rel_hum = [const.rel_hum_air] * len(date)
+    pressure_atm = [const.pressure_atm] * len(date)
+
 
     # available_elements = gws.getElementsFromTimeserieTypeStation(54710, 0, 'csv')
     observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
 
     ice_cover, energy_balance = calculate_ice_cover_eb(
-        utm33_x, utm33_y, date, temp, prec, prec_snow, cloud_cover, wind,
+        utm33_x, utm33_y, date, temp, prec, prec_snow, cloud_cover, wind, rel_hum=rel_hum, pressure_atm=pressure_atm,
         inn_column=copy.deepcopy(observed_ice[0]))
 
     # Need datetime objects from now on
@@ -198,13 +203,16 @@ def runSemsvannEB(startDate, endDate):
     sno_tot = we.strip_metadata(wsSno)
     prec_snow = dp.delta_snow_from_total_snow(sno_tot)
     prec = we.strip_metadata(wsPrec)
-    cloud_cover = we.strip_metadata(wsCC)
     wind = we.strip_metadata(wsWind)
+    cloud_cover = we.strip_metadata(wsCC)
+    rel_hum = [const.rel_hum_air] * len(date)
+    pressure_atm = [const.pressure_atm] * len(date)
 
     observed_ice = gro.get_all_season_ice(location_name, startDate, endDate)
 
     ice_cover, energy_balance = calculate_ice_cover_eb(
-        utm33_x, utm33_y, date, temp, prec, prec_snow, cloud_cover=cloud_cover, wind=wind,
+        utm33_x, utm33_y, date,
+        temp, prec, prec_snow, cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum, pressure_atm=pressure_atm,
         inn_column=copy.deepcopy(observed_ice[0]))
 
     # Need datetime objects from now on
@@ -394,9 +402,9 @@ def runStorvannetHammerfest(startDate, endDate):
 
 if __name__ == "__main__":
 
-    runSemsvannEB('2012-12-01', '2013-05-20')
-    runSemsvannEB('2013-11-15', '2014-06-20')
-    runSemsvannEB('2014-11-15', '2015-06-20')
+    #runSemsvannEB('2012-12-01', '2013-05-20')
+    #runSemsvannEB('2013-11-15', '2014-06-20')
+    #runSemsvannEB('2014-11-15', '2015-06-20')
     runOrovannEB('2014-11-15', '2015-06-20')
 
     runSemsvann('2011-11-01', '2012-05-01')
