@@ -12,8 +12,8 @@ def __getGammafilter(a, lamda, negativeDays, hardness):
     :param a:               shapefactor of a gammadistribution
     :param lamda:           scalefactor of a gammadistribution (sometimes scale=1/lamda as in scipy)
     :param negativeDays:    How many days back should the change have affect? Eg 1.5 goes to noon two days back.
-    :param hardness:        Should the filter smoothe or spread? Eg: if hardness = 0.5 and applied to only one rainevent
-                            the cloudcover will be 0.5 that day.
+    :param hardness:        Should the filter smoothe or spread? Eg: if hardness = 0.5 and applied to only
+                            one rain event the cloud cover will be 0.5 that day.
 
     :return:                A gammafilter
     """
@@ -68,7 +68,7 @@ def __getGammafilter(a, lamda, negativeDays, hardness):
 
 
 # Needs commenst
-def justGammaSmoothing(*args):
+def just_gamma_smoothing(*args):
 
     # Get the gamma "smoothing" filter
     if len(args) == 1:
@@ -210,14 +210,14 @@ def old_ccFromTempAndPrec(temp, prec):
 
 
 # Needs comments
-def ccFromTempChange(*args):
+def cc_gamma_temp_change(*args):
 
     # Take cloudcover and enforce affect of clouds on declining temps and clear weather on rizing temps.
 
     dtemp = args[0]
     dTemp_abs = map(abs, dtemp)
 
-    cloudsOut = justGammaSmoothing(dTemp_abs, args[1])
+    cloudsOut = just_gamma_smoothing(dTemp_abs, args[1])
 
     cloudsOut_cropped = []
     for clo in cloudsOut:
@@ -232,20 +232,22 @@ def ccFromTempChange(*args):
 
 
 # needs comments
-def ccFromTemp(*args):
+def cc_gamma_temp(*args):
 
     temp = args[0]
 
     # make array of tempchnge from yesterday to today
     dtemp = pz.delta_temperature_from_temperature(temp)
 
-    return ccFromTempChange(dtemp, args[1])
+    return cc_gamma_temp_change(dtemp, args[1])
 
 
 # Needs comments
-def ccGammaSmoothing(*args):
+def cc_gamma_smoothing(*args):
+    """Same as just_gamma_smoothing but since were talking about clouds values below 0% is set to 0% and
+    values over 100% are set to 100%"""
 
-    cloudsOut = justGammaSmoothing(args[0], args[1])
+    cloudsOut = just_gamma_smoothing(args[0], args[1])
 
     cloudsOut_cropped = []
     for clo in cloudsOut:
@@ -260,18 +262,18 @@ def ccGammaSmoothing(*args):
 
 
 # Needs comments
-def ccFromPrecAndTemp(*args):
+def cc_gamma_prec_and_temp_change(*args):
 
     if len(args) == 2:
-        ccPrec = ccFromPrec(args[0])
-        ccPrec = ccGammaSmoothing(ccPrec)
-        ccTemp = ccFromTemp(args[1])
+        ccPrec = pz.clouds_from_precipitation(args[0], method='Binary')
+        ccPrec = cc_gamma_smoothing(ccPrec)
+        ccTemp = cc_gamma_temp(args[1])
     elif len(args) == 4:
-        ccPrec = ccFromPrec(args[0])
-        ccPrec = ccGammaSmoothing(ccPrec, args[2])
-        ccTemp = ccFromTemp(args[1], args[3])
+        ccPrec = pz.clouds_from_precipitation(args[0], method='Binary')
+        ccPrec = cc_gamma_smoothing(ccPrec, args[2])
+        ccTemp = cc_gamma_temp(args[1], args[3])
     else:
-        print("Wrong input. Method taks 2 or 4 arguments.")
+        print("Wrong input. Method takes 2 or 4 arguments.")
 
     cc = []
     for i in range(0, len(ccPrec), 1):
