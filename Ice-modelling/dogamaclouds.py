@@ -211,13 +211,23 @@ def old_ccFromTempAndPrec(temp, prec):
 
 # Needs comments
 def cc_gamma_temp_change(*args):
+    '''Makes a cloud cover from a list of temperature change where a gamma filter has been applied.
 
-    # Take cloudcover and enforce affect of clouds on declining temps and clear weather on rizing temps.
+
+    Args[0] is the temperature change
+    Args[1] is the configurations og the gamma smoothing. Eg. gammaTemp = [4.8, 1., 5., 0.03]
+
+    :param args:
+    :return:
+
+    '''
+
 
     dtemp = args[0]
+    gammaTemp = args[1]
     dTemp_abs = map(abs, dtemp)
 
-    cloudsOut = just_gamma_smoothing(dTemp_abs, args[1])
+    cloudsOut = just_gamma_smoothing(dTemp_abs, gammaTemp)
 
     cloudsOut_cropped = []
     for clo in cloudsOut:

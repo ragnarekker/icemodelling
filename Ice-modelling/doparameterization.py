@@ -195,6 +195,9 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
     Method = Average:   Calculates a (constant) average cloud cover of a period based on the number of
                         precipitation days in the period. It turns out this gave rms = 0.37 on a Semsvann study.
 
+    Method = Binary and average: Method combines the above. If there is no rain one day, the average precipitation
+                        in the period is used and if there is precipitation 100% cloud cover is used.
+
     :param prec_inn:        [list or single value]     Precipitation
     :return clouds_out:     [list or single value]     Cloud cover
 
@@ -229,6 +232,15 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
         average = sum(clouds)/float(len(clouds))
         average = float("{0:.2f}".format(average))
         clouds_out = [average]*len(clouds)
+
+
+    if method == 'Binary and average':
+
+        clouds_out_1 = clouds_from_precipitation(prec, method='Binary')
+        clouds_out_2 = clouds_from_precipitation(prec, method='Average')
+        for i in range(0, len(clouds_out_1), 1):
+            clouds_out.append(min(clouds_out_1[i]+clouds_out_2[i], 1))
+
 
     # Again, if prec_inn isn't a list, return only a float.
     if not isinstance(prec_inn, types.ListType):

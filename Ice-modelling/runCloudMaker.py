@@ -439,6 +439,9 @@ def testCloudMaker(stnr, startDate, endDate, method):
     elif method == 'ccFromAveragePrec':
         estClouds = dpz.clouds_from_precipitation(prec, method='Average')
         gammaFigtext = 'No gamma smoothing and dayshift = {0}'.format(dayShift)
+    elif method == 'ccFromPrecAndAveragePrec':
+        estClouds = dpz.clouds_from_precipitation(prec, method='Binary and average')
+        gammaFigtext = ''.format()
     elif method == 'ccFromAverageObsCc':
         estClouds = [sum(clouds)/float(len(clouds))] * len(clouds)
         gammaFigtext = ''.format()
@@ -536,8 +539,9 @@ def testCloudMaker(stnr, startDate, endDate, method):
 
 if __name__ == "__main__":
 
-    testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrec')
-    testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromAveragePrec')
+    #testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrec')
+    #testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromAveragePrec')
+    testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrecAndAveragePrec')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromAverageObsCc')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccGammaPrec')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccGammaTempChange')
