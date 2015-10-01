@@ -232,7 +232,7 @@ def runSemsvann(startDate, endDate):
 
     wsTemp = gws.getMetData(19710, 'TAM', startDate, endDate, 0, 'list')
     wsSno = gws.getMetData(19710, 'SA', startDate, endDate, 0, 'list')
-    wsCC = gws.getMetData(18700, 'NNM', startDate, endDate, 0 , 'list')
+    wsCC = gws.getMetData(18700, 'NNM', startDate, endDate, 0, 'list')
 
     temp, date = we.strip_metadata(wsTemp, True)
     snotot = we.strip_metadata(wsSno, False)
@@ -258,9 +258,9 @@ def runHakkloa(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    cs_temp = we.make_daily_average(gcsd.getStationdata('6.24.4','17.1', from_date, to_date, 'list'))
-    cs_sno = we.make_daily_average(gcsd.getGriddata(260150, 6671135, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.make_daily_average(gcsd.getGriddata(260150, 6671135, 'sd', from_date, to_date, 'list'))
+    cs_temp = gcsd.getStationdata('6.24.4','17.1', from_date, to_date, timeseries_type=0)
+    cs_sno = gcsd.getGriddata(260150, 6671135, 'fsw', from_date, to_date, timeseries_type=0)
+    cs_snotot = gcsd.getGriddata(260150, 6671135, 'sd', from_date, to_date, timeseries_type=0)
     wsCC = gws.getMetData(18700, 'NNM', startDate, endDate, 0, 'list')
 
     temp, date = we.strip_metadata(cs_temp, True)
@@ -286,10 +286,10 @@ def runSkoddebergvatnet(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    #cs_temp = make_daily_average(gcsd.getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
-    cs_temp = we.make_daily_average(gcsd.getGriddata(593273, 7612469, 'tm', from_date, to_date, 'list'))
-    cs_sno = we.make_daily_average(gcsd.getGriddata(593273, 7612469, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.make_daily_average(gcsd.getGriddata(593273, 7612469, 'sd', from_date, to_date, 'list'))
+    #cs_temp = gcsd.getGriddata('189.3.0','17.1', from_date, to_date)
+    cs_temp = gcsd.getGriddata(593273, 7612469, 'tm', from_date, to_date)
+    cs_sno = gcsd.getGriddata(593273, 7612469, 'fsw', from_date, to_date)
+    cs_snotot = gcsd.getGriddata(593273, 7612469, 'sd', from_date, to_date)
     wsCC = gws.getMetData(87640, 'NNM', startDate, endDate, 0, 'list')  # Harstad Stadion
 
     temp, date = we.strip_metadata(cs_temp, True)
@@ -317,10 +317,10 @@ def runGiljastolsvatnet(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    #cs_temp = make_daily_average(gcsd.getStationdata('189.3.0','17.1', from_date, to_date, 'list'))
-    cs_temp = we.make_daily_average(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
-    cs_sno = we.make_daily_average(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.make_daily_average(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    #cs_temp = gcsd.getStationdata('189.3.0','17.1', from_date, to_date)
+    cs_temp = gcsd.getGriddata(x, y, 'tm', from_date, to_date)
+    cs_sno = gcsd.getGriddata(x, y, 'fsw', from_date, to_date)
+    cs_snotot = gcsd.getGriddata(x, y, 'sd', from_date, to_date)
     wsCC = gws.getMetData(43010, 'NNM', startDate, endDate, 0, 'list')  # Eik - Hove. Ligger lenger sør men er litt inn i landet.
     #wsCC = getMetData(43010, 'NNM', startDate, endDate, 0, 'list') # Sola (44560) er et alternativ
 
@@ -349,9 +349,9 @@ def runBaklidammen(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    cs_temp = we.make_daily_average(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
-    cs_sno = we.make_daily_average(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.make_daily_average(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    cs_temp = gcsd.getGriddata(x, y, 'tm', from_date, to_date)
+    cs_sno = gcsd.getGriddata(x, y, 'fsw', from_date, to_date)
+    cs_snotot = gcsd.getGriddata(x, y, 'sd', from_date, to_date)
     wsCC = gws.getMetData(68860, 'NNM', startDate, endDate, 0, 'list')  # TRONDHEIM - VOLL
 
     temp, date = we.strip_metadata(cs_temp, True)
@@ -379,9 +379,9 @@ def runStorvannetHammerfest(startDate, endDate):
     from_date = dt.datetime.strptime(startDate, "%Y-%m-%d")
     to_date = dt.datetime.strptime(endDate, "%Y-%m-%d")
 
-    cs_temp = we.make_daily_average(gcsd.getGriddata(x, y, 'tm', from_date, to_date, 'list'))
-    cs_sno = we.make_daily_average(gcsd.getGriddata(x, y, 'fsw', from_date, to_date, 'list'))
-    cs_snotot = we.make_daily_average(gcsd.getGriddata(x, y, 'sd', from_date, to_date, 'list'))
+    cs_temp = gcsd.getGriddata(x, y, 'tm', from_date, to_date)
+    cs_sno = gcsd.getGriddata(x, y, 'fsw', from_date, to_date)
+    cs_snotot = gcsd.getGriddata(x, y, 'sd', from_date, to_date)
     wsCC = gws.getMetData(95350, 'NNM', startDate, endDate, 0, 'list')  # BANAK - østover innerst i fjorden
 
     temp, date = we.strip_metadata(cs_temp, True)
@@ -402,9 +402,9 @@ def runStorvannetHammerfest(startDate, endDate):
 
 if __name__ == "__main__":
 
-    #runSemsvannEB('2012-12-01', '2013-05-20')
-    #runSemsvannEB('2013-11-15', '2014-06-20')
-    #runSemsvannEB('2014-11-15', '2015-06-20')
+    runSemsvannEB('2012-12-01', '2013-05-20')
+    runSemsvannEB('2013-11-15', '2014-06-20')
+    runSemsvannEB('2014-11-15', '2015-06-20')
     runOrovannEB('2014-11-15', '2015-06-20')
 
     runSemsvann('2011-11-01', '2012-05-01')

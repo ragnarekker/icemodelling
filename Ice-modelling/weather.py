@@ -195,14 +195,14 @@ class WeatherElement():
             elementValue = 0
         self.Value = float(elementValue)
 
-        # Snow is different
+        # Met snow is different
         if elementID == 'SA':
             if elementValue < 0.:
                 self.Value = 0.
             else:
                 self.Value = elementValue/100.
 
-        # Rain seems to have a special treatment as well. Also, we use meter and not mm..
+        # Met rain seems to have a special treatment as well. Also, we use meter and not mm..
         if elementID == 'RR':
             if elementValue < 0.:
                 self.Value = 0.

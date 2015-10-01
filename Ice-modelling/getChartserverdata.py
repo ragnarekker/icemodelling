@@ -2,14 +2,13 @@ __author__ = 'ragnarekker'
 # -*- coding: utf-8 -*-
 
 import datetime
-
 import requests
-
 import doparameterization as pz
 from weather import WeatherElement, make_daily_average, meter_from_centimeter
 
 # URL to the chartserver/ShowData service
 baseURL = "http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart&ver=1.0&vfmt=json"
+
 
 def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
     """
@@ -42,31 +41,38 @@ def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
 
     return weatherElementList
 
-def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, output):
+
+def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, timeseries_type=0, output='list'):
     """
-    Method gets data from the chartserverapi at NVE. Method called is ShowData.aspx.
-    Future dates as well as past dates are returned. Future dates are generated from modellgrids from met.no
+    Method gets data from the chartserver api at NVE. Method called is ShowData.aspx.
+    Future dates as well as past dates are returned. Future dates are generated from model grids from met.no
 
     Note that griddata is based on met data from 00 to 06 dayly values. Eg. precipitation on 17th of mai is found in
     data for 06:00 18th of mai.
 
-    :param UTM33X:      {int} X coordinate in utm33N
-    :param UTM33Y:      {int} Y coordinate in utm33N
-    :param elementID:   {string} Element ID in seNorge. Ex: elementID = 'fsw' is 24hr new snow depth in [cm]
-    :param fromDate:    {datetime} method returns [fromDate ,toDate>
-    :param toDate:      {datetime} method returns [fromDate ,toDate>
-    :param output:      {string} How to present the output.
-    :return:            {list} List of WeatherElement objects with 24h resolution.
+    :param UTM33X:          {int} X coordinate in utm33N
+    :param UTM33Y:          {int} Y coordinate in utm33N
+    :param elementID:       {string} Element ID in seNorge. Ex: elementID = 'fsw' is 24hr new snow depth in [cm]
+    :param fromDate:        {datetime} method returns data [fromDate, toDate>
+    :param toDate:          {datetime} method returns data [fromDate, toDate>
+    :param timeseries_type  {int} Works only on output='list' daily = 0, no change = None (default)
+    :param output:          {string} How to present the output.
+    :return:                {list} List of WeatherElement objects with 24h resolution.
+
+    Timeseries types:
+        None                Data returned as received from service
+        0                   Data made to daily average
+        See also:           http://eklima.no/wsKlima/complete/cTimeserie_en.html
 
     Output options:
-        'list':         returns a list of WeatherElement objects.
-        'json':         returns NULL but saves a .json file til the working folder.
+        'list':             returns a list of WeatherElement objects.
+        'json':             returns NULL but saves a .json file til the working folder.
 
 
     ElementID's used:
-        fws:            new snow last 24hrs
-        sd:             snow depth
-        tm:             temperature avarage 24hrs
+        fws:                new snow last 24hrs
+        sd:                 snow depth
+        tm:                 temperature avarage 24hrs
 
 
     Example URL for getting grid data
@@ -78,19 +84,28 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, output):
 
     """
 
-    url = '{0}&time={1};{2}&chd=ds=hgts,da=29,id={3};{4};{5}'\
-        .format(baseURL, fromDate.strftime('%Y%m%dT%H%M'), toDate.strftime('%Y%m%dT%H%M'), UTM33X, UTM33Y, elementID)
+    url = '{0}&time={1};{2}&chd=ds=hgts,da=29,id={3};{4};{5}'.format(
+        baseURL, fromDate.strftime('%Y%m%dT%H%M'), toDate.strftime('%Y%m%dT%H%M'), UTM33X, UTM33Y, elementID)
 
     if output == 'list':
-        weatherElementList = __makeWeatherElementListFromURL(url , 'UTM33 X{0} Y{1}'.format(UTM33X, UTM33Y), elementID, {'MethodName': 'Chartserver - getGriddata'})
+        weatherElementList = __makeWeatherElementListFromURL(
+            url , 'UTM33 X{0} Y{1}'.format(UTM33X, UTM33Y), elementID, {'MethodName': 'Chartserver - getGriddata'})
         if elementID == 'fsw' or elementID == 'sd':
             weatherElementList = meter_from_centimeter(weatherElementList)        # convert for [cm] til [m]
+
+        if timeseries_type == -1:              # do nothing
+            weatherElementList = weatherElementList
+        elif timeseries_type == 0:                # make dailyavaregs of hourly values
+            weatherElementList = make_daily_average(weatherElementList)
+        else:
+            print('no valid timeseries type selected')
+            weatherElementList = 'no valid timeseries type selected'
         return weatherElementList
 
     elif output == 'json':
         datareq = requests.get(url)
-        filename = 'X{0}_Y{1}_{2}.{3}_{4}.json'\
-            .format(UTM33X, UTM33Y, elementID, fromDate.strftime('%Y%m%d'), toDate.strftime('%Y%m%d'))
+        filename = 'X{0}_Y{1}_{2}.{3}_{4}.json'.format(
+            UTM33X, UTM33Y, elementID, fromDate.strftime('%Y%m%d'), toDate.strftime('%Y%m%d'))
         f = open(filename, 'w')
         f.write((datareq.text).encode('utf-8'))
         f.close()
@@ -100,9 +115,10 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, output):
         print('No valid output requested.')
         return 'No valid output requested'
 
-def getYrdata(stationID, elementID, fromDate, toDate, output):
+
+def getYrdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output='list'):
     """
-    Gets data form yr.no though the chartserverapi at NVE. Method called is ShowData.aspx.
+    Gets data form yr.no though the chartserver api at NVE. Method called is ShowData.aspx.
     Does not return historical values. Seems only to return +48 hrs even though more is requested.
 
     :param stationID:   {string} Station ID in hydra. Ex: stationID  = '6.24.4'
@@ -111,6 +127,12 @@ def getYrdata(stationID, elementID, fromDate, toDate, output):
     :param toDate:      {datetime} method returns data including toDate
     :param output:      {string} How to present the output.
     :return:            List of WeatherElement objects with 24h resolution.
+
+
+    Timeseries types:
+        None                Data returned as received from service
+        0                   Data made to daily average
+        See also:           http://eklima.no/wsKlima/complete/cTimeserie_en.html
 
     Output options:
         'list':         returns a list of WeatherElement objects.
@@ -136,7 +158,14 @@ def getYrdata(stationID, elementID, fromDate, toDate, output):
 
     if output == 'list':
         weatherElementList = __makeWeatherElementListFromURL(url, stationID, elementID, {'MethodName': 'Chartserver - getYrdata'})
-        weatherElementList = make_daily_average(weatherElementList)        # make dailyavaregs of hourly values
+        if timeseries_type == -1:              # do nothing
+            weatherElementList = weatherElementList
+        elif timeseries_type == 0:                # make dailyavaregs of hourly values
+            weatherElementList = make_daily_average(weatherElementList)
+        else:
+            print('no valid timeseries type selected')
+            weatherElementList = 'no valid timeseries type selected'
+        return weatherElementList
 
     elif output == 'json':
         datareq = requests.get(url)
@@ -152,12 +181,9 @@ def getYrdata(stationID, elementID, fromDate, toDate, output):
         return 'No valid output requested'
 
 
-
-    return weatherElementList
-
-def getStationdata(stationID, elementID, fromDate, toDate, output):
+def getStationdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output='list'):
     """
-    Method gets data from the chartserverapi at NVE. Method called is ShowData.aspx.
+    Method gets data from the chartserver api at NVE. Method called is ShowData.aspx.
     The data returned from the api are 30min values but they recalculated to daily average in this method.
     Future dates are truncated in this method, but dataset may be complemented with the getYrdata in this class.
 
@@ -167,6 +193,12 @@ def getStationdata(stationID, elementID, fromDate, toDate, output):
     :param toDate:      {datetime} method returns [fromDate ,toDate]
     :param output:      {string} How to present the output.
     :return:            {list} List of WeatherElement objects with 24h resolution.
+
+
+    Timeseries types:
+        None                Data returned as received from service
+        0                   Data made to daily average
+        See also:           http://eklima.no/wsKlima/complete/cTimeserie_en.html
 
     Output options:
         'list':         returns a list of WeatherElement objects.
@@ -188,7 +220,13 @@ def getStationdata(stationID, elementID, fromDate, toDate, output):
 
     if output == 'list':
         weatherElementList = __makeWeatherElementListFromURL(url, stationID, elementID, {'MethodName': 'Chartserver - getStationdata'})
-        weatherElementList = make_daily_average(weatherElementList)               # daily avarages
+        if timeseries_type == -1:              # do nothing
+            weatherElementList = weatherElementList
+        elif timeseries_type == 0:                # make dailyavaregs of hourly values
+            weatherElementList = make_daily_average(weatherElementList)
+        else:
+            print('no valid timeseries type selected')
+            weatherElementList = 'no valid timeseries type selected'
         return weatherElementList
 
     elif output == 'json':
@@ -215,7 +253,8 @@ def __runHakkloaTemp():
     toDate =   datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=4), datetime.datetime.min.time())
     output = 'list'
 
-    return getStationdata(stationID, elementID, fromDate, toDate, output)
+    return getStationdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output='list')
+
 
 def __runHakkloaSnow():
 
@@ -230,7 +269,8 @@ def __runHakkloaSnow():
     toDate =   datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=4), datetime.datetime.min.time())
     output = 'list'
 
-    return getGriddata(UTM33X, UTM33Y, elementID,fromDate, toDate, output)
+    return getGriddata(UTM33X, UTM33Y, elementID,fromDate, toDate, timeseries_type=0, output='list')
+
 
 def __runHakkloaTempYr():
     # Hakkloa temp data
@@ -240,7 +280,7 @@ def __runHakkloaTempYr():
     toDate =   datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=4), datetime.datetime.min.time())
     output = 'list'
 
-    return getYrdata(stationID, elementID, fromDate, toDate, output)
+    return getYrdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output='list')
 
 
 if __name__ == "__main__":

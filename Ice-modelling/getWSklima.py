@@ -65,7 +65,7 @@ def getStationsFromTimeserieTypeElemCodes():
     # Asker har id 19710 og Blindern 18700
 
 
-def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output):
+def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output='list'):
     """
     Gets availabe weather elements on a given met station.
 
@@ -153,21 +153,21 @@ def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output):
         return stationElementList
 
 
-def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
+def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='list'):
     '''
     The method uses the eklima webservice from met.no documented om eklims.met.no/wsklima
 
     Parameters and return:
         :param stationID:       The station number
         :param elementID:       The weather element code
-        :param fromDate:        The from date as string 'YYYY-MM-DD'
-        :param toDate:          The to date as string 'YYYY-MM-DD'
+        :param fromDate:        The from date as string 'YYYY-MM-DD' or datetime
+        :param toDate:          The to date as string 'YYYY-MM-DD' or datetime
         :param timeseriesType:  The timeserie type to be requested. Eg 0 is daily avarage.
         :param output:          3 types of output are available.
         :return:                A list of weatherElements or files are made to working directory.
 
     Output options:
-        'list':         returns a list of WeatherElement objects.
+        'list':         returns a list of WeatherElement objects (default).
         'xml':          returns NULL but saves a .xml file to the working folder.
         'csv':          returns NULL but saves a .csv file to the working folder. The separation value are tab
 
@@ -190,6 +190,10 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output):
             <to xsi:type="xsd:dateTime" xsi:nil="true"/>
         </item>
     '''
+
+    #if isinstance(fromDate, datetime.datetime):
+    #    fromDate = fromDate.strftime("%Y-%m-%d")
+    #    toDate = toDate.strftime("%Y-%m-%d")
 
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getMetData&timeserietypeID={4}&format=&from={2}&to={3}&stations={0}&elements={1}&hours=&months=&username="\
         .format(stationID, elementID, fromDate, toDate, timeseriesType)

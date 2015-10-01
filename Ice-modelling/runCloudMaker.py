@@ -539,8 +539,8 @@ def testCloudMaker(stnr, startDate, endDate, method):
 
 if __name__ == "__main__":
 
-    #testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrec')
-    #testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromAveragePrec')
+    testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrec')
+    testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromAveragePrec')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrecAndAveragePrec')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromAverageObsCc')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccGammaPrec')
@@ -553,6 +553,6 @@ if __name__ == "__main__":
 
     #ccFromPrecAndTemp2(19710, '2011-10-01', '2012-06-01')
 
-    makeSomeScatterPlots(19710, '2005-06-01', '2012-06-01')
+    #makeSomeScatterPlots(19710, '2005-06-01', '2012-06-01')
 
     a = 1

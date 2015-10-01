@@ -1,0 +1,15 @@
+Temperatur	TAMRR	Middeltemperatur i nedbørdøgnet	ºC	2007-09-27 00:00:00	None	Døgnverdi: Aritmetisk middel av 24 timeverdier (evt formelbasert middelverdi) for kl 06-06 utc
+Temperatur	TAM	Middeltemperatur	ºC	2007-09-26 00:00:00	None	"Timeverdi: Aritmetisk middel av minuttverdier Døgnverdi: Aritmetisk middel av 24 timeverdier (kl 00-00), evt formelbasert middelverdi ut fra færre observasjoner (kl 18-18)Månedsverdi: Aritmetisk middel av døgn-TAM "
+Temperatur	TAN	Minimumstemperatur	ºC	2007-10-01 00:00:00	None	Laveste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+Temperatur	TAX	Maksimumstemperatur	ºC	2007-10-01 00:00:00	None	Høyeste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+Snø	SD	Snødekke	kodetall	1896-02-11 00:00:00	2007-08-31 00:00:00	Oppgis med kodetall 1 - 4: 1 - 3 betyr at deler av marka er snødekt, og 4 at området rundt stasjonen er helt snødekt. Kode = -1 betyr "ikke snø", presenterast som "."
+Temperatur	VEKST	Vekstgradtall	graddager	2007-09-26 00:00:00	None	Tall som avledes av døgnmiddeltemperaturen (antall grader > 5 ºC)
+Nedbør	SLAG	Nedbørslag	kode	1884-04-06 00:00:00	2007-08-31 00:00:00	Døgnverdi: Sammendrag av nedbørtyper i døgnet: 02 (alle typer snø), 03 (alle typer regn), 30 (kombinasjon av 02 og 03), 31 (dugg, rim, tåke)
+Nedbør	RRTA	Nedbør i temperaturdøgnet	mm	2007-08-16 00:00:00	None	Døgn- eller månedssum for nedbør (temperaturdøgn 19-19)
+Snø	SA	Snødybde	cm	1896-12-07 00:00:00	2015-05-31 00:00:00	Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres som ".", -3 = "umulig å måle"
+Temperatur	GD17	Energigradtall (basis 17)	graddager	2007-09-26 00:00:00	None	Også kalt graddagstall eller fyringsgrader. Tallet avledes av døgnmiddeltemperaturen (antall grader < 17 ºC)
+Temperatur	VSUM	Varmesum	graddager	2007-09-26 00:00:00	None	Tall som avledes av døgnmiddeltemperaturen (antall grader > 0 ºC)
+Temperatur	TAND	Lufttemperatur	ºC	2008-01-26 00:00:00	None	Laveste registrerte temperatur i timen/døgnet (kl 00-23)
+Temperatur	TAXD	Lufttemperatur	ºC	2008-01-26 00:00:00	None	Høyeste registrerte temperatur i timen/døgnet (kl 00-23)
+Nedbør	RR	Nedbør	mm	1883-01-01 00:00:00	None	Døgn- eller månedssum for nedbør (nedbørdøgn 07-07)
+Nedbør	RR_720	Nedbør 720 timer (siste 30 døgn)	mm	2007-09-01 00:00:00	None	Nedbør for en løpende måned (30 døgn)
