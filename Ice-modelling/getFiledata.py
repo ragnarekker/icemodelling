@@ -5,6 +5,24 @@ import datetime
 
 
 def read_weather(from_date, to_date, filename):
+    """Reads date, temperature, snow and snowchange from a file formated with coluns for
+    date, snow change, pressure?, wind, temperature and total snow. See example under.
+
+    :param from_date:
+    :param to_date:
+    :param filename:
+    :return:
+
+    Eg. of file (tabs and spaces are optional):
+          Dato;    s [m];       mm;      m/s;      C;  tot_s [m]
+    2011-10-01;     0.01;   407.75;     1.14;  10.51;       0.01
+    2011-10-02;     0.01;    408.5;     1.61;   8.87;       0.02
+    2011-10-03;     0.01;   409.03;     2.36;   5.59;       0.03
+    2011-10-04;     0.01;   415.74;     5.69;   2.79;       0.04
+    2011-10-05;     0.01;   420.35;     3.71;   3.63;       0.05
+    2011-10-06;     0.01;   424.21;     3.09;   2.42;       0.06
+    2011-10-07;     0.01;   431.93;     4.19;   0.98;       0.07
+    """
 
     date = []
     temp = []
@@ -34,9 +52,10 @@ def read_weather(from_date, to_date, filename):
 
     return date, temp, sno, snotot
 
-# new way to read observed icecolumns for file. Inputfile contains multiple observations. Method returns a list of icecoluns
+
 def importColumns(filepath_inn):
-    '''
+    '''Reads observed ice columns from file. Input file contains multiple observations.
+    Method returns a list of ice coluns.
 
     :param filepath_inn:    path to the .csv file with observations
     :return:                a list of iceColumn objects [iceColum, iceColum, iceColum, ...]

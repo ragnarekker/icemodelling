@@ -2,17 +2,16 @@ __author__ = 'raek'
 # -*- coding: utf-8 -*-
 
 
-import datetime
+import datetime as dt
 
 
 def strip_metadata(weather_element_list, get_dates=False):
-    """
-    Method takes inn a list of WeatherElement objects and strips away all metadata. A list of values is returned and if
-    getDate = True a corresponding list of dates is also retuned.
+    """Method takes inn a list of WeatherElement objects and returns a list of values.
+    If getDate = True a corresponding list of dates is also returned.
 
-    :param weather_element_list [list of weatherElements]:    List of elements of class WeatherElement
-    :param get_dates [bool]:         if True dateList is returned also
-    :return valueList, dateList:    dateList is otional and is returned if get_dates is True.
+    :param weather_element_list:    [list] List of elements of class WeatherElement
+    :param get_dates:               [bool] if True dateList is returned also
+    :return valueList, dateList:    [list(s)] dateList is optional and is returned if get_dates is True.
     """
 
     if get_dates == True:
@@ -62,7 +61,7 @@ def unit_from_okta(cloud_cover_in_okta_list):
 
 
 def meter_from_centimeter(weather_element_list):
-    """
+    """Converts cm to meters in a WeatherElement list
 
     :param weather_element_list:
     :return:
@@ -75,6 +74,22 @@ def meter_from_centimeter(weather_element_list):
         weatherElementListSI.append(we)
 
     return weatherElementListSI
+
+
+def millimeter_from_meter(weather_element_list):
+    """Converts meters to millimeter in a WeatherElement list
+
+    :param weather_element_list:
+    :return:
+    """
+    weatherElementListOut = []
+
+    for we in weather_element_list:
+        we.Value = we.Value*1000.
+        we.Metadata.append({'Converted':'from m to mm'})
+        weatherElementListOut.append(we)
+
+    return weatherElementListOut
 
 
 def make_daily_average(weather_element_list):
@@ -111,7 +126,7 @@ def make_daily_average(weather_element_list):
         else:
 
             # Make a datetime from the date
-            datetimeFromDate = datetime.datetime.combine(date, datetime.datetime.min.time())
+            datetimeFromDate = dt.datetime.combine(date, dt.datetime.min.time())
 
             # Make a new weatherelement and inherit relvant data from the old one
             newWeatherElement = WeatherElement(e.LocationID, datetimeFromDate, e.ElementID, value/counter)
@@ -130,7 +145,7 @@ def make_daily_average(weather_element_list):
         if index == lastindex:
 
                 # Make a datetime from the date
-                datetimeFromDate = datetime.datetime.combine(date, datetime.datetime.min.time())
+                datetimeFromDate = dt.datetime.combine(date, dt.datetime.min.time())
 
                 # Make a new weatherelement and inherit relvant data from the old one
                 newWeatherElement = WeatherElement(e.LocationID, datetimeFromDate, e.ElementID, value/counter)
@@ -167,14 +182,37 @@ def average_value(weather_element_list, lower_index, upper_index):
     return avgToReturn
 
 
-class WeatherElement():
+def constant_weather_element_list(location, from_date, to_date, parameter, value):
+    """Creates a list of weather elements of constant value over a period.
 
-    '''
-    A weatherElement object as they are defined in eKlima. The variables are:
+    :param location:
+    :param from_date:
+    :param to_date:
+    :param parameter:
+    :param value:
+    :return:
+    """
+
+    delta = to_date - from_date
+    dates = []
+    for i in range(delta.days + 1):
+        dates.append(from_date + dt.timedelta(days=i))
+
+    weather_element_list = []
+    for d in dates:
+        element = WeatherElement(location, d, parameter, value)
+        element.Metadata.append({'Constant value':'from {0} to {1}'.format(from_date.date(), to_date.date())})
+        weather_element_list.append(element)
+
+    return weather_element_list
+
+
+class WeatherElement():
+    '''A weatherElement object similar to as they are defined in eKlima. The variables are:
 
     LocationID:     The location number. Preferably a int, but for NVE stations it may be a sting.
     Date:           Datetime object of the date of the weather element.
-    ElementID:      The element ID. TAM og SA for met but may be numbers from NVE.
+    ElementID:      The element ID. TAM og SA for met but may be numbers from NVE data.
     Value:          The value of the weather element. Preferably in SI units.
 
     Special cases:
@@ -182,6 +220,10 @@ class WeatherElement():
                     som ".", -3 = "umulig å måle". This variable is also calulated from [cm] to [m]
     ElementID = RR: Precipitations has -1 for what seems to be noe precipitation. Are removed.
     ElementID = NNM:Average cloudcover that day (07-07). Comes from met.no in okta.
+
+    Data errors:
+    The constructor looks out for some error cases and corrects the so that the data set returned is
+    complete.
 
     '''
 
@@ -199,8 +241,10 @@ class WeatherElement():
         if elementID == 'SA':
             if elementValue < 0.:
                 self.Value = 0.
+                self.Metadata.append({'On import':'removed negative value'})
             else:
                 self.Value = elementValue/100.
+                self.Metadata.append({'Converted':'from cm to m'})
 
         # Met rain seems to have a special treatment as well. Also, we use meter and not mm..
         if elementID == 'RR':
@@ -209,35 +253,33 @@ class WeatherElement():
                 self.Metadata.append({'On import':'removed negative value'})
             else:
                 self.Value = elementValue/1000.
+                self.Metadata.append({'Converted':'from mm to m'})
 
         # Clouds come in octas and should be in units (ranging from 0 to 1) for further use
         if elementID == 'NNM':
-            if (elementValue == 9. or elementValue == -99999):
+            if elementValue == 9. or elementValue == -99999:
                 self.Value = 0.
                 self.Metadata.append({'On import':'unknown value replaced with 0.'})
             else:
-                self.Value = self.Value/8.
+                self.Value /= 8.
                 self.Metadata.append({'Converted':'from okta to unit'})
 
         # datacorrections. I found errors in data Im using from met
-        if (self.Date).date() == datetime.date(2012, 02, 02) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
+        if (self.Date).date() == dt.date(2012, 02, 02) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
             self.Value = 0.45
             self.Metadata.append({"ManualValue":self.Value})
 
-        if (self.Date).date() == datetime.date(2012, 03, 18) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
+        if (self.Date).date() == dt.date(2012, 03, 18) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.89
             self.Metadata.append({"ManualValue":self.Value})
 
-        if (self.Date).date() == datetime.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
+        if (self.Date).date() == dt.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.36
             self.Metadata.append({"ManualValue":self.Value})
 
 
 class EnergyBalanceElement():
-    """
-    Class for containing all variables and terms in the energy balance calculations.
-    TODO: Energybalance object needs comments
-
+    """Class for containing all variables and terms in the energy balance calculations.
     """
     def __init__(self, date_inn):
         self.date = date_inn
@@ -249,6 +291,8 @@ class EnergyBalanceElement():
                         temp_atm_inn, prec_inn, prec_snow_inn, cloud_cover_inn,
                         age_factor_tau_inn, albedo_prim_inn,
                         day_no_inn, time_hour_inn, time_span_in_sec_inn):
+        """Method that adds all modelling input to the object for easy access later
+        """
         self.utm33_x = utm33_x_inn
         self.utm33_y = utm33_y_inn
         self.snow_depth = snow_depth_inn            # Snowdepth on top of colunm. Not total snowdepth on land.

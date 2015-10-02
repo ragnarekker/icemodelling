@@ -1,17 +1,17 @@
 __author__ = 'ragnarekker'
 # -*- coding: utf-8 -*-
 
-import requests
 from lxml import etree
-import datetime
-from weather import WeatherElement, unit_from_okta
-import xml.etree.ElementTree as ET      # used in the incomplete methods
-from setEnvironment import data_path
+import requests as re
+import datetime as dt
+import weather as we
+import xml.etree.ElementTree as et      # used in the incomplete methods
+import setEnvironment as env
 
 # Incomplete
 def getElementsProperties():
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getElementsProperties&language=&elem_codes="
-    ws = requests.get(url)
+    ws = re.get(url)
 
     # print ws.text
     filename = 'ElementsProperties.xml'
@@ -20,7 +20,7 @@ def getElementsProperties():
     f.write((ws.text).encode('utf-8'))
     f.close()
 
-    tree = ET.parse(filename)
+    tree = et.parse(filename)
     root = tree.getroot()
 
     filename = 'ElementsProperties.csv'
@@ -37,19 +37,19 @@ def getElementsProperties():
 # Incomplete
 def getTimeserieTypesProperties():
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getTimeserieTypesProperties&language=&timeserieTypes="
-    ws = requests.get(url)
+    ws = re.get(url)
 
     # print ws.text
-    filename = '{0}TimeseriesTypesProperties.xml'.format(data_path)
+    filename = '{0}TimeseriesTypesProperties.xml'.format(env.data_path)
 
     f = open(filename, 'w')
     f.write((ws.text).encode('utf-8'))
     f.close()
 
-    tree = ET.parse(filename)
+    tree = et.parse(filename)
     root = tree.getroot()
 
-    filename = '{0}TimeseriesTypesProperties.csv'.format(data_path)
+    filename = '{0}TimeseriesTypesProperties.csv'.format(env.data_path)
     f = open(filename, 'w')
     for element in root.iter('item'):
         Name = (element.find('serieTypeName').text).encode('utf-8')
@@ -100,19 +100,19 @@ def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output='list'
 
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getElementsFromTimeserieTypeStation&timeserietypeID={1}&stnr={0}"\
         .format(stationID, timeseriesType)
-    wsKlimaRequest = requests.get(url)
+    wsKlimaRequest = re.get(url)
 
     # Check which output option is requested
     if output == 'list':
         stationElementList = []
     elif output == 'xml':
-        filename = '{0}Elements on {1}_{2}.xml'.format(data_path, stationID, timeseriesType)
+        filename = '{0}Elements on {1}_{2}.xml'.format(env.data_path, stationID, timeseriesType)
         f = open(filename, 'w')
         f.write((wsKlimaRequest.text).encode('utf-8'))
         f.close()
         return
     elif output == 'csv':
-        filename = '{0}Elements on {1}_{2}.csv'.format(data_path, stationID, timeseriesType)
+        filename = '{0}Elements on {1}_{2}.csv'.format(env.data_path, stationID, timeseriesType)
         f = open(filename, 'w')
 
     # Take the request and make an element tree to be iterated
@@ -125,13 +125,13 @@ def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output='list'
         unit = element.find('unit').text.encode('utf-8')
 
         tempfromdate = element.find('fromdate').text
-        fromdate = datetime.datetime.strptime(tempfromdate[0:10],  "%Y-%m-%d")
+        fromdate = dt.datetime.strptime(tempfromdate[0:10],  "%Y-%m-%d")
 
         temptodate = element.find('todate').text
         if temptodate == None:
             todate = None
         else:
-            todate = datetime.datetime.strptime(temptodate[0:10], "%Y-%m-%d")
+            todate = dt.datetime.strptime(temptodate[0:10], "%Y-%m-%d")
 
         if output == 'list':
             stationElementList.append({'elemGroup': elemGroup,
@@ -145,7 +145,7 @@ def getElementsFromTimeserieTypeStation(stationID, timeseriesType, output='list'
             f.write( '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'
                      .format(elemGroup, elemCode, name, unit, fromdate, todate, description) )
 
-    # Wrap up. Close files (xml file is allready closed) and return data if it exists
+    # Wrap up. Close files (xml file is already closed) and return data if it exists
     if output == 'csv':
         f.close()
         return
@@ -197,19 +197,19 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='l
 
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getMetData&timeserietypeID={4}&format=&from={2}&to={3}&stations={0}&elements={1}&hours=&months=&username="\
         .format(stationID, elementID, fromDate, toDate, timeseriesType)
-    wsKlimaRequest = requests.get(url)
+    wsKlimaRequest = re.get(url)
 
     # Check which output option is requested
     if output == 'list':
         weatherElementList = []
     elif output == 'xml':
-        filename = '{0}{1}_{2}_{3}_{4}.xml'.format(data_path, stationID, elementID, fromDate, toDate)
+        filename = '{0}{1}_{2}_{3}_{4}.xml'.format(env.data_path, stationID, elementID, fromDate, toDate)
         f = open(filename, 'w')
         f.write((wsKlimaRequest.text).encode('utf-8'))
         f.close()
         return
     elif output == 'csv':
-        filename = '{0}{1}_{2}_{3}_{4}.csv'.format(data_path, stationID, elementID, fromDate, toDate)
+        filename = '{0}{1}_{2}_{3}_{4}.csv'.format(env.data_path, stationID, elementID, fromDate, toDate)
         f = open(filename, 'w')
     else:
         print('No valid output requested.')
@@ -224,7 +224,7 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='l
         if 'TimeStamp' in elementAttribute:
 
             elementDate = element.find('from').text.encode('utf-8')
-            elementDate = datetime.datetime.strptime(elementDate, "%Y-%m-%dT%H:%M:%S.%fZ")
+            elementDate = dt.datetime.strptime(elementDate, "%Y-%m-%dT%H:%M:%S.%fZ")
 
             elementLocatonID = element.find('location').find('item').find('id').text.encode('utf-8')
             elementLocatonID = int(elementLocatonID)
@@ -238,7 +238,7 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='l
                 elementID = weatherElementItem.find('id').text.encode('utf-8')
 
                 if output == 'list':
-                    weatherElementList.append(WeatherElement(elementLocatonID, elementDate, elementID, elementValue))
+                    weatherElementList.append(we.WeatherElement(elementLocatonID, elementDate, elementID, elementValue))
 
                 elif output == 'csv':
                     f.write('{0}\t{1}\t{2}\t{3}\n'.format(elementLocatonID, elementDate, elementID, elementValue))
