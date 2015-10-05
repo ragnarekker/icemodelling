@@ -11,16 +11,20 @@ baseURL = "http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart&ver=1.0&
 
 
 def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
-    """
-    Internal method that returns a list of weatherElements given the url to a request on Chartserver/ShowData.aspx. This
-    is common code to the public "get" methods.
+    """Internal method that returns a list of weatherElements given the url to a request
+    on Chartserver/ShowData.aspx. This is common code to the public "get" methods.
+
+    TODO: need to handle longer time spans. If requested json is to large the url should be
+    split up to request smaller portions of data.
 
     :param url [string]:                    URL for the datarequest to chartserver/ShowData
     :param stationID [string]:              Station ID in hydra. Ex: stationID  = '6.24.4'
     :param elementID [string]:              Element ID in hydra. Ex: elementID = '17.1'
-    :param methodReference [dictionary]:    Referance added to the metadata. Ex: {'MethodName': 'Chartserver - getStationdata'}
+    :param methodReference [dictionary]:    Reference added to the metadata. Ex: {'MethodName': 'Chartserver - getStationdata'}
     :return [list[WeatherElement]]:         List of WeatherElement objects.
+
     """
+
     datareq = requests.get(url).json()
 
     seriesPoints = datareq[0][u'SeriesPoints']

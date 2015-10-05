@@ -52,9 +52,9 @@ def unit_from_okta(cloud_cover_in_okta_list):
         if we.Value == 9:
             we.Value = None
         else:
-            we.Value = we.Value/8
+            we.Value = we.Value / 8
 
-        we.Metadata.append({'Converted':'from okta to unit'})
+        we.Metadata.append({'Converted': 'from okta to unit'})
         cloudCoverInUnitsList.append(we)
 
     return cloudCoverInUnitsList
@@ -69,8 +69,8 @@ def meter_from_centimeter(weather_element_list):
     weatherElementListSI = []
 
     for we in weather_element_list:
-        we.Value = we.Value/100.
-        we.Metadata.append({'Converted':'from cm to m'})
+        we.Value = we.Value / 100.
+        we.Metadata.append({'Converted': 'from cm to m'})
         weatherElementListSI.append(we)
 
     return weatherElementListSI
@@ -85,8 +85,8 @@ def millimeter_from_meter(weather_element_list):
     weatherElementListOut = []
 
     for we in weather_element_list:
-        we.Value = we.Value*1000.
-        we.Metadata.append({'Converted':'from m to mm'})
+        we.Value = we.Value * 1000.
+        we.Metadata.append({'Converted': 'from m to mm'})
         weatherElementListOut.append(we)
 
     return weatherElementListOut
@@ -111,7 +111,7 @@ def make_daily_average(weather_element_list):
     date = weather_element_list[0].Date.date()
     value = weather_element_list[0].Value
     counter = 1
-    lastindex = int(len(weather_element_list)-1)
+    lastindex = int(len(weather_element_list) - 1)
     index = 0
     newWeatherElementList = []
 
@@ -129,10 +129,10 @@ def make_daily_average(weather_element_list):
             datetimeFromDate = dt.datetime.combine(date, dt.datetime.min.time())
 
             # Make a new weatherelement and inherit relvant data from the old one
-            newWeatherElement = WeatherElement(e.LocationID, datetimeFromDate, e.ElementID, value/counter)
+            newWeatherElement = WeatherElement(e.LocationID, datetimeFromDate, e.ElementID, value / counter)
             newWeatherElement.Metadata = e.Metadata
             newWeatherElement.Metadata.pop(0)  # first element is the original value form the input eatherelementlist
-            newWeatherElement.Metadata.append({'DataManipulation':'24H Average from {0} values'.format(counter)})
+            newWeatherElement.Metadata.append({'DataManipulation': '24H Average from {0} values'.format(counter)})
 
             # Append it
             newWeatherElementList.append(newWeatherElement)
@@ -143,17 +143,16 @@ def make_daily_average(weather_element_list):
 
         # If its the last index add whats averaged so far
         if index == lastindex:
+            # Make a datetime from the date
+            datetimeFromDate = dt.datetime.combine(date, dt.datetime.min.time())
 
-                # Make a datetime from the date
-                datetimeFromDate = dt.datetime.combine(date, dt.datetime.min.time())
+            # Make a new weatherelement and inherit relvant data from the old one
+            newWeatherElement = WeatherElement(e.LocationID, datetimeFromDate, e.ElementID, value / counter)
+            newWeatherElement.Metadata = e.Metadata
+            newWeatherElement.Metadata.append({'DataManipulation': '24H Average from {0} values'.format(counter)})
 
-                # Make a new weatherelement and inherit relvant data from the old one
-                newWeatherElement = WeatherElement(e.LocationID, datetimeFromDate, e.ElementID, value/counter)
-                newWeatherElement.Metadata = e.Metadata
-                newWeatherElement.Metadata.append({'DataManipulation':'24H Average from {0} values'.format(counter)})
-
-                # Append it
-                newWeatherElementList.append(newWeatherElement)
+            # Append it
+            newWeatherElementList.append(newWeatherElement)
 
         index = index + 1
 
@@ -177,7 +176,7 @@ def average_value(weather_element_list, lower_index, upper_index):
     for i in range(lower_index, upper_index, 1):
         avgToReturn = avgToReturn + weather_element_list[i].Value
 
-    avgToReturn = avgToReturn/(upper_index-lower_index)
+    avgToReturn = avgToReturn / (upper_index - lower_index)
 
     return avgToReturn
 
@@ -201,10 +200,57 @@ def constant_weather_element_list(location, from_date, to_date, parameter, value
     weather_element_list = []
     for d in dates:
         element = WeatherElement(location, d, parameter, value)
-        element.Metadata.append({'Constant value':'from {0} to {1}'.format(from_date.date(), to_date.date())})
+        element.Metadata.append({'Constant value': 'from {0} to {1}'.format(from_date.date(), to_date.date())})
         weather_element_list.append(element)
 
     return weather_element_list
+
+
+def test_for_missing_elements(weather_element_list, from_date=None, to_date=None, time_step=24*60*60):
+    """Tests a list of weather elements if some elements are missing. Should work on all time steps, but 24hrs
+    (in seconds) is default. If a missing element is found, message is returned.
+
+    :param weather_element_list:
+    :param from_date:
+    :param to_date:
+    :param time_step:
+    :return:
+    """
+
+    if from_date is None:
+        from_date = weather_element_list[0].Date
+    if to_date is None:
+        to_date = weather_element_list[-1].Date
+
+    dates_range = to_date - from_date
+    dates = []
+    for i in range(dates_range.days + 1):
+        dates.append(from_date + dt.timedelta(seconds=time_step * i))
+
+    i = 0
+    j = 0
+
+    messages = []
+
+    while i < len(dates):
+        dates_date = dates[i]
+        weather_date = weather_element_list[j].Date
+
+        if weather_date == dates_date:
+            i += 1
+            j += 1
+        else:
+            message = '{0}/{1} missing on {2}'.format(
+                weather_element_list[j].LocationID, weather_element_list[j].ElementID, dates[i])
+            #print(message)
+            messages.append({'Missing data': message})
+            i += 1
+
+    if i == j:
+        messages.append({'No missing data': 'on {0}/{1}'.format(
+            weather_element_list[0].LocationID, weather_element_list[0].ElementID)})
+
+    return messages
 
 
 class WeatherElement():
@@ -232,8 +278,8 @@ class WeatherElement():
         self.LocationID = elementLocationID
         self.Date = elementDate
         self.ElementID = elementID
-        self.Metadata = [{'OriginalValue':elementValue}]
-        if elementValue == None:
+        self.Metadata = [{'OriginalValue': elementValue}]
+        if elementValue is None:
             elementValue = 0
         self.Value = float(elementValue)
 
@@ -241,46 +287,50 @@ class WeatherElement():
         if elementID == 'SA':
             if elementValue < 0.:
                 self.Value = 0.
-                self.Metadata.append({'On import':'removed negative value'})
+                self.Metadata.append({'On import': 'removed negative value'})
             else:
-                self.Value = elementValue/100.
-                self.Metadata.append({'Converted':'from cm to m'})
+                self.Value = elementValue / 100.
+                self.Metadata.append({'Converted': 'from cm to m'})
 
         # Met rain seems to have a special treatment as well. Also, we use meter and not mm..
         if elementID == 'RR':
             if elementValue < 0.:
                 self.Value = 0.
-                self.Metadata.append({'On import':'removed negative value'})
+                self.Metadata.append({'On import': 'removed negative value'})
             else:
-                self.Value = elementValue/1000.
-                self.Metadata.append({'Converted':'from mm to m'})
+                self.Value = elementValue / 1000.
+                self.Metadata.append({'Converted': 'from mm to m'})
 
-        # Clouds come in octas and should be in units (ranging from 0 to 1) for further use
+        # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
         if elementID == 'NNM':
             if elementValue == 9. or elementValue == -99999:
                 self.Value = 0.
-                self.Metadata.append({'On import':'unknown value replaced with 0.'})
+                self.Metadata.append({'On import': 'unknown value replaced with 0.'})
             else:
                 self.Value /= 8.
-                self.Metadata.append({'Converted':'from okta to unit'})
+                self.Metadata.append({'Converted': 'from okta to unit'})
 
-        # datacorrections. I found errors in data Im using from met
-        if (self.Date).date() == dt.date(2012, 02, 02) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
+        # data corrections. I found errors in data Im using from met
+        if (self.Date).date() == dt.date(2012, 02,
+                                         02) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
             self.Value = 0.45
-            self.Metadata.append({"ManualValue":self.Value})
+            self.Metadata.append({"ManualValue": self.Value})
 
-        if (self.Date).date() == dt.date(2012, 03, 18) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
+        if (self.Date).date() == dt.date(2012, 03,
+                                         18) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.89
-            self.Metadata.append({"ManualValue":self.Value})
+            self.Metadata.append({"ManualValue": self.Value})
 
-        if (self.Date).date() == dt.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
+        if (self.Date).date() == dt.date(2012, 12,
+                                         31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.36
-            self.Metadata.append({"ManualValue":self.Value})
+            self.Metadata.append({"ManualValue": self.Value})
 
 
 class EnergyBalanceElement():
     """Class for containing all variables and terms in the energy balance calculations.
     """
+
     def __init__(self, date_inn):
         self.date = date_inn
         self.iterations = None
@@ -295,7 +345,7 @@ class EnergyBalanceElement():
         """
         self.utm33_x = utm33_x_inn
         self.utm33_y = utm33_y_inn
-        self.snow_depth = snow_depth_inn            # Snowdepth on top of colunm. Not total snowdepth on land.
+        self.snow_depth = snow_depth_inn  # Snowdepth on top of colunm. Not total snowdepth on land.
         self.snow_density = snow_density_inn
         self.temp_surface = temp_surface_inn
         self.is_ice = is_ice_inn

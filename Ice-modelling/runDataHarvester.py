@@ -34,17 +34,15 @@ def harvest_hakloa(from_string, to_string):
     from_date = dt.datetime.strptime(from_string, "%Y-%m-%d")
     to_date = dt.datetime.strptime(to_string, "%Y-%m-%d")
 
-    data = MyLakeInput()
-    '''
-    data.Global_rad = None
-    data.Cloud_cov = gws.getMetData(stnr_met_blind, 'NNM', from_date, to_date, 0)
-    data.Air_temp = gcs.getStationdata(stnr_nve, '17.1', from_date, to_date)
-    data.Rel_hum = gcs.getStationdata(stnr_nve, '2.1', from_date, to_date)
-    data.Air_press = gws.getMetData(stnr_met_blind, 'POM', from_date, to_date, 0)
-    data.Wind_speed = gcs.getStationdata(stnr_nve, '15.1', from_date, to_date)
-    data.Precipitation = we.millimeter_from_meter(gws.getMetData(stnr_met_bjorn, 'RR', from_date, to_date, 0))
-    '''
-    data.Inflow = we.constant_weather_element_list('Hakloa', from_date, to_date, 'Inflow', 10.)
+    data = MyLakeInput(from_date, to_date)
+
+    data.add_Cloud_cov(gws.getMetData(stnr_met_blind, 'NNM', from_date, to_date, 0))
+    data.add_Air_temp(gcs.getStationdata(stnr_nve, '17.1', from_date, to_date))
+    data.add_Relat_hum(gcs.getStationdata(stnr_nve, '2.1', from_date, to_date))
+    data.add_Air_press(gws.getMetData(stnr_met_blind, 'POM', from_date, to_date, 0))
+    data.add_Wind_speed(gcs.getStationdata(stnr_nve, '15.1', from_date, to_date))
+    data.add_Precipitation(we.millimeter_from_meter(gws.getMetData(stnr_met_bjorn, 'RR', from_date, to_date, 0)))
+    data.add_Inflow(we.constant_weather_element_list('Hakloa', from_date, to_date, 'Inflow', 10.))
 
     return data
 
@@ -72,24 +70,85 @@ class MyLakeInput():
     Inflow_DOC (mg/m3)
     """
 
-    def __init__(self):
+    def __init__(self, from_date_inn, to_date_inn):
 
-        Global_rad = None    # (MJ/m2)
-        Cloud_cov = None    # (-)
-        Air_temp = None    # (deg C)
-        Relat_hum = None    # (%)
-        Air_press = None    # (hPa)
-        Wind_speed = None    # (m/s)
-        Precipitation = None    # (mm/day)
+        self.from_date = from_date_inn
+        self.to_date = to_date_inn
 
-        Inflow = None    # (m3/day)
-        Inflow_T = None    # (deg C)
-        Inflow_C = None    #
-        Inflow_S = None    # (kg/m3)
-        Inflow_TP = None    # (mg/m3)
-        Inflow_DOP = None    # (mg/m3)
-        Inflow_Chla = None    # (mg/m3)
-        Inflow_DOC = None    # (mg/m3)
+        self.metadata = []
+
+        self.Global_rad = None    # (MJ/m2)
+        self.Cloud_cov = None    # (-)
+        self.Air_temp = None    # (deg C)
+        self.Relat_hum = None    # (%)
+        self.Air_press = None    # (hPa)
+        self.Wind_speed = None    # (m/s)
+        self.Precipitation = None    # (mm/day)
+
+        self.Inflow = None    # (m3/day)
+        self.Inflow_T = None    # (deg C)
+        self.Inflow_C = None    #
+        self.Inflow_S = None    # (kg/m3)
+        self.Inflow_TP = None    # (mg/m3)
+        self.Inflow_DOP = None    # (mg/m3)
+        self.Inflow_Chla = None    # (mg/m3)
+        self.Inflow_DOC = None    # (mg/m3)
+
+
+    def add_global_rad(self, Global_rad_inn):
+        messages = we.test_for_missing_elements(Global_rad_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Global_rad = Global_rad_inn
+
+
+    def add_Cloud_cov(self, Cloud_cov_inn):
+        messages = we.test_for_missing_elements(Cloud_cov_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Cloud_cov = Cloud_cov_inn
+
+
+    def add_Air_temp(self, Air_temp_inn):
+        messages = we.test_for_missing_elements(Air_temp_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Air_temp = Air_temp_inn
+
+
+    def add_Relat_hum(self, Relat_hum_inn):
+        messages = we.test_for_missing_elements(Relat_hum_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Relat_hum = Relat_hum_inn
+
+
+    def add_Air_press(self, Air_press_inn):
+        messages = we.test_for_missing_elements(Air_press_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Air_press = Air_press_inn
+
+
+    def add_Wind_speed(self, Wind_speed_inn):
+        messages = we.test_for_missing_elements(Wind_speed_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Wind_speed = Wind_speed_inn
+
+
+    def add_Precipitation(self, Precipitation_inn):
+        messages = we.test_for_missing_elements(Precipitation_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Precipitation = Precipitation_inn
+
+
+    def add_Inflow(self, Inflow_inn):
+        messages = we.test_for_missing_elements(Inflow_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Inflow = Inflow_inn
+
+    """
+    def add_(self, _inn):
+        we.test_for_missing_elements(_inn)
+        self. = _inn
+    """
+
+
 
 
 def make_mylake_inputfile(file_path, custom_text, data):
@@ -159,7 +218,7 @@ def make_mylake_inputfile(file_path, custom_text, data):
 
 if __name__ == "__main__":
 
-    data = harvest_hakloa('2014-11-15', '2015-06-20')
+    data = harvest_hakloa('2012-06-20', '2013-06-20')
     file_path = '{0}HAK_input.csv'.format(env.data_path)
     custom_text = 'MyLake model input data for Hakloa from Hakloa (NVE), Bjørnholt (met) and Blindern (met) stations'
     make_mylake_inputfile(file_path, custom_text, data)
