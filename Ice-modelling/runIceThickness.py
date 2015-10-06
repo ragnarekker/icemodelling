@@ -222,8 +222,9 @@ def runSemsvannEB(startDate, endDate):
     plot_filename = '{0}Semsvann EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
     # pts.plot_ice_cover(ice_cover, observed_ice, date, temp, sno_tot, plot_filename)
     plot_filename = '{0}Semsvann MET with EB {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
-    pts.plot_ice_cover_eb(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename,
-                       prec=prec, wind=wind, clouds=cloud_cover)
+    pts.plot_ice_cover_eb(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename, prec=prec, wind=wind, clouds=cloud_cover)
+    #plot_filename = '{0}Semsvann MET with EB simple {1}-{2}.png'.format(plot_folder, from_date.year, to_date.year)
+    #pts.plot_ice_cover_eb_simple(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename)
 
 
 def runSemsvann(startDate, endDate):
