@@ -698,6 +698,7 @@ def get_turbulent_flux_MARTIN_1998(
 
     # Richardsons number relating horizontal (nominator) vs vertical (denominator) momentum in the atmosphere,
     R_i = 2*g/(temp_atm - const.absolute_zero) * (temp_atm - temp_surface)/zt * zu/wind     # error in paper. use Z_a not Z_0
+    #R_i = 0
     stability_correction = 1        # neutral case (R_i = 0)
     if R_i > 0:                     # for stable case
         stability_correction = rho_air * c_air * coeff_n * max( 0.75 , (1-5*R_i)**2 )       # eq 8 in paper
@@ -767,6 +768,7 @@ def get_turbulent_flux_YOU_2014(
     # Richardsons number relating horizontal (nominator) vs vertical (denominator) momentum in the atmosphere,
     # Correction when temperature gradient near surface.
     R_i = g * zu * (temp_atm-temp_surface) / (0.5 * (temp_atm + temp_surface - const.absolute_zero*2) * wind**2)
+    #R_i = 0
     stability_correction = 1
     if R_i > 0:             # for stable conditions
         stability_correction = 1/(1+10*R_i)

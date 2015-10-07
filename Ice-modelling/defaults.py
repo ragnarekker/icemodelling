@@ -25,5 +25,6 @@ num_iterations_max = 20
 default_albedo_method = "ueb"
 
 # get_turbulent_flux
+#default_turbulent_flux_method = "YOU 2014"
 default_turbulent_flux_method = "MARTIN 1998"
 

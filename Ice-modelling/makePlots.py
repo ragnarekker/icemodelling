@@ -431,19 +431,21 @@ def plot_ice_cover_eb(
 
 
 
-    #############################
+    ############# Energy terms and albedo ################
     pplt.subplot2grid((11, 1), (7, 0), rowspan=4)
 
 
     # plot surface albedo
     for i in range(0, len(albedo) - 1, 1):
         if albedo[i] > 0.:
-            plb.hlines(-8000, date[i], date[i + 1], lw=25, color=str(albedo[i]))
+            plb.hlines(-11000, date[i], date[i + 1], lw=25, color=str(albedo[i]))
         elif clouds[i] == np.nan:
-            plb.hlines(-8000, date[i], date[i + 1], lw=25, color="1.0")
+            plb.hlines(-11000, date[i], date[i + 1], lw=25, color="1.0")
 
 
-    plb.plot(date, SM, "gray", lw=2)
+    plb.plot(date, SM, "red", lw=3)
+    plb.plot(date, SC, "blue", lw=3)
+    plb.plot(date, [0.]*len(date), "white", lw=2)
     plb.plot(date, H, "blue")
     plb.plot(date, LE, "navy")
     plb.plot(date, R, "turquoise")
@@ -451,7 +453,6 @@ def plot_ice_cover_eb(
     plb.plot(date, L, "green", lw=1)
     plb.plot(date, S, "gold", lw=1)
     #plb.plot(date, s_inn, "gold", lw=1)
-    plb.plot(date, SC, "red", lw=2)
     plb.plot(date, CC, "pink", lw=1)
     plb.plot(date, EB, "black")
 
