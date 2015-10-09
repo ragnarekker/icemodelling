@@ -1,0 +1,104 @@
+Temperatur	X1TA	Lufttemperatur (1)	ºC	2006-12-16 00:00:00	None	Lufttemperatur - sensor 1
+Vind	KLFG_1	Tidspunkt	tid	2015-09-18 00:00:00	None	Klokkeslett da FG inntraff (HHmm)  hel time
+Vind	KLFX_1	Tidspunkt	tid	2015-09-18 00:00:00	None	Klokkeslett da FX inntraff (HHmm) hel time
+Temperatur	X1TAX	Maksimumstemperatur (2)	ºC	2006-12-16 00:00:00	None	Maksimumstemperatur - sensor 1
+Temperatur	X1TAM	Middeltemperatur (2)	ºC	2011-11-08 00:00:00	2014-06-30 00:00:00	Middeltemperatur - sensor 1
+Temperatur	TAX_24	Maksimumstemperatur (24 timer)	ºC	1937-01-01 00:00:00	1937-05-31 00:00:00	Maksimumstemperatur (24 timer)
+Vær	WD3	Været siden forrige hovedobservasjon	kode	2005-01-26 00:00:00	2015-04-30 00:00:00	Tilleggsopplysning om været siden forrige hovedobservasjon
+Temperatur	TAN_24	Minimumstemperatur	ºC	1937-01-01 00:00:00	1937-02-28 00:00:00	Temperatur i ºC, minimum minuttverdi siste 24 timer
+Lufttrykk	POM	Midlere lufttrykk, stasjonsnivå	hPa	1993-11-07 00:00:00	2006-04-30 00:00:00	Lufttrykk på stasjonen (QFE), middelverdi for perioden
+Vind	FG_010	Kraftigste vindkast (siste 10 min)	m/s	2006-04-03 00:00:00	None	Kraftigste vindkast (3 sekunder) siste 10 minutter (10 meter over bakken)
+Vind	FG_1	Kraftigste vindkast (siste time)	m/s	1992-12-01 00:00:00	None	Kraftigste vindkast (3 sekunder) siste time (10 meter over bakken)
+Nedbør	RR_1	Nedbør (1 time)	mm	2013-12-14 00:00:00	2013-12-31 00:00:00	Nedbørmengde siste time
+Nedbør	RR_1	Nedbør (1 time)	mm	1993-11-07 00:00:00	None	Nedbørmengde siste time
+Nedbør	RR_6	Nedbør (6 timer)	mm	2005-09-07 00:00:00	2010-08-31 00:00:00	Nedbørmengde siste 6 timer
+Nedbør	RR_X	Nedbør	mm	2006-09-21 00:00:00	2009-05-31 00:00:00	Nedbørmengde i en uspesifisert tidsperiode
+Temperatur	TAN_12	Minimumstemperatur (12 timer)	ºC	1931-01-01 00:00:00	2004-12-31 00:00:00	Laveste registrerte temperatur siste 12 timer
+Temperatur	TAN_12	Minimumstemperatur (12 timer)	ºC	2005-01-01 00:00:00	None	Laveste registrerte temperatur siste 12 timer
+Vær	V1	Været ved observasjonstida	kode	1951-01-01 00:00:00	2009-12-31 00:00:00	Været ved observasjonstida, tall- eller bokstavkode for ulike værslag, inntil tre forekomster (V1-V3)
+Vær	V5	Værslag i perioden	kode	1951-01-01 00:00:00	2009-12-31 00:00:00	Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+Vær	V7	Værslag i perioden	kode	1951-01-14 00:00:00	2008-09-30 00:00:00	Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+Temperatur	X1TAN	-	ºC	2006-12-16 00:00:00	None	Minimumstemperatur sensor 1
+Temperatur	X1TAN_12	-	ºC	2006-12-17 00:00:00	None	Minimumstemperatur siste 12 timer sensor 1
+Temperatur	X1TAX_12	-	ºC	2006-12-17 00:00:00	None	Temperatur i ºC, maximum siste 24 timer sensor 1
+Stråling	QSI_01	Kortbølget(global) stråling	W/m2	2014-02-28 00:00:00	None	Kortbølget stråling(global) ovenfra, midlet over siste minutt
+Temperatur	TD	Duggpunktstemperatur	ºC	1951-01-01 00:00:00	2004-12-31 00:00:00	Duggpunktstemperatur (den temperaturen lufta må avkjøles til før skydannelse (metning) inntreffer)
+Temperatur	TD	Duggpunktstemperatur	ºC	1993-05-04 00:00:00	None	Duggpunktstemperatur (den temperaturen lufta må avkjøles til før skydannelse (metning) inntreffer)
+Temperatur	TAM	Middeltemperatur	ºC	1992-12-01 00:00:00	2006-04-30 00:00:00	"Timeverdi: Aritmetisk middel av minuttverdier Døgnverdi: Aritmetisk middel av 24 timeverdier (kl 00-00), evt formelbasert middelverdi ut fra færre observasjoner (kl 18-18)Månedsverdi: Aritmetisk middel av døgn-TAM "
+Temperatur	TAN	Minimumstemperatur	ºC	1992-12-01 00:00:00	None	Laveste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+Temperatur	TAX	Maksimumstemperatur	ºC	1992-12-01 00:00:00	None	Høyeste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+Vær	V3	Været ved observasjonstida	kode	1951-01-02 00:00:00	2009-02-28 00:00:00	Været ved observasjonstida, tall- eller bokstavkode for ulike værslag, inntil tre forekomster (V1-V3)
+Vær	V4	Værslag i perioden	kode	1951-01-01 00:00:00	2009-12-31 00:00:00	Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+Lufttrykk	PH	Lufttrykk (QNH)	hPa	1951-05-06 00:00:00	1951-05-31 00:00:00	Lufttrykk (QNH, nåverdi) redusert til havets nivå etter ICAO standard - avrundes ned til nærmeste hPa(HectoPascal). Brukes i luftfarten.
+Lufttrykk	PH	Lufttrykk (QNH)	hPa	1993-11-07 00:00:00	None	Lufttrykk (QNH, nåverdi) redusert til havets nivå etter ICAO standard - avrundes ned til nærmeste hPa(HectoPascal). Brukes i luftfarten.
+Vær	W1	Været siden forrige observasjon	kodetall	1957-01-01 00:00:00	None	Høyeste kode for været siden forrige hovedobservasjonstid (kode 0-9)
+Skyer	HL	Skyhøyde	meter	1957-01-01 00:00:00	None	Høyde til undersida av laveste sky, meldes i kode, konverteres til meter.  Kode -3 = mengde av skyer er ikke mulig å se pga tåke, snøfokk eller lignende. -3 presenteres som '.'  (i synop kode=9))
+Nedbør	RR_12	Nedbør (12 timer)	mm	1937-03-01 00:00:00	2014-08-31 00:00:00	Nedbørmengde siste 12 timer
+Nedbør	RR_12	Nedbør (12 timer)	mm	2005-07-01 00:00:00	None	Nedbørmengde siste 12 timer
+Vind	DDM	Midlere vindretning (FM)	grader	1992-12-01 00:00:00	2006-04-30 00:00:00	Midlere vindretning siste time (jf FM)
+Vær	WD1	Været siden forrige hovedobservasjon	kode	2005-01-04 00:00:00	None	Tilleggsopplysning om været siden forrige hovedobservasjon
+Markas tilstand	EE0	Markas tilstand	kode	1957-01-01 00:00:00	1981-12-31 00:00:00	Kode benyttet t.o.m 1981
+Stråling	QSO	Kortbølget stråling	W/m2	2012-12-04 00:00:00	2014-03-31 00:00:00	Kortbølget stråling nedenfra, midlet over siste time
+Lufttrykk	AA	Karakteristikk av lufttrykk	kodetall	1957-01-01 00:00:00	2004-12-31 00:00:00	Barometertendensens karakteristikk oppgitt i kodetall (0-8) etter bevegelsesmåten (stigende, synkende, stabilt)
+Lufttrykk	AA	Karakteristikk av lufttrykk	kodetall	1993-05-03 00:00:00	None	Barometertendensens karakteristikk oppgitt i kodetall (0-8) etter bevegelsesmåten (stigende, synkende, stabilt)
+Skyer	CL	Type lave skyer	kodetall	1957-01-01 00:00:00	None	Skytype, lave skyer (underside 0 - ca 2500 meter), oppgis i kodetall 0-9 (Cu, Cb, St, Sc, se skyatlas)
+Nedbør	RT_1	Nedbørtid	minutt	1993-11-07 00:00:00	None	Antallet minutt i løpet av en time da det er registrert nedbør av noe slag
+Vind	DD	Vindretning (FF)	grader	1951-01-01 00:00:00	2004-12-31 00:00:00	Generell vindretning siste 10 minutter (refererer til vindhastighet FF), definert som retningen vinden kommer fra, der f.eks nord er 360º og øst 90º. Kode -3 betyr variabel vindretning.
+Vind	DD	Vindretning (FF)	grader	1992-12-01 00:00:00	None	Generell vindretning siste 10 minutter (refererer til vindhastighet FF), definert som retningen vinden kommer fra, der f.eks nord er 360º og øst 90º. Kode -3 betyr variabel vindretning.
+Temperatur	TA	Lufttemperatur	ºC	1931-01-01 00:00:00	2004-12-31 00:00:00	Lufttemperatur ved observasjonstiden
+Temperatur	TA	Lufttemperatur	ºC	1992-12-01 00:00:00	None	Lufttemperatur ved observasjonstiden
+Fuktighet	UM	Midlere relativ luftfuktighet	prosent	1992-12-01 00:00:00	2006-04-30 00:00:00	Midlere relativ luftfuktighet, timesverdi automat???
+Snø	SD	Snødekke	kodetall	1937-03-02 00:00:00	None	Oppgis med kodetall 1 - 4: 1 - 3 betyr at deler av marka er snødekt, og 4 at området rundt stasjonen er helt snødekt. Kode = -1 betyr "ikke snø", presenterast som "."
+Skyer	NN	Skydekke	åttedeler	1951-01-01 00:00:00	None	Samlet skydekke, kodetall 0-8 (0 = skyfritt, 1-8 = åttedeler av himmelen. Kode -3 = mengden av skyer kan ikke bedømmes pga tåke, snøfokk eller lignende. -3 presenteres som '.'  (i synop kode=9))
+Vind	FX	Kraftigste middelvind	m/s	1951-01-01 00:00:00	2004-12-31 00:00:00	Høyeste vindhastighet (10 meter over bakken) - standardverdi: høyeste timinutters middelvind for tida etter stasjonens forrige hovedobservasjon (normalt 6 timer, kan være 12 timer særlig ved obs kl 06 utc)
+Vind	FG	Kraftigste vindkast	m/s	1982-01-01 00:00:00	2004-12-31 00:00:00	Kraftigste vindkast (3 sekunder) siden siste hovedobservasjon (10 meter over bakken)
+Temperatur	TG	Gresstemperatur	ºC	2006-04-20 00:00:00	2007-06-30 00:00:00	Temperatur målt 10 cm over bakkenivå
+Nedbør	RR_24	Nedbør (24 timer)	mm	1937-01-01 00:00:00	1937-02-28 00:00:00	Nedbørmengde siste 24 timer
+Nedbør	RR_24	Nedbør (24 timer)	mm	2005-07-01 00:00:00	None	Nedbørmengde siste 24 timer
+Vær	W2	Været siden forrige observasjon	kodetall	1982-01-01 00:00:00	None	Nest høyeste kode for været siden forrige hovedobservasjonstid (kode 0-9)
+Lufttrykk	PP	Barometertendens	hPa	1957-01-01 00:00:00	2004-12-31 00:00:00	Barometertendensens størrelse, dvs. endring i de siste 3 timene
+Lufttrykk	PP	Barometertendens	hPa	1993-05-03 00:00:00	None	Barometertendensens størrelse, dvs. endring i de siste 3 timene
+Temperatur	TGN	Gressminimumstemperatur	ºC	1996-03-14 00:00:00	2007-06-30 00:00:00	Laveste registrerte temperatur i timen/døgnet/måneden, målt 10 cm over bakken
+Skyer	CM	Type midlere skyer	kodetall	1957-01-04 00:00:00	None	Skytype, mellomhøye skyer (underside ca 2500-6000 meter pluss nedbørskylag), oppgis i kodetall 0-9 (As, Ac, Ns, se skyatlas)
+Vind	FXB	Kraftigste middelvind (beaufort)	Beaufort	1951-01-01 00:00:00	2005-05-31 00:00:00	Høyeste vindhastighet (10 meter over bakken) - verdi FX oppgitt etter beaufortskalaen
+Skyer	CH	Type høye skyer	kodetall	1957-01-05 00:00:00	None	Skytype, høye skyer (underside over ca 6000 meter), oppgis i kodetall 0-9 (Ci, Cs, Cc, se skyatlas)
+Bølger	HWA	Bølgehøyde - instrumentell	meter	2006-02-13 00:00:00	2006-02-28 00:00:00	Signifikant bølgehøyde - instrumentell måling
+Skyer	NH	Skydekke, laveste skyer	åttedeler	1957-01-01 00:00:00	None	Mengden (0-8, -3=mengden av skyer er ikke kjent pga tåke, snøfokk eller lignende, - presenteres som '.') av alle lave skyer (CL), evt mengden av midlere skyer (CM) om det ikke forekommer lave skyer
+Vind	FF	Vindhastighet (10 meter over bakken)	m/s	1951-01-01 00:00:00	2004-12-31 00:00:00	Vindhastighet (10 meter over bakken) - standardverdi: middelverdi for siste 10 minutter før observasjonstida
+Vind	FF	Vindhastighet (10 meter over bakken)	m/s	1992-12-01 00:00:00	None	Vindhastighet (10 meter over bakken) - standardverdi: middelverdi for siste 10 minutter før observasjonstida
+Vær	WD2	Været siden forrige hovedobservasjon	kode	2005-01-26 00:00:00	None	Tilleggsopplysning om været siden forrige hovedobservasjon
+Skyer	CC1	Skytype (CB/TCU)	kode	1951-02-06 00:00:00	1980-12-31 00:00:00	Tilleggsopplysning for skytype i gruppe HS1/NS1; angir om det er CB (cumulonimbus) eller TCU (towering cumulus)
+Vind	FM	Middelvind siste time	m/s	1992-12-01 00:00:00	2006-04-30 00:00:00	Middelverdi av siste times vindmålinger (10 meter over bakken)
+Vær	IX	Værinformasjon	kodetall	2005-01-03 00:00:00	2014-01-31 00:00:00	Kodetall som viser om værslag er med i synopmeldingen (1 = værslag med, 2 = ikke vær av betydning, 3 = væropplysninger mangler) 
+Lufttrykk	PR	Lufttrykk i havnivå	hPa	1957-01-01 00:00:00	2004-12-31 00:00:00	Lufttrykk redusert til havets nivå (QFF, nåverdi)
+Lufttrykk	PR	Lufttrykk i havnivå	hPa	1992-12-01 00:00:00	None	Lufttrykk redusert til havets nivå (QFF, nåverdi)
+Sikt	VV	Synsvidde (sikt)	meter	1951-01-01 00:00:00	None	Sikt i dårligste retning, oppgis i meter, konvertert fra synopkode (maks 75 km) eller metar (maks 10 km)
+Lufttrykk	POX	Høyeste lufttrykk, stasjonsnivå	hPa	1992-12-01 00:00:00	2006-04-30 00:00:00	Lufttrykk på stasjonen (QFE), høyeste verdi for perioden
+Sol	OT_1	Sol siste time	minutter	2004-02-03 00:00:00	None	Antall minutter med sol siste time
+Sol	OT_24	Sol siste 24 timer	timer	1952-07-07 00:00:00	2005-05-31 00:00:00	Antall timer (en desimal) med sol siste 24 timer
+Nedbør	IR	Nedbørmåling	kodetall	2005-01-03 00:00:00	2014-01-31 00:00:00	Kodetall som viser om nedbørmengde er med i synopmeldingen (1 = nedbør med, 3 = nedbør ikke falt, 4 = nedbør ikke målt) 
+Snø	SA	Snødybde	cm	1937-11-01 00:00:00	None	Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres som ".", -3 = "umulig å måle"
+Snø	SA	Snødybde	cm	1995-03-01 00:00:00	2009-05-31 00:00:00	Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres som ".", -3 = "umulig å måle"
+Lufttrykk	PO	Lufttrykk i stasjonsnivå	hPa	1951-01-01 00:00:00	2004-12-31 00:00:00	Lufttrykk redusert til stasjonens referansehøyde (QFE, nåverdi)
+Lufttrykk	PO	Lufttrykk i stasjonsnivå	hPa	1992-12-01 00:00:00	None	Lufttrykk redusert til stasjonens referansehøyde (QFE, nåverdi)
+Stråling	QSI	Kortbølget(global) stråling	W/m2	1996-10-09 00:00:00	2006-04-30 00:00:00	Kortbølget stråling(global) ovenfra, midlet over siste time
+Markas tilstand	EE	Markas tilstand	kode	1957-01-01 00:00:00	None	Kode benyttet f.o.m 2013
+Vind	DX_1	Vindretning (FX_1)	grader	2005-11-29 00:00:00	None	Vindretning ved kraftigste middelvind siste time (FX_1)
+Temperatur	TAX_12	Maksimumstemperatur (12 timer)	ºC	1937-06-01 00:00:00	2004-12-31 00:00:00	Høyeste registrerte temperatur siste 12 timer
+Temperatur	TAX_12	Maksimumstemperatur (12 timer)	ºC	2005-01-01 00:00:00	None	Høyeste registrerte temperatur siste 12 timer
+Skyer	NS1	Skymengde	kode	1951-02-06 00:00:00	1980-12-31 00:00:00	Skymengden (i 8-deler) i skylaget angitt ved høyde HS1 (metarkode FEW, SCT, BKN eller OVC kodet i 8-deler). Ukjent skydekke, kode=-3, presenteres som '.'
+Temperatur	TGN_12	Laveste gresstemperatur (12 timer)	ºC	1957-01-01 00:00:00	2005-02-28 00:00:00	Temperatur målt 10 cm over bakkenivå, laveste verdi siste tolv timer
+Nedbør	ITR	Måleperiode for nedbør	antall	2005-01-04 00:00:00	2014-08-31 00:00:00	Antall 6-timers perioder som nedbørmålingen omfatter
+Bølger	PWA	Bølgeperiode - instrumentell	sekund	2006-02-13 00:00:00	2006-02-28 00:00:00	Gjennomsnittlig bølgeperiode, instrumentell måling over ca 20 minutter
+Vær	WW	Været ved observasjonstida	kode	1957-01-01 00:00:00	None	Været ved observasjonstida, gitt ved synopkode 00-99
+Fuktighet	UU	Relativ luftfuktighet	prosent	1951-01-01 00:00:00	2004-12-31 00:00:00	Relativ luftfuktighet ved observasjonstida
+Fuktighet	UU	Relativ luftfuktighet	prosent	1992-12-01 00:00:00	None	Relativ luftfuktighet ved observasjonstida
+Vind	FX_1	Kraftigste middelvind (siste time)	m/s	1992-12-01 00:00:00	None	Høyeste timinutters middelvind for siste time (10 meter over bakken)
+Vind	DG	Vindretning (FG)	grader	1992-12-01 00:00:00	2006-04-30 00:00:00	Vindretning ved sterkeste vindkast (FG)
+Vind	DX	Vindretning (FX)	grader	1992-12-01 00:00:00	2005-11-30 00:00:00	Vindretning ved kraftigste middelvind (FX)
+Snø	EM	Markas tilstand (E')	kodetall	1982-01-01 00:00:00	2014-01-31 00:00:00	Markas tilstand (snø- og isdekke)
+Skyer	HS1	Skyhøyde	kode	1951-02-06 00:00:00	1980-12-31 00:00:00	Høyde til skybase 1 (skyer angitt ved mengden NS1), konvertert fra fot/meter til kode
+Lufttrykk	PON	Laveste lufttrykk, stasjonsnivå	hPa	1992-12-01 00:00:00	2006-04-30 00:00:00	Lufttrykk på stasjonen (QFE), laveste verdi for perioden
+Nedbør	RA	Total nedbør	mm	1993-11-07 00:00:00	None	Automatstasjon: Total nedbørmengde i bøtta (samlemengde siden sist tømming)
+Vær	V2	Været ved observasjonstida	kode	1951-01-01 00:00:00	2009-12-31 00:00:00	Været ved observasjonstida, tall- eller bokstavkode for ulike værslag, inntil tre forekomster (V1-V3)
+Vær	V6	Værslag i perioden	kode	1951-01-01 00:00:00	2009-12-31 00:00:00	Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)

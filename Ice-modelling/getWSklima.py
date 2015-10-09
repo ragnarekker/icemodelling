@@ -62,6 +62,8 @@ def getTimeserieTypesProperties():
 # Incomplete
 def getStationsFromTimeserieTypeElemCodes():
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getStationsFromTimeserieTypeElemCodes&timeserietypeID=0&elem_codes=ss_24%2C+tam&username="
+    #Denne finner alle stasjoner emd langbølget stråling
+    # http://eklima.met.no/met/MetService?invoke=getStationsFromTimeserieTypeElemCodes&timeserietypeID=2&elem_codes=QLI&username=
     # Asker har id 19710 og Blindern 18700
 
 

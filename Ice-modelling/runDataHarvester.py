@@ -46,6 +46,31 @@ def harvest_hakloa(from_string, to_string):
 
     return data
 
+
+def harvest_and_save_blindern(from_string, to_string):
+
+    stnr_met_blind = 18700          # Blindern (met)
+    from_date = dt.datetime.strptime(from_string, "%Y-%m-%d")
+    to_date = dt.datetime.strptime(to_string, "%Y-%m-%d")
+    #elems_blind = gws.getElementsFromTimeserieTypeStation(stnr_met_blind, 2, output='csv')
+
+    #rr = gws.getMetData(stnr_met_blind, 'RR', from_date, to_date, 0)
+    #rr_test_message = we.test_for_missing_elements(rr, from_date, to_date)
+
+    #tam = gws.getMetData(stnr_met_blind, 'TAM', from_date, to_date, 0)
+    #tam_test_message = we.test_for_missing_elements(tam, from_date, to_date)
+
+    #nnm = gws.getMetData(stnr_met_blind, 'NNM', from_date, to_date, 0)
+    #nnm_test_message = we.test_for_missing_elements(nnm, from_date, to_date)
+
+    # QLI (innkommende langbølget stråling) finnes i timesdata (timeserietypeID = 2) men bare for et lite utvalg stasjoner
+
+    a = 1
+
+
+
+
+
 class MyLakeInput():
     """
     Year
@@ -217,6 +242,8 @@ def make_mylake_inputfile(file_path, custom_text, data):
     f.close()
 
 if __name__ == "__main__":
+
+    harvest_and_save_blindern('2005-01-01', '2015-10-01')
 
     data = harvest_hakloa('2012-06-20', '2013-06-20')
     file_path = '{0}HAK_input.csv'.format(env.data_path)

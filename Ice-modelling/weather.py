@@ -211,8 +211,8 @@ def test_for_missing_elements(weather_element_list, from_date=None, to_date=None
     (in seconds) is default. If a missing element is found, message is returned.
 
     :param weather_element_list:
-    :param from_date:
-    :param to_date:
+    :param from_date:               [datetime]
+    :param to_date:                 [datetime]
     :param time_step:
     :return:
     """
