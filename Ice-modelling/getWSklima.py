@@ -197,8 +197,13 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='l
     #    fromDate = fromDate.strftime("%Y-%m-%d")
     #    toDate = toDate.strftime("%Y-%m-%d")
 
-    url = "http://eklima.met.no/metdata/MetDataService?invoke=getMetData&timeserietypeID={4}&format=&from={2}&to={3}&stations={0}&elements={1}&hours=&months=&username="\
-        .format(stationID, elementID, fromDate, toDate, timeseriesType)
+    # hours in the request is given in a comaseparated list: '0,..,23'. hours in UTC-time
+    # må settes bare for timeserietypeID = 2, 8, 9, 13, 14, 15 og 16 (timesdata)
+    # Get all hours
+    hours = '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23'
+
+    url = "http://eklima.met.no/metdata/MetDataService?invoke=getMetData&timeserietypeID={4}&format=&from={2}&to={3}&stations={0}&elements={1}&hours={5}&months=&username="\
+        .format(stationID, elementID, fromDate, toDate, timeseriesType, hours)
     wsKlimaRequest = re.get(url)
 
     # Check which output option is requested

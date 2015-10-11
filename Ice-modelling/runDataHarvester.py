@@ -6,6 +6,7 @@ import weather as we
 import getChartserverdata as gcs
 import datetime as dt
 import setEnvironment as env
+import makeFiledata as mfd
 
 
 def harvest_hakloa(from_string, to_string):
@@ -54,20 +55,38 @@ def harvest_and_save_blindern(from_string, to_string):
     to_date = dt.datetime.strptime(to_string, "%Y-%m-%d")
     #elems_blind = gws.getElementsFromTimeserieTypeStation(stnr_met_blind, 2, output='csv')
 
-    #rr = gws.getMetData(stnr_met_blind, 'RR', from_date, to_date, 0)
-    #rr_test_message = we.test_for_missing_elements(rr, from_date, to_date)
+    rr = gws.getMetData(stnr_met_blind, 'RR', from_date, to_date, 0)
+    rr_test_message = we.test_for_missing_elements(rr, from_date, to_date)
 
-    #tam = gws.getMetData(stnr_met_blind, 'TAM', from_date, to_date, 0)
+    tam = gws.getMetData(stnr_met_blind, 'TAM', from_date, to_date, 0)
     #tam_test_message = we.test_for_missing_elements(tam, from_date, to_date)
 
     #nnm = gws.getMetData(stnr_met_blind, 'NNM', from_date, to_date, 0)
     #nnm_test_message = we.test_for_missing_elements(nnm, from_date, to_date)
 
-    # QLI (innkommende langbølget stråling) finnes i timesdata (timeserietypeID = 2) men bare for et lite utvalg stasjoner
+    mfd.write_vardat()
 
-    a = 1
+    return
 
 
+def harvest_and_save_nordnesfjelet(from_string, to_string):
+
+    stnr = 91500          # Blindern (met)
+    from_date = dt.datetime.strptime(from_string, "%Y-%m-%d")
+    to_date = dt.datetime.strptime(to_string, "%Y-%m-%d")
+
+    #elems_blind = gws.getElementsFromTimeserieTypeStation(stnr, 2, output='csv')
+
+    qli = gws.getMetData(stnr, 'QLI', from_date, to_date, 2)
+    qli_test_message = we.test_for_missing_elements(qli, from_date, to_date, time_step=60*60)
+
+    ta = gws.getMetData(stnr, 'ta', from_date, to_date, 2)
+    ta_test_message = we.test_for_missing_elements(ta, from_date, to_date, time_step=3600)
+
+    rr = gws.getMetData(stnr, 'rr_1', from_date, to_date, 2)
+    rr_test_message = we.test_for_missing_elements(rr, from_date, to_date, time_step=3600)
+
+    return
 
 
 
@@ -243,7 +262,10 @@ def make_mylake_inputfile(file_path, custom_text, data):
 
 if __name__ == "__main__":
 
-    harvest_and_save_blindern('2005-01-01', '2015-10-01')
+
+    yesturday = (dt.date.today()-dt.timedelta(days=1)).strftime("%Y-%m-%d")
+    #harvest_and_save_blindern('2005-01-01', yesturday)
+    harvest_and_save_nordnesfjelet('2015-09-01', yesturday)
 
     data = harvest_hakloa('2012-06-20', '2013-06-20')
     file_path = '{0}HAK_input.csv'.format(env.data_path)
