@@ -1,0 +1,528 @@
+toDate:            1969-02-28
+description:       Værintensitet knytta til værslag gitt ved V5, f.eks kraftig (regn) eller lette (snøbyger).
+fromdate:          1969-01-01
+elemCode:          V5S
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden (intensitet)
+
+toDate:            2015-01-31
+description:       Kraftigste vindkast (3 sekunder) siste 10 minutter (10 meter over bakken)
+fromdate:          2015-01-08
+elemCode:          FG_010
+elemGroup:         Vind
+unit:              m/s
+name:              Kraftigste vindkast (siste 10 min)
+
+toDate:            2015-01-31
+description:       Kraftigste vindkast (3 sekunder) siste time (10 meter over bakken)
+fromdate:          2015-01-08
+elemCode:          FG_1
+elemGroup:         Vind
+unit:              m/s
+name:              Kraftigste vindkast (siste time)
+
+toDate:            2010-10-31
+description:       Nedbørmengde siste minutt
+fromdate:          1983-06-23
+elemCode:          RR_01
+elemGroup:         Intensitet
+unit:              mm
+name:              Nedbørintensitet
+
+toDate:            None
+description:       Nedbørmengde siste time
+fromdate:          1983-06-26
+elemCode:          RR_1
+elemGroup:         Nedbør
+unit:              mm
+name:              Nedbør (1 time)
+
+toDate:            2012-06-30
+description:       Laveste registrerte temperatur siste 12 timer
+fromdate:          1957-01-01
+elemCode:          TAN_12
+elemGroup:         Temperatur
+unit:              ºC
+name:              Minimumstemperatur (12 timer)
+
+toDate:            None
+description:       Laveste registrerte temperatur siste 12 timer
+fromdate:          2012-07-01
+elemCode:          TAN_12
+elemGroup:         Temperatur
+unit:              ºC
+name:              Minimumstemperatur (12 timer)
+
+toDate:            2012-04-30
+description:       Været ved observasjonstida, tall- eller bokstavkode for ulike værslag, inntil tre forekomster (V1-V3)
+fromdate:          1957-01-01
+elemCode:          V1
+elemGroup:         Vær
+unit:              kode
+name:              Været ved observasjonstida
+
+toDate:            2012-04-30
+description:       Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+fromdate:          1957-01-01
+elemCode:          V5
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden
+
+toDate:            2012-04-30
+description:       Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+fromdate:          1957-01-16
+elemCode:          V7
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden
+
+toDate:            2012-06-30
+description:       Duggpunktstemperatur (den temperaturen lufta må avkjøles til før skydannelse (metning) inntreffer)
+fromdate:          1957-01-01
+elemCode:          TD
+elemGroup:         Temperatur
+unit:              ºC
+name:              Duggpunktstemperatur
+
+toDate:            None
+description:       Duggpunktstemperatur (den temperaturen lufta må avkjøles til før skydannelse (metning) inntreffer)
+fromdate:          2012-07-01
+elemCode:          TD
+elemGroup:         Temperatur
+unit:              ºC
+name:              Duggpunktstemperatur
+
+toDate:            None
+description:       Laveste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+fromdate:          2012-07-01
+elemCode:          TAN
+elemGroup:         Temperatur
+unit:              ºC
+name:              Minimumstemperatur
+
+toDate:            None
+description:       Høyeste registrerte temperatur i timen/døgnet (kl 18-18)/måneden
+fromdate:          2012-07-01
+elemCode:          TAX
+elemGroup:         Temperatur
+unit:              ºC
+name:              Maksimumstemperatur
+
+toDate:            2012-04-30
+description:       Været ved observasjonstida, tall- eller bokstavkode for ulike værslag, inntil tre forekomster (V1-V3)
+fromdate:          1957-01-16
+elemCode:          V3
+elemGroup:         Vær
+unit:              kode
+name:              Været ved observasjonstida
+
+toDate:            2012-04-30
+description:       Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+fromdate:          1957-01-01
+elemCode:          V4
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden
+
+toDate:            1969-01-31
+description:       Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+fromdate:          1969-01-24
+elemCode:          V4
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden
+
+toDate:            1969-02-28
+description:       Værintensitet knytta til værslag gitt ved V4, f.eks kraftig (regn) eller lette (snøbyger).
+fromdate:          1969-01-01
+elemCode:          V4S
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden (intensitet)
+
+toDate:            1969-02-28
+description:       Værintensitet knytta til værslag gitt ved V6, f.eks kraftig (regn) eller lette (snøbyger).
+fromdate:          1969-01-01
+elemCode:          V6S
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden (intensitet)
+
+toDate:            2012-04-30
+description:       Høyeste kode for været siden forrige hovedobservasjonstid (kode 0-9)
+fromdate:          2012-02-29
+elemCode:          W1
+elemGroup:         Vær
+unit:              kodetall
+name:              Været siden forrige observasjon
+
+toDate:            2012-04-30
+description:       Høyde til undersida av laveste sky, meldes i kode, konverteres til meter.  Kode -3 = mengde av skyer er ikke mulig å se pga tåke, snøfokk eller lignende. -3 presenteres som '.'  (i synop kode=9))
+fromdate:          2012-02-29
+elemCode:          HL
+elemGroup:         Skyer
+unit:              meter
+name:              Skyhøyde
+
+toDate:            2012-06-30
+description:       Nedbørmengde siste 12 timer
+fromdate:          2008-12-09
+elemCode:          RR_12
+elemGroup:         Nedbør
+unit:              mm
+name:              Nedbør (12 timer)
+
+toDate:            None
+description:       Nedbørmengde siste 12 timer
+fromdate:          2005-05-21
+elemCode:          RR_12
+elemGroup:         Nedbør
+unit:              mm
+name:              Nedbør (12 timer)
+
+toDate:            2009-11-30
+description:       Tilleggsopplysning om været siden forrige hovedobservasjon
+fromdate:          2009-11-29
+elemCode:          WD1
+elemGroup:         Vær
+unit:              kode
+name:              Været siden forrige hovedobservasjon
+
+toDate:            1959-04-30
+description:       Kode benyttet t.o.m 1981
+fromdate:          1959-04-26
+elemCode:          EE0
+elemGroup:         Markas tilstand
+unit:              kode
+name:              Markas tilstand
+
+toDate:            2015-01-31
+description:       Barometertendensens karakteristikk oppgitt i kodetall (0-8) etter bevegelsesmåten (stigende, synkende, stabilt)
+fromdate:          2015-01-08
+elemCode:          AA
+elemGroup:         Lufttrykk
+unit:              kodetall
+name:              Karakteristikk av lufttrykk
+
+toDate:            None
+description:       Antallet minutt i løpet av en time da det er registrert nedbør av noe slag
+fromdate:          2012-07-01
+elemCode:          RT_1
+elemGroup:         Nedbør
+unit:              minutt
+name:              Nedbørtid
+
+toDate:            2012-06-30
+description:       Generell vindretning siste 10 minutter (refererer til vindhastighet FF), definert som retningen vinden kommer fra, der f.eks nord er 360º og øst 90º. Kode -3 betyr variabel vindretning.
+fromdate:          1957-01-01
+elemCode:          DD
+elemGroup:         Vind
+unit:              grader
+name:              Vindretning (FF)
+
+toDate:            2015-01-31
+description:       Generell vindretning siste 10 minutter (refererer til vindhastighet FF), definert som retningen vinden kommer fra, der f.eks nord er 360º og øst 90º. Kode -3 betyr variabel vindretning.
+fromdate:          2015-01-08
+elemCode:          DD
+elemGroup:         Vind
+unit:              grader
+name:              Vindretning (FF)
+
+toDate:            2012-06-30
+description:       Lufttemperatur ved observasjonstiden
+fromdate:          1957-01-01
+elemCode:          TA
+elemGroup:         Temperatur
+unit:              ºC
+name:              Lufttemperatur
+
+toDate:            None
+description:       Lufttemperatur ved observasjonstiden
+fromdate:          2012-07-01
+elemCode:          TA
+elemGroup:         Temperatur
+unit:              ºC
+name:              Lufttemperatur
+
+toDate:            2012-06-30
+description:       Oppgis med kodetall 1 - 4: 1 - 3 betyr at deler av marka er snødekt, og 4 at området rundt stasjonen er helt snødekt. Kode = -1 betyr "ikke snø", presenterast som "."
+fromdate:          1957-01-01
+elemCode:          SD
+elemGroup:         Snø
+unit:              kodetall
+name:              Snødekke
+
+toDate:            1969-02-28
+description:       Oppgis med kodetall 1 - 4: 1 - 3 betyr at deler av marka er snødekt, og 4 at området rundt stasjonen er helt snødekt. Kode = -1 betyr "ikke snø", presenterast som "."
+fromdate:          1969-01-01
+elemCode:          SD
+elemGroup:         Snø
+unit:              kodetall
+name:              Snødekke
+
+toDate:            2012-05-31
+description:       Samlet skydekke, kodetall 0-8 (0 = skyfritt, 1-8 = åttedeler av himmelen. Kode -3 = mengden av skyer kan ikke bedømmes pga tåke, snøfokk eller lignende. -3 presenteres som '.'  (i synop kode=9))
+fromdate:          1957-01-01
+elemCode:          NN
+elemGroup:         Skyer
+unit:              åttedeler
+name:              Skydekke
+
+toDate:            2012-04-30
+description:       Høyeste vindhastighet (10 meter over bakken) - standardverdi: høyeste timinutters middelvind for tida etter stasjonens forrige hovedobservasjon (normalt 6 timer, kan være 12 timer særlig ved obs kl 06 utc)
+fromdate:          1957-01-01
+elemCode:          FX
+elemGroup:         Vind
+unit:              m/s
+name:              Kraftigste middelvind
+
+toDate:            2008-12-31
+description:       Nedbørmengde siste 24 timer
+fromdate:          1957-01-01
+elemCode:          RR_24
+elemGroup:         Nedbør
+unit:              mm
+name:              Nedbør (24 timer)
+
+toDate:            1969-02-28
+description:       Nedbørmengde siste 24 timer
+fromdate:          1969-01-01
+elemCode:          RR_24
+elemGroup:         Nedbør
+unit:              mm
+name:              Nedbør (24 timer)
+
+toDate:            None
+description:       Nedbørmengde siste 24 timer
+fromdate:          2008-04-10
+elemCode:          RR_24
+elemGroup:         Nedbør
+unit:              mm
+name:              Nedbør (24 timer)
+
+toDate:            2012-04-30
+description:       Nest høyeste kode for været siden forrige hovedobservasjonstid (kode 0-9)
+fromdate:          2012-02-29
+elemCode:          W2
+elemGroup:         Vær
+unit:              kodetall
+name:              Været siden forrige observasjon
+
+toDate:            2012-08-31
+description:       Laveste registrerte temperatur i timen/døgnet/måneden, målt 10 cm over bakken
+fromdate:          2012-08-30
+elemCode:          TGN
+elemGroup:         Temperatur
+unit:              ºC
+name:              Gressminimumstemperatur
+
+toDate:            2005-03-31
+description:       Høyeste vindhastighet (10 meter over bakken) - verdi FX oppgitt etter beaufortskalaen
+fromdate:          1957-01-01
+elemCode:          FXB
+elemGroup:         Vind
+unit:              Beaufort
+name:              Kraftigste middelvind (beaufort)
+
+toDate:            2012-06-30
+description:       Vindhastighet (10 meter over bakken) - standardverdi: middelverdi for siste 10 minutter før observasjonstida
+fromdate:          1957-01-01
+elemCode:          FF
+elemGroup:         Vind
+unit:              m/s
+name:              Vindhastighet (10 meter over bakken)
+
+toDate:            2015-01-31
+description:       Vindhastighet (10 meter over bakken) - standardverdi: middelverdi for siste 10 minutter før observasjonstida
+fromdate:          2015-01-08
+elemCode:          FF
+elemGroup:         Vind
+unit:              m/s
+name:              Vindhastighet (10 meter over bakken)
+
+toDate:            2012-06-30
+description:       Kodetall som viser om værslag er med i synopmeldingen (1 = værslag med, 2 = ikke vær av betydning, 3 = væropplysninger mangler) 
+fromdate:          2005-01-04
+elemCode:          IX
+elemGroup:         Vær
+unit:              kodetall
+name:              Værinformasjon
+
+toDate:            2012-04-30
+description:       Sikt i dårligste retning, oppgis i meter, konvertert fra synopkode (maks 75 km) eller metar (maks 10 km)
+fromdate:          1957-01-01
+elemCode:          VV
+elemGroup:         Sikt
+unit:              meter
+name:              Synsvidde (sikt)
+
+toDate:            2012-04-30
+description:       Minimumstermometerets topp (kontrollverdi)
+fromdate:          2005-01-04
+elemCode:          TNT
+elemGroup:         Temperatur
+unit:              ºC
+name:              Minimumstemperatur (topp)
+
+toDate:            2012-04-30
+description:       Maksimumstermometerets topp (kontrollverdi)
+fromdate:          2005-01-04
+elemCode:          TXT
+elemGroup:         Temperatur
+unit:              ºC
+name:              Maksimumstemperatur (topp)
+
+toDate:            2012-06-30
+description:       Kodetall som viser om nedbørmengde er med i synopmeldingen (1 = nedbør med, 3 = nedbør ikke falt, 4 = nedbør ikke målt) 
+fromdate:          2005-01-04
+elemCode:          IR
+elemGroup:         Nedbør
+unit:              kodetall
+name:              Nedbørmåling
+
+toDate:            2012-06-30
+description:       Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres som ".", -3 = "umulig å måle"
+fromdate:          1957-01-01
+elemCode:          SA
+elemGroup:         Snø
+unit:              cm
+name:              Snødybde
+
+toDate:            1969-02-28
+description:       Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres som ".", -3 = "umulig å måle"
+fromdate:          1969-01-01
+elemCode:          SA
+elemGroup:         Snø
+unit:              cm
+name:              Snødybde
+
+toDate:            None
+description:       Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres som ".", -3 = "umulig å måle"
+fromdate:          2012-10-29
+elemCode:          SA
+elemGroup:         Snø
+unit:              cm
+name:              Snødybde
+
+toDate:            2012-06-30
+description:       Kode benyttet f.o.m 2013
+fromdate:          1959-04-26
+elemCode:          EE
+elemGroup:         Markas tilstand
+unit:              kode
+name:              Markas tilstand
+
+toDate:            2015-01-31
+description:       Vindretning ved kraftigste middelvind siste time (FX_1)
+fromdate:          2015-01-08
+elemCode:          DX_1
+elemGroup:         Vind
+unit:              grader
+name:              Vindretning (FX_1)
+
+toDate:            2012-06-30
+description:       Høyeste registrerte temperatur siste 12 timer
+fromdate:          1957-01-01
+elemCode:          TAX_12
+elemGroup:         Temperatur
+unit:              ºC
+name:              Maksimumstemperatur (12 timer)
+
+toDate:            None
+description:       Høyeste registrerte temperatur siste 12 timer
+fromdate:          2012-07-01
+elemCode:          TAX_12
+elemGroup:         Temperatur
+unit:              ºC
+name:              Maksimumstemperatur (12 timer)
+
+toDate:            2012-06-30
+description:       Direkte avlest hygrometerverdi, ukorrigert
+fromdate:          2005-01-04
+elemCode:          UH
+elemGroup:         Fuktighet
+unit:              prosent
+name:              Relativ fuktighet
+
+toDate:            2012-06-30
+description:       Antall 6-timers perioder som nedbørmålingen omfatter
+fromdate:          2005-01-04
+elemCode:          ITR
+elemGroup:         Nedbør
+unit:              antall
+name:              Måleperiode for nedbør
+
+toDate:            2012-04-30
+description:       Været ved observasjonstida, gitt ved synopkode 00-99
+fromdate:          2012-02-29
+elemCode:          WW
+elemGroup:         Vær
+unit:              kode
+name:              Været ved observasjonstida
+
+toDate:            2012-06-30
+description:       Relativ luftfuktighet ved observasjonstida
+fromdate:          1957-01-01
+elemCode:          UU
+elemGroup:         Fuktighet
+unit:              prosent
+name:              Relativ luftfuktighet
+
+toDate:            None
+description:       Relativ luftfuktighet ved observasjonstida
+fromdate:          2012-07-01
+elemCode:          UU
+elemGroup:         Fuktighet
+unit:              prosent
+name:              Relativ luftfuktighet
+
+toDate:            2015-01-31
+description:       Høyeste timinutters middelvind for siste time (10 meter over bakken)
+fromdate:          2015-01-08
+elemCode:          FX_1
+elemGroup:         Vind
+unit:              m/s
+name:              Kraftigste middelvind (siste time)
+
+toDate:            2012-06-30
+description:       Markas tilstand (snø- og isdekke)
+fromdate:          1983-01-01
+elemCode:          EM
+elemGroup:         Snø
+unit:              kodetall
+name:              Markas tilstand (E')
+
+toDate:            None
+description:       Automatstasjon: Total nedbørmengde i bøtta (samlemengde siden sist tømming)
+fromdate:          2012-07-01
+elemCode:          RA
+elemGroup:         Nedbør
+unit:              mm
+name:              Total nedbør
+
+toDate:            2012-04-30
+description:       Været ved observasjonstida, tall- eller bokstavkode for ulike værslag, inntil tre forekomster (V1-V3)
+fromdate:          1957-01-01
+elemCode:          V2
+elemGroup:         Vær
+unit:              kode
+name:              Været ved observasjonstida
+
+toDate:            2012-04-30
+description:       Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+fromdate:          1957-01-05
+elemCode:          V6
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden
+
+toDate:            1969-02-28
+description:       Været i seks- eller tolvtimersperioden før observasjonstida, tall- eller bokstavkode for ulike værslag, inntil fire forekomster (V4-V7)
+fromdate:          1969-01-01
+elemCode:          V6
+elemGroup:         Vær
+unit:              kode
+name:              Værslag i perioden
+

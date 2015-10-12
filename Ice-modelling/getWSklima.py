@@ -202,7 +202,7 @@ def getElementsFromTimeserieTypeStation(stationID, timeserietypeID, output='list
     Output options:
         'list':         returns a list of dictionary elements.
         'xml':          returns NULL but saves a .xml file to the working folder.
-        'csv':          returns NULL but saves a .csv file to the working folder. The separation value is tab.
+        'txt':          returns NULL but saves a .txt file to the working folder. The separation value is tab.
 
     Example of xml that is iterated:
 
@@ -230,18 +230,12 @@ def getElementsFromTimeserieTypeStation(stationID, timeserietypeID, output='list
         .format(stationID, timeserietypeID)
     wsKlimaRequest = re.get(url)
 
-    # Check which output option is requested
-    if output == 'list':
-        stationElementList = []
-    elif output == 'xml':
-        filename = '{0}Elements on {1}_{2}.xml'.format(env.data_path, stationID, timeserietypeID)
-        f = open(filename, 'w')
-        f.write((wsKlimaRequest.text).encode('utf-8'))
-        f.close()
-        return
-    elif output == 'csv':
-        filename = '{0}Elements on {1}_{2}.csv'.format(env.data_path, stationID, timeserietypeID)
-        f = open(filename, 'w')
+    stationElementList = []
+    filename = '{0}Elements on {1}_{2}'.format(env.data_path, stationID, timeserietypeID)
+
+    if output == 'xml':
+        mfd.write_large_sting(filename, '.xml', wsKlimaRequest.text.encode('utf-8'))
+        return None
 
     # Take the request and make an element tree to be iterated
     root = etree.fromstring(wsKlimaRequest.content)
@@ -252,33 +246,26 @@ def getElementsFromTimeserieTypeStation(stationID, timeserietypeID, output='list
         description = element.find('description').text.encode('utf-8')
         unit = element.find('unit').text.encode('utf-8')
 
-        tempfromdate = element.find('fromdate').text
-        fromdate = dt.datetime.strptime(tempfromdate[0:10], "%Y-%m-%d").date()
+        fromdate = element.find('fromdate').text
+        fromdate = dt.datetime.strptime(fromdate[0:10], "%Y-%m-%d").date()
+        todate = element.find('todate').text
+        if todate is not None:
+            todate = dt.datetime.strptime(todate[0:10], "%Y-%m-%d").date()
 
-        temptodate = element.find('todate').text
-        if temptodate == None:
-            todate = None
-        else:
-            todate = dt.datetime.strptime(temptodate[0:10], "%Y-%m-%d").date()
+        stationElementList.append({'elemGroup': elemGroup,
+                                   'elemCode': elemCode,
+                                   'name': name,
+                                   'description': description,
+                                   'unit': unit,
+                                   'fromdate': fromdate,
+                                   'toDate': todate})
 
-        if output == 'list':
-            stationElementList.append({'elemGroup': elemGroup,
-                                       'elemCode': elemCode,
-                                       'name': name,
-                                       'description': description,
-                                       'unit': unit,
-                                       'fromdate': fromdate,
-                                       'toDate': todate})
-        elif output == 'csv':
-            f.write( '{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\n'
-                     .format(elemGroup, elemCode, name, unit, fromdate, todate, description) )
-
-    # Wrap up. Close files (xml file is already closed) and return data if it exists
-    if output == 'csv':
-        f.close()
-        return
-    elif output == 'list':
+    if output == 'list':
         return stationElementList
+    if output == 'txt':
+        mfd.write_dictionary(filename, '.txt', stationElementList, tabulated=False)
+        return None
+
 
 
 def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='list'):
@@ -405,12 +392,12 @@ if __name__ == "__main__":
     # elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
     # elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
     #elementsOnEvenes = getElementsFromTimeserieTypeStation(84970, 0, 'list')
-    #getElementsFromTimeserieTypeStation(84970, 0, 'xml')
-    #getElementsFromTimeserieTypeStation(19710, 0, 'csv')
+    getElementsFromTimeserieTypeStation(84970, 0, 'xml')
+    getElementsFromTimeserieTypeStation(19710, 2, 'txt')
 
-    #list = getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='xml')
-    list = getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='txt')
-    list = getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'RR_1', 'TA'], output='txt')
+    #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='xml')
+    #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='txt')
+    #getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'RR_1', 'TA'], output='txt')
 
 
 

@@ -1,17 +1,4 @@
 utm_zone:          33
-municipalityNo:    514
-stnr:              15270
-to_date:           None
-lonDec:            8.369
-amsl:              1894
-name:              JUVVASSHE
-latDec:            61.6775
-utm_e:             149452
-from_date:         2014-02-11
-department:        OPPLAND
-utm_n:             6856140
-
-utm_zone:          33
 municipalityNo:    511
 stnr:              16400
 to_date:           None
@@ -33,7 +20,7 @@ amsl:              1162
 name:              MIDTSTOVA
 latDec:            60.6563
 utm_e:             78375
-from_date:         2013-02-25
+from_date:         2011-11-23
 department:        HORDALAND
 utm_n:             6749336
 
@@ -46,7 +33,7 @@ amsl:              17
 name:              MYKEN
 latDec:            66.7628
 utm_e:             389341
-from_date:         2014-02-13
+from_date:         1992-11-01
 department:        NORDLAND
 utm_n:             7407169
 
@@ -59,7 +46,7 @@ amsl:              700
 name:              NORDNESFJELLET
 latDec:            69.5738
 utm_e:             711075
-from_date:         2014-01-21
+from_date:         2011-12-31
 department:        TROMS
 utm_n:             7727719
 
@@ -72,20 +59,7 @@ amsl:              131
 name:              KARASJOK - MARKANNJARGA
 latDec:            69.4635
 utm_e:             909434
-from_date:         2015-06-03
+from_date:         2004-07-07
 department:        FINNMARK
 utm_n:             7741309
-
-utm_zone:          33
-municipalityNo:    2021
-stnr:              97710
-to_date:           None
-lonDec:            25.346
-amsl:              591
-name:              ISKORAS II
-latDec:            69.3003
-utm_e:             906462
-from_date:         2014-09-05
-department:        FINNMARK
-utm_n:             7722293
 

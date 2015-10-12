@@ -61,7 +61,7 @@ def write_large_sting(file_name, extension, data):
 
 
 def write_dictionary(file_name, extension, data, tabulated=False):
-    """INCOMPLETE IMPLEMENTATION. Writes a list of directoiries to file.
+    """Writes a list of directoiries to file.
 
     :param file_name:
     :param extension:
@@ -73,10 +73,11 @@ def write_dictionary(file_name, extension, data, tabulated=False):
     file_name += extension
 
     if tabulated == False:
-
         with open(file_name, "w") as myfile:
             for d in data:
-                for key in d:
-                    myfile.write(key + "   :   " + d[key] + "\n")
+                for key, value in d.iteritems():
+                    myfile.write("{0: <18} {1}\n".format(key+":", value))
                 myfile.write("\n")
-
+    else:
+        with open(file_name, "w") as myfile:
+            myfile.write("Tabulated data goes here. Method not implemented.")
