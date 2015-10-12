@@ -55,36 +55,55 @@ def harvest_and_save_blindern(from_string, to_string):
     to_date = dt.datetime.strptime(to_string, "%Y-%m-%d")
     #elems_blind = gws.getElementsFromTimeserieTypeStation(stnr_met_blind, 2, output='csv')
 
-    rr = gws.getMetData(stnr_met_blind, 'RR', from_date, to_date, 0)
+    rr = gws.getMetData(stnr_met_blind, 'RR', from_date, to_date, 0, output='raw list')
+    rr = we.millimeter_from_meter(rr)
     rr_test_message = we.test_for_missing_elements(rr, from_date, to_date)
 
-    tam = gws.getMetData(stnr_met_blind, 'TAM', from_date, to_date, 0)
-    #tam_test_message = we.test_for_missing_elements(tam, from_date, to_date)
+    tam = gws.getMetData(stnr_met_blind, 'TAM', from_date, to_date, 0, output='raw list')
+    tam_test_message = we.test_for_missing_elements(tam, from_date, to_date)
 
-    #nnm = gws.getMetData(stnr_met_blind, 'NNM', from_date, to_date, 0)
-    #nnm_test_message = we.test_for_missing_elements(nnm, from_date, to_date)
+    nnm = gws.getMetData(stnr_met_blind, 'NNM', from_date, to_date, 0, output='raw list')
+    nnm_test_message = we.test_for_missing_elements(nnm, from_date, to_date)
 
-    mfd.write_vardat()
+    file_name = '{2}RR TAM NNM Blindern 18700 {0} to {1}.txt'.format(from_string, to_string, env.data_path)
+
+    WSYS = "github/Ice-modelling/rundataharvester.py"
+    OPER = "Ragnar Ekker"
+    DCHA = ['RR  [mm/day]          on Blindern 18700 from eklima.met.no',
+            'TAM [C]     daily avg on Blindern 18700 from eklima.met.no',
+            'NNM [%/100] daily avg on Blindern 18700 from eklima.met.no']
+
+    mfd.write_vardat2(file_name, [rr, tam, nnm], WSYS, OPER, DCHA)
 
     return
 
 
 def harvest_and_save_nordnesfjelet(from_string, to_string):
 
-    stnr = 91500          # Blindern (met)
+    stnr = 91500          # Nordnesfjellet (met)
     from_date = dt.datetime.strptime(from_string, "%Y-%m-%d")
     to_date = dt.datetime.strptime(to_string, "%Y-%m-%d")
-
     #elems_blind = gws.getElementsFromTimeserieTypeStation(stnr, 2, output='csv')
 
-    qli = gws.getMetData(stnr, 'QLI', from_date, to_date, 2)
+    qli = gws.getMetData(stnr, 'QLI', from_date, to_date, 2, output='raw list')
     qli_test_message = we.test_for_missing_elements(qli, from_date, to_date, time_step=60*60)
 
-    ta = gws.getMetData(stnr, 'ta', from_date, to_date, 2)
+    ta = gws.getMetData(stnr, 'ta', from_date, to_date, 2, output='raw list')
     ta_test_message = we.test_for_missing_elements(ta, from_date, to_date, time_step=3600)
 
-    rr = gws.getMetData(stnr, 'rr_1', from_date, to_date, 2)
-    rr_test_message = we.test_for_missing_elements(rr, from_date, to_date, time_step=3600)
+    rr_1 = gws.getMetData(stnr, 'rr_1', from_date, to_date, 2, output='raw list')
+    rr_1 = we.millimeter_from_meter(rr_1)
+    rr_test_message = we.test_for_missing_elements(rr_1, from_date, to_date, time_step=3600)
+
+    file_name = '{2}QLI TA RR Nordnesfjellet 91500 {0} to {1}.txt'.format(from_string, to_string, env.data_path)
+
+    WSYS = "github/Ice-modelling/rundataharvester.py"
+    OPER = "Ragnar Ekker"
+    DCHA = ['QLI  [Wh/m2] avg pr hr on Nordnesfjellet 91500 from eklima.met.no',
+            'TA   [C]     avg pr hr on Nordnesfjellet 91500 from eklima.met.no',
+            'RR_1 [mm/hr]           on Nordnesfjellet 91500 from eklima.met.no']
+
+    mfd.write_vardat2(file_name, [qli, ta, rr_1], WSYS, OPER, DCHA)
 
     return
 
@@ -193,8 +212,6 @@ class MyLakeInput():
     """
 
 
-
-
 def make_mylake_inputfile(file_path, custom_text, data):
     """
 
@@ -262,10 +279,9 @@ def make_mylake_inputfile(file_path, custom_text, data):
 
 if __name__ == "__main__":
 
-
     yesturday = (dt.date.today()-dt.timedelta(days=1)).strftime("%Y-%m-%d")
-    #harvest_and_save_blindern('2005-01-01', yesturday)
-    harvest_and_save_nordnesfjelet('2015-09-01', yesturday)
+    #harvest_and_save_blindern('2000-01-01', yesturday)
+    #harvest_and_save_nordnesfjelet('2014-08-01', yesturday)
 
     data = harvest_hakloa('2012-06-20', '2013-06-20')
     file_path = '{0}HAK_input.csv'.format(env.data_path)

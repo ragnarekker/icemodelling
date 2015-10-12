@@ -77,7 +77,7 @@ def meter_from_centimeter(weather_element_list):
 
 
 def millimeter_from_meter(weather_element_list):
-    """Converts meters to millimeter in a WeatherElement list
+    """Converts meters to millimeter on precipitation data [RR and RR_1] in a WeatherElement list
 
     :param weather_element_list:
     :return:
@@ -85,8 +85,10 @@ def millimeter_from_meter(weather_element_list):
     weatherElementListOut = []
 
     for we in weather_element_list:
-        we.Value = we.Value * 1000.
-        we.Metadata.append({'Converted': 'from m to mm'})
+        if we.ElementID in ['RR', 'RR_1']:
+            if we.Value >= 0:
+                we.Value = we.Value * 1000.
+                we.Metadata.append({'Converted': 'from m to mm'})
         weatherElementListOut.append(we)
 
     return weatherElementListOut
@@ -273,6 +275,7 @@ class WeatherElement():
 
     '''
 
+
     def __init__(self, elementLocationID, elementDate, elementID, elementValue):
 
         self.LocationID = elementLocationID
@@ -283,48 +286,54 @@ class WeatherElement():
             elementValue = 0
         self.Value = float(elementValue)
 
-        # Met snow is different
+        # Met snow is in [cm] and always positive. Convert to [m]
         if elementID == 'SA':
-            if elementValue < 0.:
-                self.Value = 0.
-                self.Metadata.append({'On import': 'removed negative value'})
-            else:
+            if elementValue >= 0.:
                 self.Value = elementValue / 100.
                 self.Metadata.append({'Converted': 'from cm to m'})
 
-        # Met rain seems to have a special treatment as well. Also, we use meter and not mm..
-        if elementID == 'RR':
-            if elementValue < 0.:
-                self.Value = 0.
-                self.Metadata.append({'On import': 'removed negative value'})
-            else:
+        # Met rain is in [mm] and always positive. We use SI and [m]; not [mm].
+        if elementID in ['RR','RR_1']:
+            if self.Value > 0.:
                 self.Value = elementValue / 1000.
                 self.Metadata.append({'Converted': 'from mm to m'})
 
         # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
         if elementID == 'NNM':
-            if elementValue == 9. or elementValue == -99999:
-                self.Value = 0.
-                self.Metadata.append({'On import': 'unknown value replaced with 0.'})
-            else:
-                self.Value /= 8.
+            if self.Value not in [9., -99999.]:
+                pecent = int(self.Value/8*100)
+                self.Value = pecent/100.
                 self.Metadata.append({'Converted': 'from okta to unit'})
 
+
+    def fix_data_quick(self):
+
+        # These values should always be positive. -99999 is often used as unknown number in eklima.
+        # RR = 0 or negligible precipitation. RR = -1 is noe precipitation observed.
+        if self.ElementID in ['SA', 'RR','RR_1', 'QLI']:
+            if self.Value < 0.:
+                self.Value = 0.
+                self.Metadata.append({'Value manipulation': 'removed negative value'})
+
+        # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
+        if self.ElementID == 'NNM':
+            if self.Value in [9., -99999]:
+                self.Value = 0.
+                self.Metadata.append({'On import': 'unknown value replaced with 0.'})
+
         # data corrections. I found errors in data Im using from met
-        if (self.Date).date() == dt.date(2012, 02,
-                                         02) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
+        if (self.Date).date() == dt.date(2012, 02, 02) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
             self.Value = 0.45
             self.Metadata.append({"ManualValue": self.Value})
 
-        if (self.Date).date() == dt.date(2012, 03,
-                                         18) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
+        if (self.Date).date() == dt.date(2012, 03, 18) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.89
             self.Metadata.append({"ManualValue": self.Value})
 
-        if (self.Date).date() == dt.date(2012, 12,
-                                         31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
+        if (self.Date).date() == dt.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.36
             self.Metadata.append({"ManualValue": self.Value})
+
 
 
 class EnergyBalanceElement():
