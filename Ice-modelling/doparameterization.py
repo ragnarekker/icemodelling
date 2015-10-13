@@ -6,6 +6,7 @@ import types
 import math
 import constants as const
 from doconversions import *
+import random as random
 
 
 #######    Works on arrays
@@ -186,6 +187,25 @@ def k_snow_from_rho_snow(rho_snow):
 ####### Works on both
 
 
+def atmospheric_emissivity(temp_atm, cloud_cover, method="2005 WALTER"):
+    """Its a start.. Incomplete
+
+    :param temp_atm:
+    :param cloud_cover:
+    :return:
+    """
+
+    eps_atm_list = []
+
+    if method=="1998 CAMPBELL":
+        # Atmospheric emissivity from Campbell and Norman, 1998. Emissivity er dimasnjonsløs
+        eps_atm = (0.72+0.005*temp_atm)*(1-0.84*cloud_cover)+0.84*cloud_cover
+
+    if method=="2005 WALTER":
+        # From THS og 2005 WALTER
+        eps_atm = (1.0+0.0025*temp_atm)-(1-cloud_cover)*(0.25*(1.0+0.0025*temp_atm))
+
+
 def clouds_from_precipitation(prec_inn, method='Binary'):
     '''Takes a list of precipitation and returns cloud cover.
 
@@ -257,7 +277,13 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
         dettet i beregningen av skyer.
 
         '''
-
+        for p in prec:
+            if p > 5./1000:
+                clouds.append(1.)
+            elif 0. < p <= 5./1000:
+                clouds.append(0.8+random.random()/5.)       # random numbers between 0.8 an 1.0
+            if p == 0.:
+                clouds.append(0.4+random.random()*3./10.)   # random numbers between 0.4 and 0.7
 
 
     # Again, if prec_inn isn't a list, return only a float.
