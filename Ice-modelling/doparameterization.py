@@ -213,7 +213,6 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
     clouds_out = []
 
     if method == 'Binary':
-
         for p in prec:
             if p == 0:
                 # clouds.append(0.)
@@ -222,8 +221,8 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
                 clouds.append(1.)
         clouds_out = clouds
 
-    if method == 'Average':
 
+    if method == 'Average':
         for p in prec:
             if p == 0:
                 clouds.append(0.)
@@ -235,11 +234,30 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
 
 
     if method == 'Binary and average':
-
         clouds_out_1 = clouds_from_precipitation(prec, method='Binary')
         clouds_out_2 = clouds_from_precipitation(prec, method='Average')
         for i in range(0, len(clouds_out_1), 1):
             clouds_out.append(min(clouds_out_1[i]+clouds_out_2[i], 1))
+
+
+    if method == 'Random Thomas':
+        '''
+        Mange takk, dette blir bra å  forske videre på. Jeg må tenke på andre snø ting nå, men dette er så
+        langt jeg kom, kanskje det er bra nok! Da beregnes skyer slik:
+
+        if(P >5)Cl <-1.0
+        if(P>0.0&& P <=5) Cl <- runif(1,0.80,1.0)
+        if(P==0) Cl<-runif(1,0.4,0.7)
+
+        og emmisivitet slik:
+        epsa <- (1.0+0.0025*Ta)-(1-Cl)*(0.25*(1.0+0.0025*Ta))
+
+        Tilfeldigvis ble dette uttrykket ganske ryddig. Hvis helt skyfritt reduseres epsa med 25 %. Litt
+        pussig at emmisiviteten kan bli over en (med Cl = 1.0),  på den annen side tillates aldri
+        dettet i beregningen av skyer.
+
+        '''
+
 
 
     # Again, if prec_inn isn't a list, return only a float.

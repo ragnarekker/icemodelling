@@ -641,6 +641,7 @@ def get_long_wave(cloud_cover, temp_atm, temp_surface, snow_depth, is_ice, time_
     '''
 
     eps_atm = (0.72+0.005*temp_atm)*(1-0.84*cloud_cover)+0.84*cloud_cover    # Atmospheric emissivity from Campbell and Norman, 1998. Emissivity er dimasnjonsløs
+    # eps_atm = (1.0+0.0025*temp_atm)-(1-cloud_cover)*(0.25*(1.0+0.0025*temp_atm))        # From THS
     eps_surface = const.eps_snow                       # By default we assume snow cover
     sigma = const.sigma_pr_second                      # Stefan-Boltzmann constant
 
