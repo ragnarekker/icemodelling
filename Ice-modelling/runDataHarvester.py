@@ -7,9 +7,10 @@ import getChartserverdata as gcs
 import datetime as dt
 import setEnvironment as env
 import makeFiledata as mfd
+import makePickle as mp
 
 
-def harvest_hakloa(from_string, to_string):
+def harvest_for_mylake_hakloa(from_string, to_string):
     """Method gathers meteorological parameters needed to run myLake and saves them to a formated file as needed
     to run myLake. For columns needed se MyLakeInput class.
 
@@ -34,8 +35,12 @@ def harvest_hakloa(from_string, to_string):
 
     from_date = dt.datetime.strptime(from_string, "%Y-%m-%d")
     to_date = dt.datetime.strptime(to_string, "%Y-%m-%d")
-
     data = MyLakeInput(from_date, to_date)
+
+    data.output_file_path = '{0}HAK_input'.format(env.data_path)
+    data.output_header = 'MyLake model input data for Hakloa from Hakloa (NVE), Bjørnholt (met) and Blindern (met) stations'
+
+    data.add_Global_rad(None)
 
     data.add_Cloud_cov(gws.getMetData(stnr_met_blind, 'NNM', from_date, to_date, 0))
     data.add_Air_temp(gcs.getStationdata(stnr_nve, '17.1', from_date, to_date))
@@ -43,7 +48,19 @@ def harvest_hakloa(from_string, to_string):
     data.add_Air_press(gws.getMetData(stnr_met_blind, 'POM', from_date, to_date, 0))
     data.add_Wind_speed(gcs.getStationdata(stnr_nve, '15.1', from_date, to_date))
     data.add_Precipitation(we.millimeter_from_meter(gws.getMetData(stnr_met_bjorn, 'RR', from_date, to_date, 0)))
-    data.add_Inflow(we.constant_weather_element_list('Hakloa', from_date, to_date, 'Inflow', 10.))
+
+    # finne areal av nedbørsfelt og gange opp med nedbør
+    data.add_Inflow(we.constant_weather_element('Hakloa', from_date, to_date, 'Inflow', 10.))
+    # max(tufttemp, 0)
+    data.add_Inflow_T(gcs.getStationdata(stnr_nve, '17.1', from_date, to_date))
+
+    data.add_Inflow_C(we.constant_weather_element('Hakloa', from_date, to_date, 'Inflow_C', .5))
+    data.add_Inflow_S(we.constant_weather_element('Hakloa', from_date, to_date, 'Inflow_S', .01))
+    data.add_Inflow_TP(we.constant_weather_element('Hakloa', from_date, to_date, 'Inflow_TP', 44.))
+    data.add_Inflow_DOP(we.constant_weather_element('Hakloa', from_date, to_date, 'Inflow_DOP', 7.))
+    data.add_Inflow_Chla(we.constant_weather_element('Hakloa', from_date, to_date, 'Inflow_Chla', .1))
+    data.add_Inflow_DOC(we.constant_weather_element('Hakloa', from_date, to_date, 'Inflow_DOC', 3000.))
+
 
     return data
 
@@ -108,7 +125,6 @@ def harvest_and_save_nordnesfjelet(from_string, to_string):
     return
 
 
-
 class MyLakeInput():
     """
     Year
@@ -138,6 +154,9 @@ class MyLakeInput():
         self.from_date = from_date_inn
         self.to_date = to_date_inn
 
+        self.output_file_path = None
+        self.output_header = None
+
         self.metadata = []
 
         self.Global_rad = None    # (MJ/m2)
@@ -158,10 +177,13 @@ class MyLakeInput():
         self.Inflow_DOC = None    # (mg/m3)
 
 
-    def add_global_rad(self, Global_rad_inn):
-        messages = we.test_for_missing_elements(Global_rad_inn, self.from_date, self.to_date)
-        self.metadata += messages
-        self.Global_rad = Global_rad_inn
+    def add_Global_rad(self, Global_rad_inn):
+        if Global_rad_inn is None:
+            self.Global_rad = None
+        else:
+            messages = we.test_for_missing_elements(Global_rad_inn, self.from_date, self.to_date)
+            self.metadata += messages
+            self.Global_rad = Global_rad_inn
 
 
     def add_Cloud_cov(self, Cloud_cov_inn):
@@ -205,17 +227,53 @@ class MyLakeInput():
         self.metadata += messages
         self.Inflow = Inflow_inn
 
-    """
-    def add_(self, _inn):
-        we.test_for_missing_elements(_inn)
-        self. = _inn
-    """
+
+    def add_Inflow_T(self, Inflow_T_inn):
+        messages = we.test_for_missing_elements(Inflow_T_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Inflow_T = Inflow_T_inn
 
 
-def make_mylake_inputfile(file_path, custom_text, data):
+    def add_Inflow_C(self, Inflow_C_inn):
+        messages = we.test_for_missing_elements(Inflow_C_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Inflow_C = Inflow_C_inn
+
+
+    def add_Inflow_S(self, Inflow_S_inn):
+        messages = we.test_for_missing_elements(Inflow_S_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Inflow_S = Inflow_S_inn
+
+
+    def add_Inflow_TP(self, Inflow_TP_inn):
+        messages = we.test_for_missing_elements(Inflow_TP_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Inflow_TP = Inflow_TP_inn
+
+
+    def add_Inflow_DOP(self, Inflow_DOP_inn):
+        messages = we.test_for_missing_elements(Inflow_DOP_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Inflow_DOP = Inflow_DOP_inn
+
+
+    def add_Inflow_Chla(self, Inflow_Chla_inn):
+        messages = we.test_for_missing_elements(Inflow_Chla_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Inflow_Chla = Inflow_Chla_inn
+
+
+    def add_Inflow_DOC(self, Inflow_DOC_inn):
+        messages = we.test_for_missing_elements(Inflow_DOC_inn, self.from_date, self.to_date)
+        self.metadata += messages
+        self.Inflow_DOC = Inflow_DOC_inn
+
+
+def make_mylake_inputfile(data):
     """
 
-    :param file_path:
+    :param data:
     :return:
 
     E.g.:
@@ -283,7 +341,8 @@ if __name__ == "__main__":
     #harvest_and_save_blindern('2000-01-01', yesturday)
     #harvest_and_save_nordnesfjelet('2014-08-01', yesturday)
 
-    data = harvest_hakloa('2012-06-20', '2013-06-20')
-    file_path = '{0}HAK_input.csv'.format(env.data_path)
-    custom_text = 'MyLake model input data for Hakloa from Hakloa (NVE), Bjørnholt (met) and Blindern (met) stations'
-    make_mylake_inputfile(file_path, custom_text, data)
+    data = harvest_for_mylake_hakloa('2013-05-20', '2013-06-20')
+    mp.pickle_anything(data, data.output_file_path +'.pickle')
+    data = mp.unpickle_anything(data.output_file_path +'.pickle')
+
+    make_mylake_inputfile(data)

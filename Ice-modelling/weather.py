@@ -183,7 +183,7 @@ def average_value(weather_element_list, lower_index, upper_index):
     return avgToReturn
 
 
-def constant_weather_element_list(location, from_date, to_date, parameter, value):
+def constant_weather_element(location, from_date, to_date, parameter, value):
     """Creates a list of weather elements of constant value over a period.
 
     :param location:
