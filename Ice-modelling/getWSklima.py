@@ -123,7 +123,7 @@ def getStationsFromTimeserieTypeElemCodes(timeserietypeID, elem_codes, output='l
 
      # Check which output option is requested
     if output == 'xml':     # save the xml received on the eklima request
-        mfd.write_large_sting(filename, ".xml", wsKlimaRequest.text.encode('utf-8'))
+        mfd.write_large_string(filename, ".xml", wsKlimaRequest.text.encode('utf-8'))
         return None
 
     # Take the request and make an element tree to be iterated
@@ -234,7 +234,7 @@ def getElementsFromTimeserieTypeStation(stationID, timeserietypeID, output='list
     filename = '{0}Elements on {1}_{2}'.format(env.data_path, stationID, timeserietypeID)
 
     if output == 'xml':
-        mfd.write_large_sting(filename, '.xml', wsKlimaRequest.text.encode('utf-8'))
+        mfd.write_large_string(filename, '.xml', wsKlimaRequest.text.encode('utf-8'))
         return None
 
     # Take the request and make an element tree to be iterated
@@ -265,7 +265,6 @@ def getElementsFromTimeserieTypeStation(stationID, timeserietypeID, output='list
     if output == 'txt':
         mfd.write_dictionary(filename, '.txt', stationElementList, tabulated=False)
         return None
-
 
 
 def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='list'):
@@ -323,6 +322,7 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='l
 
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getMetData&timeserietypeID={4}&format=&from={2}&to={3}&stations={0}&elements={1}&hours={5}&months=&username="\
         .format(stationID, elementID, fromDate, toDate, timeseriesType, hours)
+    print 'getWSklima.py -> getMetData: Requesting {0}'.format(url)
     wsKlimaRequest = re.get(url)
 
     # Check which output option is requested

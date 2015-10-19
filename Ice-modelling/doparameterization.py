@@ -218,6 +218,11 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
     Method = Binary and average: Method combines the above. If there is no rain one day, the average precipitation
                         in the period is used and if there is precipitation 100% cloud cover is used.
 
+    Method = Random Thomas: Thomas Skaugen suggests to choose random numbers in a interval based on
+                        precipitation amount to estimate clouds. Method returns different nash sutcliffie every
+                        run but the seem to sircle around the results from "Binary and avarage" method.
+
+
     :param prec_inn:        [list or single value]     Precipitation
     :return clouds_out:     [list or single value]     Cloud cover
 
@@ -229,20 +234,18 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
     else:
         prec = prec_inn
 
-    clouds = []
     clouds_out = []
 
     if method == 'Binary':
         for p in prec:
             if p == 0:
                 # clouds.append(0.)
-                clouds.append(0.1)      # THS suggests a lower threshold
+                clouds_out.append(0.1)      # THS suggests a lower threshold
             else:
-                clouds.append(1.)
-        clouds_out = clouds
-
+                clouds_out.append(1.)
 
     if method == 'Average':
+        clouds = []
         for p in prec:
             if p == 0:
                 clouds.append(0.)
@@ -252,39 +255,22 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
         average = float("{0:.2f}".format(average))
         clouds_out = [average]*len(clouds)
 
-
     if method == 'Binary and average':
         clouds_out_1 = clouds_from_precipitation(prec, method='Binary')
         clouds_out_2 = clouds_from_precipitation(prec, method='Average')
         for i in range(0, len(clouds_out_1), 1):
             clouds_out.append(min(clouds_out_1[i]+clouds_out_2[i], 1))
 
-
     if method == 'Random Thomas':
-        '''
-        Mange takk, dette blir bra å  forske videre på. Jeg må tenke på andre snø ting nå, men dette er så
-        langt jeg kom, kanskje det er bra nok! Da beregnes skyer slik:
-
-        if(P >5)Cl <-1.0
-        if(P>0.0&& P <=5) Cl <- runif(1,0.80,1.0)
-        if(P==0) Cl<-runif(1,0.4,0.7)
-
-        og emmisivitet slik:
-        epsa <- (1.0+0.0025*Ta)-(1-Cl)*(0.25*(1.0+0.0025*Ta))
-
-        Tilfeldigvis ble dette uttrykket ganske ryddig. Hvis helt skyfritt reduseres epsa med 25 %. Litt
-        pussig at emmisiviteten kan bli over en (med Cl = 1.0),  på den annen side tillates aldri
-        dettet i beregningen av skyer.
-
-        '''
+        # Thomas Skaugen suggests to choose random numbers in a interval based on precipitation amount
+        # to estimate clouds.
         for p in prec:
             if p > 5./1000:
-                clouds.append(1.)
+                clouds_out.append(1.)
             elif 0. < p <= 5./1000:
-                clouds.append(0.8+random.random()/5.)       # random numbers between 0.8 an 1.0
+                clouds_out.append(0.8+random.random()/5.)       # random numbers between 0.8 an 1.0
             if p == 0.:
-                clouds.append(0.4+random.random()*3./10.)   # random numbers between 0.4 and 0.7
-
+                clouds_out.append(0.4+random.random()*3./10.)   # random numbers between 0.4 and 0.7
 
     # Again, if prec_inn isn't a list, return only a float.
     if not isinstance(prec_inn, types.ListType):

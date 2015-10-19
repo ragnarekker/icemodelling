@@ -433,7 +433,11 @@ def testCloudMaker(stnr, startDate, endDate, method):
     dayShift = 1
     clouds = __shiftClouds(clouds, dayShift)
 
-    if method == 'ccFromPrec':
+
+    if method == 'ccFromRandomThomas':
+        estClouds = dpz.clouds_from_precipitation(prec, method='Random Thomas')
+        gammaFigtext = 'No gamma smoothing and dayshift = {0}'.format(dayShift)
+    elif method == 'ccFromPrec':
         estClouds = dpz.clouds_from_precipitation(prec, method='Binary')
         gammaFigtext = 'No gamma smoothing and dayshift = {0}'.format(dayShift)
     elif method == 'ccFromAveragePrec':
@@ -534,11 +538,13 @@ def testCloudMaker(stnr, startDate, endDate, method):
     plt.text(0.0, 0.1, 'na_su = {0}'.format(round(nash_sutcliffe, 2)), color='yellow', bbox={'facecolor':'black'})
 
     plt.savefig("{0}{1}".format(plot_folder, fileName))
+
     return
 
 
 if __name__ == "__main__":
 
+    testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromRandomThomas')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrec')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromAveragePrec')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrecAndAveragePrec')

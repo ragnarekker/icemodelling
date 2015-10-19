@@ -122,8 +122,9 @@ def make_daily_average(weather_element_list):
 
         # If on the same date keep on adding else add the avarage value and reinitialize counters on the new date
         if date == e.Date.date():
-            value = value + e.Value
-            counter = counter + 1
+            if e.Value is not None:
+                value = value + e.Value
+                counter = counter + 1
 
         else:
 
@@ -184,7 +185,8 @@ def average_value(weather_element_list, lower_index, upper_index):
 
 
 def constant_weather_element(location, from_date, to_date, parameter, value):
-    """Creates a list of weather elements of constant value over a period.
+    """Creates a list of weather elements of constant value over a period. Also, if None is passed
+    it creates a list of None weatherelements.
 
     :param location:
     :param from_date:
@@ -202,7 +204,10 @@ def constant_weather_element(location, from_date, to_date, parameter, value):
     weather_element_list = []
     for d in dates:
         element = WeatherElement(location, d, parameter, value)
-        element.Metadata.append({'Constant value': 'from {0} to {1}'.format(from_date.date(), to_date.date())})
+        if value is None:
+            element.Metadata.append({'No value': 'from {0} to {1}'.format(from_date.date(), to_date.date())})
+        else:
+            element.Metadata.append({'Constant value': 'from {0} to {1}'.format(from_date.date(), to_date.date())})
         weather_element_list.append(element)
 
     return weather_element_list
@@ -226,7 +231,7 @@ def test_for_missing_elements(weather_element_list, from_date=None, to_date=None
 
     dates_range = to_date - from_date
     dates = []
-    for i in range(dates_range.days + 1):
+    for i in range(dates_range.days):
         dates.append(from_date + dt.timedelta(seconds=time_step * i))
 
     i = 0
@@ -282,31 +287,34 @@ class WeatherElement():
         self.Date = elementDate
         self.ElementID = elementID
         self.Metadata = [{'OriginalValue': elementValue}]
-        if elementValue is None:
-            elementValue = 0
-        self.Value = float(elementValue)
+        self.Value = elementValue
+        if elementValue is not None:
+            self.Value = float(elementValue)
 
-        # Met snow is in [cm] and always positive. Convert to [m]
-        if elementID == 'SA':
-            if elementValue >= 0.:
-                self.Value = elementValue / 100.
-                self.Metadata.append({'Converted': 'from cm to m'})
+            # Met snow is in [cm] and always positive. Convert to [m]
+            if elementID == 'SA':
+                if elementValue >= 0.:
+                    self.Value = elementValue / 100.
+                    self.Metadata.append({'Converted': 'from cm to m'})
 
-        # Met rain is in [mm] and always positive. We use SI and [m]; not [mm].
-        if elementID in ['RR','RR_1']:
-            if self.Value > 0.:
-                self.Value = elementValue / 1000.
-                self.Metadata.append({'Converted': 'from mm to m'})
+            # Met rain is in [mm] and always positive. We use SI and [m]; not [mm].
+            if elementID in ['RR','RR_1']:
+                if self.Value > 0.:
+                    self.Value = elementValue / 1000.
+                    self.Metadata.append({'Converted': 'from mm to m'})
 
-        # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
-        if elementID == 'NNM':
-            if self.Value not in [9., -99999.]:
-                pecent = int(self.Value/8*100)
-                self.Value = pecent/100.
-                self.Metadata.append({'Converted': 'from okta to unit'})
+            # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
+            if elementID == 'NNM':
+                if self.Value not in [9., -99999.]:
+                    pecent = int(self.Value/8*100)
+                    self.Value = pecent/100.
+                    self.Metadata.append({'Converted': 'from okta to unit'})
 
 
     def fix_data_quick(self):
+
+        if self.Value is None:
+            self.Value = 0.
 
         # These values should always be positive. -99999 is often used as unknown number in eklima.
         # RR = 0 or negligible precipitation. RR = -1 is noe precipitation observed.

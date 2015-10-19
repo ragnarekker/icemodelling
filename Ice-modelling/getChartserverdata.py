@@ -10,12 +10,9 @@ from weather import WeatherElement, make_daily_average, meter_from_centimeter
 baseURL = "http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart&ver=1.0&vfmt=json"
 
 
-def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
-    """Internal method that returns a list of weatherElements given the url to a request
-    on Chartserver/ShowData.aspx. This is common code to the public "get" methods.
-
-    TODO: need to handle longer time spans. If requested json is to large the url should be
-    split up to request smaller portions of data.
+def make_weather_element_list_from_url(url, stationID, elementID, methodReference):
+    """Returns a list of weatherElements given the url to a request
+    on Chartserver/ShowData.aspx. This is common code to the "get" methods.
 
     :param url [string]:                    URL for the datarequest to chartserver/ShowData
     :param stationID [string]:              Station ID in hydra. Ex: stationID  = '6.24.4'
@@ -25,7 +22,19 @@ def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
 
     """
 
-    datareq = requests.get(url).json()
+    #TODO: need to handle longer time spans. If requested json is to large the url should be split up to
+    # request smaller portions of data.
+
+    print "getChartserverdata: Requesting {0}".format(url)
+    request = requests.get(url)
+
+    if request.status_code == 500:
+        if "The length of the string exceeds the value set on the maxJsonLength property." in request.content:
+            return "Request less data."
+        else:
+            return "HTTP 500 for unknown reason."
+
+    datareq = request.json()
 
     seriesPoints = datareq[0][u'SeriesPoints']
     legendText = datareq[0][u'LegendText']
@@ -43,16 +52,22 @@ def __makeWeatherElementListFromURL(url, stationID, elementID, methodReference):
         we.Metadata.append({'LegendText':legendText})
         weatherElementList.append(we)
 
+    # Chartserver/ShowData.aspx returns half hour values and on request it returns [from, to]. That is,
+    # it includes the to value so if the reuest is nested the data will contain doublets of values
+    # om the "to dates". THese are therefore taken out in this method.
+    del weatherElementList[-1]
+
     return weatherElementList
 
 
 def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, timeseries_type=0, output='list'):
-    """
-    Method gets data from the chartserver api at NVE. Method called is ShowData.aspx.
+    """Method gets data from the chartserver api at NVE. Method called is ShowData.aspx.
     Future dates as well as past dates are returned. Future dates are generated from model grids from met.no
 
     Note that griddata is based on met data from 00 to 06 dayly values. Eg. precipitation on 17th of mai is found in
     data for 06:00 18th of mai.
+
+    Method returns [fromDate,toDate>
 
     :param UTM33X:          {int} X coordinate in utm33N
     :param UTM33Y:          {int} Y coordinate in utm33N
@@ -92,19 +107,31 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, timeseries_type=0, 
         baseURL, fromDate.strftime('%Y%m%dT%H%M'), toDate.strftime('%Y%m%dT%H%M'), UTM33X, UTM33Y, elementID)
 
     if output == 'list':
-        weatherElementList = __makeWeatherElementListFromURL(
-            url , 'UTM33 X{0} Y{1}'.format(UTM33X, UTM33Y), elementID, {'MethodName': 'Chartserver - getGriddata'})
-        if elementID == 'fsw' or elementID == 'sd':
-            weatherElementList = meter_from_centimeter(weatherElementList)        # convert for [cm] til [m]
 
-        if timeseries_type == -1:              # do nothing
-            weatherElementList = weatherElementList
-        elif timeseries_type == 0:                # make dailyavaregs of hourly values
-            weatherElementList = make_daily_average(weatherElementList)
+        weatherElementList = make_weather_element_list_from_url(url , 'UTM33 X{0} Y{1}'.format(UTM33X, UTM33Y), elementID, {'MethodName': 'Chartserver - getGriddata'})
+
+        # If to much data is requested, break it down to smaller portions.
+        if weatherElementList == "Request less data.":
+            time_delta = toDate - fromDate
+            date_in_middle = (fromDate + time_delta/2).replace(hour=0, minute=0)
+            weatherElementList = \
+                getGriddata(UTM33X, UTM33Y, elementID, fromDate, date_in_middle, timeseries_type=timeseries_type, output=output) \
+                + getGriddata(UTM33X, UTM33Y, elementID, date_in_middle, toDate, timeseries_type=timeseries_type, output=output)
+            return weatherElementList
+
         else:
-            print('no valid timeseries type selected')
-            weatherElementList = 'no valid timeseries type selected'
-        return weatherElementList
+
+            if elementID == 'fsw' or elementID == 'sd':
+                weatherElementList = meter_from_centimeter(weatherElementList)        # convert for [cm] til [m]
+
+            if timeseries_type == -1:              # do nothing
+                weatherElementList = weatherElementList
+            elif timeseries_type == 0:                # make dailyavaregs of hourly values
+                weatherElementList = make_daily_average(weatherElementList)
+            else:
+                print('no valid timeseries type selected')
+                weatherElementList = 'no valid timeseries type selected'
+            return weatherElementList
 
     elif output == 'json':
         datareq = requests.get(url)
@@ -161,15 +188,27 @@ def getYrdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output=
                 elementID.replace('.',';'))
 
     if output == 'list':
-        weatherElementList = __makeWeatherElementListFromURL(url, stationID, elementID, {'MethodName': 'Chartserver - getYrdata'})
-        if timeseries_type == -1:              # do nothing
-            weatherElementList = weatherElementList
-        elif timeseries_type == 0:                # make dailyavaregs of hourly values
-            weatherElementList = make_daily_average(weatherElementList)
+
+        weatherElementList = make_weather_element_list_from_url(url, stationID, elementID, {'MethodName': 'Chartserver - getYrdata'})
+
+        # If to much data is requested, break it down to smaller portions.
+        if weatherElementList == "Request less data.":
+            time_delta = toDate - fromDate
+            date_in_middle = (fromDate + time_delta/2).replace(hour=0, minute=0)
+            weatherElementList = getYrdata(stationID, elementID, fromDate, date_in_middle, timeseries_type=timeseries_type, output=output) \
+                                 + getYr(stationID, elementID, date_in_middle, toDate, timeseries_type=timeseries_type, output=output)
+            return weatherElementList
+
         else:
-            print('no valid timeseries type selected')
-            weatherElementList = 'no valid timeseries type selected'
-        return weatherElementList
+
+            if timeseries_type == -1:              # do nothing
+                weatherElementList = weatherElementList
+            elif timeseries_type == 0:                # make dailyavaregs of hourly values
+                weatherElementList = make_daily_average(weatherElementList)
+            else:
+                print('no valid timeseries type selected')
+                weatherElementList = 'no valid timeseries type selected'
+            return weatherElementList
 
     elif output == 'json':
         datareq = requests.get(url)
@@ -186,17 +225,17 @@ def getYrdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output=
 
 
 def getStationdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output='list'):
-    """
-    Method gets data from the chartserver api at NVE. Method called is ShowData.aspx.
-    The data returned from the api are 30min values but they recalculated to daily average in this method.
-    Future dates are truncated in this method, but dataset may be complemented with the getYrdata in this class.
+    """Method gets data from the chartserver api at NVE. Method called is ShowData.aspx.
+    The data returned from the api are 30min values but they may be recalculated to daily average in this method
+    if timeseries_type=0. Method returns [fromDate,toDate>. Future dates are truncated in this method,
+    but dataset may be complemented with the getYrdata in this class.
 
     :param stationID:   {string} Station ID in hydra. Ex: stationID  = '6.24.4'
     :param elementID:   {string} Element ID in hydra. Ex: elementID = '17.1'
     :param fromDate:    {datetime} method returns [fromDate ,toDate]
     :param toDate:      {datetime} method returns [fromDate ,toDate]
     :param output:      {string} How to present the output.
-    :return:            {list} List of WeatherElement objects with 24h resolution.
+    :return:            {list} List of WeatherElement objects.
 
 
     Timeseries types:
@@ -223,15 +262,25 @@ def getStationdata(stationID, elementID, fromDate, toDate, timeseries_type=0, ou
         .format(baseURL, fromDate.strftime('%Y%m%dT%H%M'), toDate.strftime('%Y%m%dT%H%M'), stationID, elementID)
 
     if output == 'list':
-        weatherElementList = __makeWeatherElementListFromURL(url, stationID, elementID, {'MethodName': 'Chartserver - getStationdata'})
-        if timeseries_type == -1:              # do nothing
-            weatherElementList = weatherElementList
-        elif timeseries_type == 0:                # make dailyavaregs of hourly values
-            weatherElementList = make_daily_average(weatherElementList)
+        weatherElementList = make_weather_element_list_from_url(url, stationID, elementID, {'MethodName': 'Chartserver - getStationdata'})
+
+        # If to much data is requested, break it down to smaller portions.
+        if weatherElementList == "Request less data.":
+            time_delta = toDate - fromDate
+            date_in_middle = (fromDate + time_delta/2).replace(hour=0, minute=0)
+            weatherElementList = getStationdata(stationID, elementID, fromDate, date_in_middle, timeseries_type=timeseries_type, output=output) \
+                                 + getStationdata(stationID, elementID, date_in_middle, toDate, timeseries_type=timeseries_type, output=output)
+            return weatherElementList
+
         else:
-            print('no valid timeseries type selected')
-            weatherElementList = 'no valid timeseries type selected'
-        return weatherElementList
+            if timeseries_type == -1:              # do nothing
+                weatherElementList = weatherElementList
+            elif timeseries_type == 0:                # make daily averages of hourly values
+                weatherElementList = make_daily_average(weatherElementList)
+            else:
+                print('no valid timeseries type selected')
+                weatherElementList = 'no valid timeseries type selected'
+            return weatherElementList
 
     elif output == 'json':
         datareq = requests.get(url)
@@ -251,13 +300,13 @@ def __runHakkloaTemp():
     # Hakkloa temp data
     stationID  = '6.24.4'
     elementID = '17.1'
-    #fromDate = datetime.datetime.strptime('2013-10-01', "%Y-%m-%d")
-    #toDate   = datetime.datetime.strptime('2014-06-01', "%Y-%m-%d")
-    fromDate = datetime.datetime.combine(datetime.date.today() - datetime.timedelta(days=4), datetime.datetime.min.time())
-    toDate =   datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=4), datetime.datetime.min.time())
+    fromDate = datetime.datetime.strptime('2011-01-01', "%Y-%m-%d")
+    toDate   = datetime.datetime.strptime('2015-01-01', "%Y-%m-%d")
+    #fromDate = datetime.datetime.combine(datetime.date.today() - datetime.timedelta(days=4), datetime.datetime.min.time())
+    #toDate =   datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=4), datetime.datetime.min.time())
     output = 'list'
 
-    return getStationdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output='list')
+    return getStationdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output=output)
 
 
 def __runHakkloaSnow():
@@ -267,13 +316,13 @@ def __runHakkloaSnow():
     UTM33Y = 6671132
     elementID = 'fsw'
 
-    #fromDate = datetime.datetime.strptime('2013-10-01', "%Y-%m-%d")
-    #toDate   = datetime.datetime.strptime('2014-06-01', "%Y-%m-%d")
-    fromDate = datetime.datetime.combine(datetime.date.today() - datetime.timedelta(days=4), datetime.datetime.min.time())
-    toDate =   datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=4), datetime.datetime.min.time())
+    fromDate = datetime.datetime.strptime('2010-01-01', "%Y-%m-%d")
+    toDate   = datetime.datetime.strptime('2015-07-01', "%Y-%m-%d")
+    #fromDate = datetime.datetime.combine(datetime.date.today() - datetime.timedelta(days=4), datetime.datetime.min.time())
+    #toDate =   datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=4), datetime.datetime.min.time())
     output = 'list'
 
-    return getGriddata(UTM33X, UTM33Y, elementID,fromDate, toDate, timeseries_type=0, output='list')
+    return getGriddata(UTM33X, UTM33Y, elementID,fromDate, toDate, timeseries_type=0, output=output)
 
 
 def __runHakkloaTempYr():
@@ -284,14 +333,18 @@ def __runHakkloaTempYr():
     toDate =   datetime.datetime.combine(datetime.date.today() + datetime.timedelta(days=4), datetime.datetime.min.time())
     output = 'list'
 
-    return getYrdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output='list')
+    return getYrdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output=output)
 
 
 if __name__ == "__main__":
 
     # Examples
     station = __runHakkloaTemp()
-    grid    =__runHakkloaSnow()
-    yr      = __runHakkloaTempYr()
+    grid =__runHakkloaSnow()
+    yr = __runHakkloaTempYr()
+
+    import makeFiledata as mfd
+    mfd.write_weather_element_list(station)
+    mfd.write_weather_element_list(grid)
 
     a = 1
