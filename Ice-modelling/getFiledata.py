@@ -1,7 +1,10 @@
 __author__ = 'raek'
 # -*- coding: utf-8 -*-
 
-import datetime
+import datetime as dt
+import weather as we
+import setEnvironment as se
+import makeFiledata as mf
 
 
 def read_weather(from_date, to_date, filename):
@@ -40,7 +43,7 @@ def read_weather(from_date, to_date, filename):
         indata[i] = indata[i].split(separator)      # splits line into list of elements in the line
 
     for i in range(1, len(indata), 1):              # from 1 since index 0 are headers
-        this_date = datetime.datetime.strptime(indata[i][0], "%Y-%m-%d")
+        this_date = dt.datetime.strptime(indata[i][0], "%Y-%m-%d")
         if this_date >= from_date and this_date <= to_date:
             date.append(this_date)
             if float(indata[i][1]) >= 0:            # only snow accumulation is used. The model melts and compresses snow.
@@ -98,7 +101,7 @@ def importColumns(filepath_inn):
     separator = ';'
 
     # This column is only for initiation and is removed from columns before returned
-    column = ice.IceColumn(datetime.datetime(1,1,1), 0)
+    column = ice.IceColumn(dt.datetime(1,1,1), 0)
     columns = []
 
     for row in inndata:
@@ -109,7 +112,7 @@ def importColumns(filepath_inn):
             row[1] = row[1].strip()
             if row[1] == 'date':
                 columns.append(copy.deepcopy(column))
-                date = datetime.datetime.strptime(row[0], "%Y-%m-%d")
+                date = dt.datetime.strptime(row[0], "%Y-%m-%d")
                 column = ice.IceColumn(date, 0)
             elif row[1] == 'water_line':
                 column.water_line = float(row[0])
@@ -130,3 +133,59 @@ def importColumns(filepath_inn):
 
     return columns
 
+
+def read_hydra_time_value(station, element, file_name, from_date=None, to_date=None, timeseries_type=0):
+    """Reads a time/value file made in NVEs Start for accessing data in HydraII.
+
+    :param station:
+    :param element:
+    :param file_name:
+    :param from_date:           {datetime} method returns [fromDate , toDate>
+    :param to_date:             {datetime} method returns [fromDate , toDate>
+    :param timeseries_type:
+    :return:
+    """
+
+    print "getFildata.py -> read_hydra_time_value: Reading {0}".format(file_name)
+
+    if from_date is None:
+        from_date = dt.date(0,0,0)
+    if to_date is None:
+        to_date = dt.datetime.now().date()
+
+    inn_file = open(file_name)
+    inn_data = inn_file.readlines()
+    inn_file.close()
+    separator = ' '
+    for i in range(len(inn_data)):
+        inn_data[i] = inn_data[i].strip()               # get rid of ' ' and '\n' and such
+        inn_data[i] = inn_data[i].split(separator)      # splits line into list of elements in the line
+
+    weather_element_list = []
+    for d in inn_data:
+        if d[0] == '':                  # blank line at end of file
+            break
+        value = float(d[1])
+        date = dt.datetime.strptime(d[0], '%Y%m%d/%H%M')
+        if from_date.date() <= date.date() < to_date.date():
+            weather_element_list.append(we.WeatherElement(station, date, element, value))
+
+    if timeseries_type == -1:                           # do nothing
+        weather_element_list = weather_element_list
+    elif timeseries_type == 0:                          # make daily averages of hourly values
+        weather_element_list = we.make_daily_average(weather_element_list)
+    else:
+        print('no valid time series type selected')
+        weather_element_list = 'no valid time series type selected'
+
+    return weather_element_list
+
+
+if __name__ == "__main__":
+
+    file_name = '{0}6.24.4.17.1 Hakkloa temperatur 20110101-20151009.txt'.format(se.data_path)
+    temperature = read_hydra_time_value(
+        '6.24.4', '17.1', file_name, from_date=dt.datetime(2015, 7, 1), to_date=dt.datetime(2015, 8, 1))
+    #mf.write_weather_element_list(temperature)
+
+    a = 1

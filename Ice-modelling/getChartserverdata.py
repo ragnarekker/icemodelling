@@ -22,9 +22,6 @@ def make_weather_element_list_from_url(url, stationID, elementID, methodReferenc
 
     """
 
-    #TODO: need to handle longer time spans. If requested json is to large the url should be split up to
-    # request smaller portions of data.
-
     print "getChartserverdata: Requesting {0}".format(url)
     request = requests.get(url)
 
@@ -53,8 +50,8 @@ def make_weather_element_list_from_url(url, stationID, elementID, methodReferenc
         weatherElementList.append(we)
 
     # Chartserver/ShowData.aspx returns half hour values and on request it returns [from, to]. That is,
-    # it includes the to value so if the reuest is nested the data will contain doublets of values
-    # om the "to dates". THese are therefore taken out in this method.
+    # it includes the to value so if the request is nested the data will contain doublets of values
+    # om the "to dates". These are therefore taken out in this method.
     del weatherElementList[-1]
 
     return weatherElementList
@@ -196,7 +193,7 @@ def getYrdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output=
             time_delta = toDate - fromDate
             date_in_middle = (fromDate + time_delta/2).replace(hour=0, minute=0)
             weatherElementList = getYrdata(stationID, elementID, fromDate, date_in_middle, timeseries_type=timeseries_type, output=output) \
-                                 + getYr(stationID, elementID, date_in_middle, toDate, timeseries_type=timeseries_type, output=output)
+                                 + getYrdata(stationID, elementID, date_in_middle, toDate, timeseries_type=timeseries_type, output=output)
             return weatherElementList
 
         else:
@@ -232,8 +229,8 @@ def getStationdata(stationID, elementID, fromDate, toDate, timeseries_type=0, ou
 
     :param stationID:   {string} Station ID in hydra. Ex: stationID  = '6.24.4'
     :param elementID:   {string} Element ID in hydra. Ex: elementID = '17.1'
-    :param fromDate:    {datetime} method returns [fromDate ,toDate]
-    :param toDate:      {datetime} method returns [fromDate ,toDate]
+    :param fromDate:    {datetime} method returns [fromDate ,toDate>
+    :param toDate:      {datetime} method returns [fromDate ,toDate>
     :param output:      {string} How to present the output.
     :return:            {list} List of WeatherElement objects.
 

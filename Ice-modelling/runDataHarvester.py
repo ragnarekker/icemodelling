@@ -4,6 +4,7 @@ __author__ = 'ragnarekker'
 import getWSklima as gws
 import weather as we
 import getChartserverdata as gcs
+import getFiledata as gfd
 import datetime as dt
 import setEnvironment as env
 import makeFiledata as mfd
@@ -30,8 +31,9 @@ def harvest_for_mylake_hakkloa(from_string, to_string):
     stnr_met_bjorn = 18500          # Bjørnholt (met)
     stnr_nve = '6.24.4'             # Hakloa (NVE)
 
-    #elems_bjorn = gws.getElementsFromTimeserieTypeStation(stnr_met_bjorn, 0, output='csv')
-    #elems_blind = gws.getElementsFromTimeserieTypeStation(stnr_met_blind, 0, output='csv')
+    hydraii_temperature = '{0}6.24.4.17.1 Hakkloa temperatur 20110101-20151009.txt'.format(env.data_path)
+    hydraii_wind = '{0}6.24.4.15.1 Hakkloa vind 20110101-20151009.txt'.format(env.data_path)
+    hydraii_relative_humidity = '{0}6.24.4.2.1 Hakkloa relativ fuktighet 20110101-20151009.txt'.format(env.data_path)
 
     from_date = dt.datetime.strptime(from_string, "%Y-%m-%d")
     to_date = dt.datetime.strptime(to_string, "%Y-%m-%d")
@@ -41,18 +43,38 @@ def harvest_for_mylake_hakkloa(from_string, to_string):
 
     data.add_Global_rad(we.constant_weather_element('Hakkloa', from_date, to_date, 'Global_rad', None))
     data.add_Cloud_cov(gws.getMetData(stnr_met_blind, 'NNM', from_date, to_date, 0))
-    data.add_Air_temp(gcs.getStationdata(stnr_nve, '17.1', from_date, to_date))
-    data.add_Relat_hum(we.constant_weather_element('Hakkloa', from_date, to_date, 'Relat_hum', .85))
-    #data.add_Relat_hum(gcs.getStationdata(stnr_nve, '2.1', from_date, to_date))
+    data.add_Air_temp(gfd.read_hydra_time_value(stnr_nve, '17.1', hydraii_temperature, from_date, to_date))
+    data.add_Relat_hum(gfd.read_hydra_time_value(stnr_nve, '2.1', hydraii_relative_humidity, from_date, to_date))
     data.add_Air_press(gws.getMetData(stnr_met_blind, 'POM', from_date, to_date, 0))
-    data.add_Wind_speed(we.constant_weather_element('Hakkloa', from_date, to_date, 'Wind_speed', 2.0))
-    #data.add_Wind_speed(gcs.getStationdata(stnr_nve, '15.1', from_date, to_date))
+    data.add_Wind_speed(gfd.read_hydra_time_value(stnr_nve, '15.1', hydraii_wind, from_date, to_date))
     data.add_Precipitation(we.millimeter_from_meter(gws.getMetData(stnr_met_bjorn, 'RR', from_date, to_date, 0)))
 
-    # finne areal av nedbørsfelt og gange opp med nedbør
-    data.add_Inflow(we.constant_weather_element('Hakkloa', from_date, to_date, 'Inflow', 10.))
-    # max(tufttemp, 0)
-    data.add_Inflow_T(gcs.getStationdata(stnr_nve, '17.1', from_date, to_date))
+    # Inflow is water shed area * precipitation
+    Inflow = []
+    precipitation = data.Precipitation # precipitation in [mm]
+    water_shed_area = 6.49 * 10**6 # [m2]
+    for p in precipitation:
+        value =  p.Value/1000*water_shed_area
+        Inflow.append(we.WeatherElement('Hakkloa', p.Date, 'Inflow', value))
+    data.add_Inflow(Inflow)
+
+    # Inflow temperature is assumed air temp but never below 0C and if snow always 0C
+    snow = gcs.getGriddata(utm33_x, utm33_y, 'sd', from_date, to_date)
+    temperature = data.Air_temp
+
+    #mfd.write_weather_element_list(temperature)
+    #mfd.write_weather_element_list(snow)
+    #mfd.write_weather_element_list(data.Relat_hum)
+    #mfd.write_weather_element_list(data.Wind_speed)
+
+    Inflow_T = []
+    for i in range(0, len(snow), 1):
+        date = temperature[i].Date
+        value = max(0., temperature[i].Value)       # water never below 0C
+        if snow[i].Value > 0. and value > 0.:       # if snow, water never over 0C
+            value = 0.
+        Inflow_T.append(we.WeatherElement('Hakkloa', date, 'Inflow_T', value))
+    data.add_Inflow_T(Inflow_T)
 
     data.add_Inflow_C(we.constant_weather_element('Hakkloa', from_date, to_date, 'Inflow_C', .5))
     data.add_Inflow_S(we.constant_weather_element('Hakkloa', from_date, to_date, 'Inflow_S', .01))
@@ -275,7 +297,7 @@ if __name__ == "__main__":
     #harvest_and_save_blindern('2000-01-01', yesturday)
     #harvest_and_save_nordnesfjelet('2014-08-01', yesturday)
 
-    data = harvest_for_mylake_hakkloa('2012-09-01', '2015-10-02')
+    data = harvest_for_mylake_hakkloa('2013-04-01', '2015-10-01')
     mp.pickle_anything(data, data.output_file_path +'.pickle')
     data2 = mp.unpickle_anything('{0}HAK_input'.format(env.data_path) +'.pickle')
 
