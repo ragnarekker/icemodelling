@@ -526,7 +526,7 @@ def testCloudMaker(stnr, startDate, endDate, method):
     plt.text(date[len(date)/2], min(temp)*1.2, 'gamma smoothing [shape, scale, days back, amplification]')
     plt.text(date[len(date)/2], min(temp)*1.3, gammaFigtext)
 
-    # this is a scatterplot of modelled and estimated cloud cover
+    # this is a scatter plot of modelled and estimated cloud cover
     xfrac = 0.15
     yfrac = (float(fsize[0])/float(fsize[1])) * xfrac
     xpos = 0.95-xfrac
@@ -539,10 +539,19 @@ def testCloudMaker(stnr, startDate, endDate, method):
 
     plt.savefig("{0}{1}".format(plot_folder, fileName))
 
-    return
+    return nash_sutcliffe
 
 
 if __name__ == "__main__":
+
+    i = 0
+    na_sus = []
+    while i < 50:
+        print '{0}'.format(i)
+        na_su = testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromRandomThomas')
+        na_sus.append(na_su)
+        i += 1
+
 
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromRandomThomas')
     testCloudMaker(19710, '2011-10-01', '2012-06-01', method='ccFromPrec')

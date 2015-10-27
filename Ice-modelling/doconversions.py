@@ -70,8 +70,6 @@ def lat_long_from_utm33(x, y, output="degrees"):
         return phi, thi
 
 
-
-
 if __name__ == "__main__":
 
     # Test koordinater i tana

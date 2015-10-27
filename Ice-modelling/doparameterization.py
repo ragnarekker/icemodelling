@@ -5,7 +5,7 @@ import datetime as dt
 import types
 import math
 import constants as const
-from doconversions import *
+import doconversions as dc
 import random as random
 
 
@@ -183,11 +183,136 @@ def k_snow_from_rho_snow(rho_snow):
 
     return k_snow
 
+# untested
+def irradiance_clear_sky(utm33_x, utm33_y, date_inn, time_span_in_sec=24*60*60):
+    '''Clear sky irradiance in J/m2/s * time_span_in_sec.
+
+    :param utm33_x, utm33_y:    koordinat i UTM 33
+    :param date_inn:            [datetime]
+    :param time_span_in_sec:    [sec] Time resolution in sec
+
+    :return I_clear_sky:        [J/m2] Energy over the time span we are looking at.
+    '''
+
+    day_no = date_inn.timetuple().tm_yday
+    # time given as the end of the time span
+    time_hour = (date_inn + dt.timedelta(seconds=time_span_in_sec)).hour
+
+    if time_hour == 0:
+        time_hour = 24
+
+    phi, thi, ddphi, ddthi = dc.lat_long_from_utm33(utm33_x,utm33_y, output= "both")
+
+    theta = 0.4092*math.cos((2*math.pi/365.25)*(day_no-173))  # solar declination angleday angle, Liston 1995
+    theta2 = 2*math.pi/365.25*(day_no-80)
+
+    r = 149598000   # distance from the sun
+    R = 6378        # Radius of earth
+
+    timezone = -4 * (math.fabs(thi) % 15) * thi/math.fabs(thi)      # ang lengdegrad ikke
+    epsilon = 0.4092    # rad(23.45)
+
+    z_s = r*math.sin(theta2)*math.sin(epsilon)
+    r_p = math.sqrt(r**2-z_s**2)
+    nevner = (R-z_s*math.sin(phi))/(r_p*math.cos(phi))
+
+    if(nevner > -1) and (nevner < 1):
+        # acos(mÂ ha inn verdier ,(mellom-1,1) hvis <-1 sÂ er det midnattsol > 1 er det m¯rketid.
+        t0 = 1440/(2*math.pi)*math.acos((R-z_s*math.sin(phi))/(r_p*math.cos(phi)))
+        that = t0+5
+        n = 720-10*math.sin(4*math.pi*(day_no-80)/365.25)+8*math.sin(2*math.pi*day_no/365.25)
+        sr = (n-that+timezone)/60 #soloppgang
+        ss = (n+that+timezone)/60 #solnedgang
+
+    if nevner <= -1:    # Midnattsol
+        sr = 0.
+        ss = 24.
+
+    if nevner >= 1:     # Mørketid
+        sr = 12.
+        ss = 12.
+
+    dingom = {}         # Values for zenith angle (0 straight up)
+
+    for tid in range(1, 24, 1):
+        if (tid > sr) and (tid < ss):
+            tom = tid-12    # Number of hours from solar noon. Solar noon is tom=0
+            cosarg = 0.2618 * tom   # Radians pr hour
+            dingom[tid] = math.acos(math.sin(phi)*math.sin(theta)+math.cos(phi)*math.cos(theta)*math.cos(cosarg))  # Dingmans zenith angle
+
+        if (tid < sr) or (tid > ss):  # If time is outside sunrise-sunset
+            dingom[tid] = math.pi/2     # Angle below horizin is set to be on the horizon.
+
+    if time_span_in_sec == 86400:
+        zenith_angle = dingom.values()          # list
+    elif time_span_in_sec < 86400:              # Midler transmissvitet og solvinkel For finere tidssoppløsning
+        interv = list(range(time_hour-int(time_span_in_sec/3600)+1, time_hour, 1))     # aktuelle timer
+        zenith_angle = [dingom[i] for i in interv]
+    else:
+        print("Method doesnt work on time intervals greater than 24hrs")
+        zenith_angle = None
+
+    # Mean values
+    zenith_angle = float( sum(zenith_angle) / len(zenith_angle) )
+
+    #Solar radiation
+    S0 = const.solar_constant   #[J/m2/s] Solar constant pr sec
+    S0 *= time_span_in_sec      # solar constant pr time step
+    S0 /=1000                   # J to kJ
+
+    I_clear_sky = math.sin((math.pi/2)-zenith_angle) * S0
+
+    return I_clear_sky
+
 
 ####### Works on both
 
+# untested
+def clouds_from_short_wave(utm33_x, utm33_y, short_wave_inn, date_inn, time_span_in_sec=24*60*60):
+    """Clouds defined by: clouds = 1 - measured solar irradiance / clear-sky irradiance
 
-def atmospheric_emissivity(temp_atm, cloud_cover, method="2005 WALTER"):
+    :param utm33_x:             []
+    :param utm33_y:
+    :param short_wave_inn:      [float] in J/m2/time_step
+    :param date_inn:
+    :param time_span_in_sec:    [int] Is necessary if used on non-list calculations and not on daily values.
+    :return cloud_cover_out:
+    """
+
+    # If input isn't list, make it so
+    input_is_list = False
+    if isinstance(short_wave_inn, types.ListType):
+        input_is_list = True
+
+    if input_is_list:
+        short_wave_list = short_wave_inn
+        date_list = date_inn
+        time_span_in_sec = (date_list[1] - date_list[0]).total_seconds()
+    else:
+        short_wave_list = [short_wave_inn]
+        date_list = [date_inn]
+
+
+    cloud_cover_list = []
+    for i in range(0, len(short_wave_list), 1):
+
+        I_clear_sky = irradiance_clear_sky(utm33_x, utm33_y, date_list[i], time_span_in_sec)
+        I_measured = short_wave_list[i]
+
+        cloud_cover = 1 - I_measured/I_clear_sky
+        cloud_cover_list.append(cloud_cover)
+
+
+    # If input aren't lists, return only float.
+    if input_is_list:
+        cloud_cover_out = cloud_cover_list
+    else:
+        cloud_cover_out = cloud_cover_list[0]
+
+    return cloud_cover_out
+
+# untested
+def atmospheric_emissivity(temp_atm_inn, cloud_cover_inn, method="2005 WALTER"):
     """Its a start.. Incomplete
 
     :param temp_atm:
@@ -195,15 +320,45 @@ def atmospheric_emissivity(temp_atm, cloud_cover, method="2005 WALTER"):
     :return:
     """
 
+    # If input aren't lists, make them so
+    if not isinstance(temp_atm_inn, types.ListType):
+        temp_atm_list = [temp_atm_inn]
+        cloud_cover_list = [cloud_cover_inn]
+    else:
+        temp_atm_list = temp_atm_inn
+        cloud_cover_list = cloud_cover_inn
+
     eps_atm_list = []
 
-    if method=="1998 CAMPBELL":
-        # Atmospheric emissivity from Campbell and Norman, 1998. Emissivity er dimasnjonsløs
-        eps_atm = (0.72+0.005*temp_atm)*(1-0.84*cloud_cover)+0.84*cloud_cover
+    for i in range(0, len(temp_atm_list), 1):
+        temp_atm = temp_atm_list[i]
+        cloud_cover = cloud_cover_list[i]
 
-    if method=="2005 WALTER":
-        # From THS og 2005 WALTER
-        eps_atm = (1.0+0.0025*temp_atm)-(1-cloud_cover)*(0.25*(1.0+0.0025*temp_atm))
+        if method=="1998 CAMPBELL":
+            # Atmospheric emissivity from Campbell and Norman, 1998. Emissivity er dimasnjonsløs
+            eps_atm = (0.72+0.005*temp_atm)*(1-0.84*cloud_cover)+0.84*cloud_cover
+        elif method=="2005 WALTER":
+            # From THS og 2005 WALTER
+            eps_atm = (1.0+0.0025*temp_atm)-(1-cloud_cover)*(0.25*(1.0+0.0025*temp_atm))
+        elif method=="1963 SWINBANK":
+            # From 1998 TODD eq 13
+            eps_atm = cloud_cover + (1-cloud_cover) * (9.36 * 10**-6 * temp_atm**2)
+        elif method=="1969 Idso and Jackson":
+            # From 1998 TODD eq 14
+            eps_atm = (cloud_cover + (1-cloud_cover) * (1 - (0.261 * math.exp(-7.77 * 10**-4) * (273.15 - temp_atm)**2 )))
+        else:
+            eps_atm = None
+            print 'doparameterization.py --> atmospheric_emissivity: Unknown method.'
+
+        eps_atm_list.append(eps_atm)
+
+    # Again, if input aren't lists, return only float.
+    if not isinstance(temp_atm_inn, types.ListType):
+        eps_atm_out = eps_atm_list[0]
+    else:
+        eps_atm_out = eps_atm_list
+
+    return eps_atm_out
 
 
 def clouds_from_precipitation(prec_inn, method='Binary'):
@@ -219,8 +374,8 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
                         in the period is used and if there is precipitation 100% cloud cover is used.
 
     Method = Random Thomas: Thomas Skaugen suggests to choose random numbers in a interval based on
-                        precipitation amount to estimate clouds. Method returns different nash sutcliffie every
-                        run but the seem to sircle around the results from "Binary and avarage" method.
+                        precipitation amount to estimate clouds. Method returns different Nash-Sutcliffe every
+                        run but the seem to circle around the results from "Binary and average" method.
 
 
     :param prec_inn:        [list or single value]     Precipitation
@@ -279,20 +434,54 @@ def clouds_from_precipitation(prec_inn, method='Binary'):
     return clouds_out
 
 
+def __test_clouds_from_short_wave():
+
+    import getWSklima as gws
+    import weather as we
+
+    date_list = [dt.date.today() - dt.timedelta(days=x) for x in range(0, 365)]
+    date_list = [dt.datetime.combine(d, dt.datetime.min.time()) for d in date_list]
+    date_list.reverse()
+
+    # test Nordnesfjellet i Troms
+    station_id = 91500
+    short_wave_id = 'QSI'
+    long_wave_id = 'QLI'
+    temperature_id = 'TA'
+    timeseries_type = 2
+    utm_e = 711075
+    utm_n = 7727719
+
+    short_wave = gws.getMetData(station_id, short_wave_id, date_list[0], date_list[-1], timeseries_type)
+    long_wave = gws.getMetData(station_id, long_wave_id, date_list[0], date_list[-1], timeseries_type)
+    temperature = gws.getMetData(station_id, temperature_id, date_list[0], date_list[-1], timeseries_type)
+
+    short_wave = we.fix_data_quick(short_wave)
+    long_wave = we.fix_data_quick(long_wave)
+    temperature_daily = we.fix_data_quick(temperature)
+
+    short_wave_daily = we.make_daily_average(short_wave)
+    short_wave_daily = we.multiply_constant(short_wave_daily, 24 * 3600 / 1000)  # Wh/m2 * 3600 s/h * kJ/1000J (energy) over 24hrs
+    long_wave_daily = we.make_daily_average(long_wave)
+    long_wave_daily = we.multiply_constant(long_wave_daily, 24 * 3600 / 1000)
+    temperature_daily = we.make_daily_average(temperature)
+
+    Short_wave_list = we.strip_metadata(short_wave_daily)
+    I_clear_sky_list = [irradiance_clear_sky(utm_e, utm_n, d) for d in date_list]
+    Cloud_cover = clouds_from_short_wave(utm_e, utm_n, Short_wave_list, date_list)
+
+    import matplotlib.pyplot as plt
+
+    plt.plot(date_list, Short_wave_list)
+    plt.plot(date_list, I_clear_sky_list)
+    plt.plot(date_list, Cloud_cover)
+    plt.ylim(0, 50000)
+    plt.show()
+
+
 if __name__ == "__main__":
 
-    # Test koordinater i tana
-    x_tana = 988130
-    y_tana = 7844353
-    lat_tana, long_tana = lat_long_from_utm33(x_tana, y_tana)
-
-
-    # Test Filefjell
-    y_file = 6802070
-    x_file = 130513
-    lat_file, long_file = lat_long_from_utm33(x_file, y_file)
-
-
+    __test_clouds_from_short_wave()
 
     a = 1
 

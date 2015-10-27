@@ -162,6 +162,23 @@ def make_daily_average(weather_element_list):
     return newWeatherElementList
 
 
+def fix_data_quick(weather_element_list):
+
+    for we in weather_element_list:
+        we.fix_data_quick()
+
+    return weather_element_list
+
+
+def multiply_constant(weather_element_list, constant):
+
+    for we in weather_element_list:
+        we.Value = we.Value * constant
+        we.Metadata.append({'Multiplied by {0}.'.format(constant)})
+
+    return weather_element_list
+
+
 def average_value(weather_element_list, lower_index, upper_index):
     """
     The method will return the avarage value of a list or part of a list with weatherElements
@@ -318,7 +335,7 @@ class WeatherElement():
 
         # These values should always be positive. -99999 is often used as unknown number in eklima.
         # RR = 0 or negligible precipitation. RR = -1 is noe precipitation observed.
-        if self.ElementID in ['SA', 'RR','RR_1', 'QLI']:
+        if self.ElementID in ['SA', 'RR','RR_1', 'QLI', 'QSI']:
             if self.Value < 0.:
                 self.Value = 0.
                 self.Metadata.append({'Value manipulation': 'removed negative value'})
@@ -341,7 +358,6 @@ class WeatherElement():
         if (self.Date).date() == dt.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.36
             self.Metadata.append({"ManualValue": self.Value})
-
 
 
 class EnergyBalanceElement():

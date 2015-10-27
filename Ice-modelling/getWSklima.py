@@ -77,7 +77,7 @@ def getStationsFromTimeserieTypeElemCodes(timeserietypeID, elem_codes, output='l
         'xml':          returns NULL but saves a .xml file to the working folder.
         'txt':          returns NULL but saves a .txt file to the working folder.
 
-    timeseriesType options:
+    timeseries_type options:
         0   dayly averages
         1   monthly averages
         2   hour average
@@ -285,7 +285,7 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='l
         'xml':          returns NULL but saves a .xml file to the working folder.
         'csv':          returns NULL but saves a .csv file to the working folder. The separation value are tab
 
-    timeseriesType options:
+    timeseries_type options:
         0   dayly averages
         1   monthly averages
         2   hour average
@@ -392,12 +392,12 @@ if __name__ == "__main__":
     # elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
     # elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
     #elementsOnEvenes = getElementsFromTimeserieTypeStation(84970, 0, 'list')
-    getElementsFromTimeserieTypeStation(84970, 0, 'xml')
-    getElementsFromTimeserieTypeStation(19710, 2, 'txt')
+    #getElementsFromTimeserieTypeStation(84970, 0, 'xml')
+    #getElementsFromTimeserieTypeStation(19710, 2, 'txt')
 
     #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='xml')
     #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='txt')
-    #getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'RR_1', 'TA'], output='txt')
+    getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'QSI', 'TA'], output='txt')
 
 
 
