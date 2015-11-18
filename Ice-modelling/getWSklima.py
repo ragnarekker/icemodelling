@@ -69,7 +69,7 @@ def getStationsFromTimeserieTypeElemCodes(timeserietypeID, elem_codes, output='l
     :param timeserietypeID      [string]
     :param elem_codes           [string] or [list of string]
     :param output               [string]
-    :param has_all_elems_now    [bool] Station must have all elements stil active
+    :param has_all_elems_now    [bool] Station must have all elements still active
     :return stationList         [list of dictionary elements] or None if file is requested output.
 
     Output options:
@@ -112,9 +112,11 @@ def getStationsFromTimeserieTypeElemCodes(timeserietypeID, elem_codes, output='l
         elem_codes_string = ','.join(elem_codes)
     else:
         elem_codes_string = elem_codes
+        elem_codes = [elem_codes]
 
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getStationsFromTimeserieTypeElemCodes&timeserietypeID={0}&elem_codes={1}&username="\
         .format(timeserietypeID, elem_codes_string)
+    print 'getWSklima.py -> getStationsFromTimeserieTypeElemCodes: Requesting url {0}'.format(url)
     wsKlimaRequest = re.get(url)
 
     station_list = []
@@ -223,6 +225,7 @@ def getElementsFromTimeserieTypeStation(stationID, timeserietypeID, output='list
 
     NOTE2: Asker has id 19710 and Blindern 18700
     """
+
     print 'getWSklima: Requesting getElementsFromTimeserieTypeStation on {0} for {1}'\
         .format(stationID, timeserietypeID)
 
@@ -397,7 +400,22 @@ if __name__ == "__main__":
 
     #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='xml')
     #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='txt')
-    getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'QSI', 'TA'], output='txt')
+    #getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'QSI', 'TA'], output='txt')
+
+
+
+
+    # Snødyp (SA) måles hver dag (kode 0).
+    # For å finne stasjoner med SA som måles idag kan du bruke:
+    active_snow_stations = getStationsFromTimeserieTypeElemCodes(0, 'SA')
+
+    # For å finne ALLE stasjoner som har hatt SA kan du bruke:
+    all_snow_stations = getStationsFromTimeserieTypeElemCodes(0, 'SA', has_all_elems_now=False)
+
+    # For å skrive det til fil som legges i en data ut mappe definert i setEnvironment.py:
+    getStationsFromTimeserieTypeElemCodes(0, 'SA', output='txt')
+
+
 
 
 
