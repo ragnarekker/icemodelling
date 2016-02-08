@@ -470,6 +470,7 @@ def get_albedo_ueb(prec_snow, snow_depth, temp_surface, zenith_angle, time_span_
     return age_factor_tau, albedo
 
 
+# http://www.physics.gla.ac.uk/~shild/grid2025challenge/data.html
 def get_short_wave(
         utm33_x, utm33_y, day_no, temp_atm, cloud_cover, snow_depth, snow_density, prec_snow, time_hour,
         time_span_in_sec, temp_surface, albedo_prim, age_factor_tau=None, albedo_method="ueb"):

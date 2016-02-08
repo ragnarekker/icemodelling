@@ -20,6 +20,13 @@ def remove_norwegian_letters(name_inn):
         name = name.replace(u'ø', 'oe')
     if u'æ' in name:
         name = name.replace(u'æ', 'ae')
+    if u'Å' in name:
+        name = name.replace(u'Å', 'AA')
+    if u'Ø' in name:
+        name = name.replace(u'Ø', 'OE')
+    if u'Æ' in name:
+        name = name.replace(u'Æ', 'AE')
+
 
     name = name.encode('ascii', 'ignore')
     name = name.strip()                 # removes whitespace to left and right
@@ -47,6 +54,12 @@ def add_norwegian_letters(name_inn, use_encoding='utf8'):
         name = name.replace(u'oe', 'ø'.decode(use_encoding, 'ignore'))
     if u'aa' in name:
         name = name.replace(u'aa', 'å'.decode(use_encoding, 'ignore'))
+    if u'AE' in name:
+        name = name.replace(u'AE', 'Æ'.decode(use_encoding, 'ignore'))
+    if u'OE' in name:
+        name = name.replace(u'OE', 'Ø'.decode(use_encoding, 'ignore'))
+    if u'AA' in name:
+        name = name.replace(u'AA', 'Å'.decode(use_encoding, 'ignore'))
 
     return name
 

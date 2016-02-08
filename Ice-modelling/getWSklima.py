@@ -13,6 +13,11 @@ import makeFiledata as mfd
 
 # Incomplete
 def getElementsProperties():
+    '''
+    Overview over all parameters in database:
+    http://met.no/Parametere+i+Kvalobs-databasen.b7C_wlnG5w.ips
+    :return:
+    '''
     url = "http://eklima.met.no/metdata/MetDataService?invoke=getElementsProperties&language=&elem_codes="
     ws = re.get(url)
 
@@ -222,6 +227,7 @@ def getElementsFromTimeserieTypeStation(stationID, timeserietypeID, output='list
 
     NOTE: if you only wish to read data for a given station check out
     http://eklima.met.no/eklimapub/servlet/ReportInfo?action=parameterinfo&tab=T_ELEM_DIURNAL&s=19710&la=no&co=NO
+    http://eklima.met.no/eklimapub/servlet/ReportInfo?action=parameterinfo&tab=T_ELEM_OBS&s=15270&la=no&co=NO
 
     NOTE2: Asker has id 19710 and Blindern 18700
     """
@@ -382,7 +388,31 @@ def getMetData(stationID, elementID, fromDate, toDate, timeseriesType, output='l
         return weatherElementList
 
 
+def __get_data_for_jan_magnusson():
+
+    ### Stasjoner som Jan trenger:
+    # stations_basic_2 = getStationsFromTimeserieTypeElemCodes(2, ['TAM', 'RR_1', 'FM2', 'UM'], output='txt')
+    # stations_basic_10 = getStationsFromTimeserieTypeElemCodes(2, ['TAM', 'RR_1', 'FM', 'UM'], output='txt')
+    # stations_rad = getStationsFromTimeserieTypeElemCodes(2, ['QSI', 'QSO', 'QLI', 'QLO'], output='txt')
+    # stations_all_rr = getStationsFromTimeserieTypeElemCodes(2, ['TA', 'RR_1', 'FF', 'UU', 'QSI', 'QSO', 'QLI', 'QLO'], output='txt')
+    # stations = getStationsFromTimeserieTypeElemCodes(2, ['TA', 'FF', 'UU', 'QSI', 'QSO', 'QLI', 'QLO'])
+
+    stationlist = [16400, 53530, 80610, 97251]
+    stationlist = [80610, 97251]
+    element = ['TA', 'RR_1', 'FF', 'UU', 'QSI', 'QSO', 'QLI', 'QLO']
+    from_date = dt.date(2013,2,1)
+    to_date = dt.date.today()
+
+    for s in stationlist:
+        for e in element:
+            getMetData(s, e, from_date, to_date, 2, output="csv")
+
+    return
+
+
 if __name__ == "__main__":
+
+    __get_data_for_jan_magnusson()
 
     ### Examles ###
     #getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'xml')
@@ -402,18 +432,16 @@ if __name__ == "__main__":
     #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='txt')
     #getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'QSI', 'TA'], output='txt')
 
+    # # Snødyp (SA) måles hver dag (kode 0).
+    # # For å finne stasjoner med SA som måles idag kan du bruke:
+    # active_snow_stations = getStationsFromTimeserieTypeElemCodes(0, 'SA')
+    #
+    # # For å finne ALLE stasjoner som har hatt SA kan du bruke:
+    # all_snow_stations = getStationsFromTimeserieTypeElemCodes(0, 'SA', has_all_elems_now=False)
+    #
+    # # For å skrive det til fil som legges i en data ut mappe definert i setEnvironment.py:
+    # getStationsFromTimeserieTypeElemCodes(0, 'SA', output='txt')
 
-
-
-    # Snødyp (SA) måles hver dag (kode 0).
-    # For å finne stasjoner med SA som måles idag kan du bruke:
-    active_snow_stations = getStationsFromTimeserieTypeElemCodes(0, 'SA')
-
-    # For å finne ALLE stasjoner som har hatt SA kan du bruke:
-    all_snow_stations = getStationsFromTimeserieTypeElemCodes(0, 'SA', has_all_elems_now=False)
-
-    # For å skrive det til fil som legges i en data ut mappe definert i setEnvironment.py:
-    getStationsFromTimeserieTypeElemCodes(0, 'SA', output='txt')
 
 
 

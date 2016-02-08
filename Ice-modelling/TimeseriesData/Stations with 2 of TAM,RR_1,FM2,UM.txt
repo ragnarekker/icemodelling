@@ -1,0 +1,325 @@
+utm_zone:          33
+municipalityNo:    236
+stnr:              4920
+to_date:           None
+lonDec:            11.3933
+amsl:              160
+name:              RNES
+latDec:            60.1268
+utm_e:             299664
+from_date:         2010-05-12
+department:        AKERSHUS
+utm_n:             6671003
+
+utm_zone:          33
+municipalityNo:    528
+stnr:              11500
+to_date:           None
+lonDec:            10.8695
+amsl:              264
+name:              STRE TOTEN - APELSVOLL
+latDec:            60.7002
+utm_e:             274598
+from_date:         1987-03-19
+department:        OPPLAND
+utm_n:             6736485
+
+utm_zone:          33
+municipalityNo:    412
+stnr:              12550
+to_date:           None
+lonDec:            10.8055
+amsl:              128
+name:              KISE PA HEDMARK
+latDec:            60.7733
+utm_e:             271629
+from_date:         1982-01-01
+department:        HEDMARK
+utm_n:             6744837
+
+utm_zone:          33
+municipalityNo:    135
+stnr:              17050
+to_date:           None
+lonDec:            10.8145
+amsl:              12
+name:              RDE - TOMB
+latDec:            59.3188
+utm_e:             261862
+from_date:         2013-02-05
+department:        STFOLD
+utm_n:             6583037
+
+utm_zone:          33
+municipalityNo:    136
+stnr:              17380
+to_date:           None
+lonDec:            10.7543
+amsl:              35
+name:              RYGGE - HUGGENES
+latDec:            59.398
+utm_e:             259002
+from_date:         2013-02-13
+department:        STFOLD
+utm_n:             6592062
+
+utm_zone:          33
+municipalityNo:    626
+stnr:              19940
+to_date:           None
+lonDec:            10.2607
+amsl:              39
+name:              LIER
+latDec:            59.7902
+utm_e:             234131
+from_date:         2013-02-06
+department:        BUSKERUD
+utm_n:             6637557
+
+utm_zone:          33
+municipalityNo:    544
+stnr:              23500
+to_date:           None
+lonDec:            9.063
+amsl:              521
+name:              LKEN I VOLBU
+latDec:            61.122
+utm_e:             180431
+from_date:         1987-06-01
+department:        OPPLAND
+utm_n:             6790894
+
+utm_zone:          33
+municipalityNo:    713
+stnr:              26990
+to_date:           None
+lonDec:            10.215
+amsl:              60
+name:              SANDE - GALLEBERG
+latDec:            59.6193
+utm_e:             230197
+from_date:         2003-09-18
+department:        VESTFOLD
+utm_n:             6618742
+
+utm_zone:          33
+municipalityNo:    709
+stnr:              27780
+to_date:           None
+lonDec:            10.125
+amsl:              19
+name:              TJLLING
+latDec:            59.0467
+utm_e:             220458
+from_date:         2013-02-06
+department:        VESTFOLD
+utm_n:             6555460
+
+utm_zone:          33
+municipalityNo:    904
+stnr:              38140
+to_date:           None
+lonDec:            8.5225
+amsl:              6
+name:              LANDVIK
+latDec:            58.34
+utm_e:             121120
+from_date:         1987-03-23
+department:        AUST-AGDER
+utm_n:             6484824
+
+utm_zone:          33
+municipalityNo:    1032
+stnr:              41825
+to_date:           None
+lonDec:            7.0503
+amsl:              6
+name:              LYNGDAL
+latDec:            58.1258
+utm_e:             32416
+from_date:         2013-02-06
+department:        VEST-AGDER
+utm_n:             6470332
+
+utm_zone:          33
+municipalityNo:    1120
+stnr:              44300
+to_date:           None
+lonDec:            5.6505
+amsl:              87
+name:              SRHEIM
+latDec:            58.7605
+utm_e:             -39759
+from_date:         1987-03-19
+department:        ROGALAND
+utm_n:             6551167
+
+utm_zone:          33
+municipalityNo:    1231
+stnr:              49490
+to_date:           None
+lonDec:            6.6538
+amsl:              12
+name:              ULLENSVANG FORSKSGARD
+latDec:            60.3185
+utm_e:             39785
+from_date:         2009-06-01
+department:        HORDALAND
+utm_n:             6716081
+
+utm_zone:          33
+municipalityNo:    1419
+stnr:              55770
+to_date:           None
+lonDec:            6.8622
+amsl:              45
+name:              NJS
+latDec:            61.1798
+utm_e:             63141
+from_date:         2013-02-06
+department:        SOGN OG FJORDANE
+utm_n:             6810063
+
+utm_zone:          33
+municipalityNo:    1429
+stnr:              56420
+to_date:           None
+lonDec:            5.0443
+amsl:              7
+name:              FURENESET
+latDec:            61.2928
+utm_e:             -32044
+from_date:         1987-03-23
+department:        SOGN OG FJORDANE
+utm_n:             6836094
+
+utm_zone:          33
+municipalityNo:    1560
+stnr:              64510
+to_date:           None
+lonDec:            8.1862
+amsl:              23
+name:              TINGVOLL
+latDec:            62.9133
+utm_e:             154319
+from_date:         2013-02-06
+department:        MRE OG ROMSDAL
+utm_n:             6994260
+
+utm_zone:          33
+municipalityNo:    1714
+stnr:              69150
+to_date:           None
+lonDec:            10.8795
+amsl:              40
+name:              KVITHAMAR
+latDec:            63.4882
+utm_e:             294886
+from_date:         1987-05-12
+department:        NORD-TRNDELAG
+utm_n:             7046589
+
+utm_zone:          33
+municipalityNo:    1717
+stnr:              69655
+to_date:           None
+lonDec:            10.694
+amsl:              70
+name:              FROSTA
+latDec:            63.5657
+utm_e:             286243
+from_date:         2010-03-02
+department:        NORD-TRNDELAG
+utm_n:             7055818
+
+utm_zone:          33
+municipalityNo:    1702
+stnr:              70680
+to_date:           None
+lonDec:            11.4255
+amsl:              59
+name:              MRE III
+latDec:            63.9425
+utm_e:             324874
+from_date:         2013-02-06
+department:        NORD-TRNDELAG
+utm_n:             7095517
+
+utm_zone:          33
+municipalityNo:    1624
+stnr:              71320
+to_date:           None
+lonDec:            9.9705
+amsl:              23
+name:              RISSA III
+latDec:            63.5858
+utm_e:             250555
+from_date:         2013-02-13
+department:        SR-TRNDELAG
+utm_n:             7060674
+
+utm_zone:          33
+municipalityNo:    1820
+stnr:              76530
+to_date:           None
+lonDec:            12.4255
+amsl:              21
+name:              TJTTA
+latDec:            65.8295
+utm_e:             382399
+from_date:         1987-07-01
+department:        NORDLAND
+utm_n:             7303317
+
+utm_zone:          33
+municipalityNo:    1841
+stnr:              82110
+to_date:           None
+lonDec:            15.1018
+amsl:              20
+name:              VALNESFJORD
+latDec:            67.2763
+utm_e:             504388
+from_date:         2014-10-29
+department:        NORDLAND
+utm_n:             7462185
+
+utm_zone:          33
+municipalityNo:    1870
+stnr:              86520
+to_date:           None
+lonDec:            15.2517
+amsl:              14
+name:              SORTLAND - KLEIVA
+latDec:            68.6372
+utm_e:             510232
+from_date:         2013-02-06
+department:        NORDLAND
+utm_n:             7613930
+
+utm_zone:          33
+municipalityNo:    1902
+stnr:              90400
+to_date:           None
+lonDec:            18.9057
+amsl:              20
+name:              TROMS - HOLT
+latDec:            69.6523
+utm_e:             651477
+from_date:         1987-06-01
+department:        TROMS
+utm_n:             7731942
+
+utm_zone:          33
+municipalityNo:    2030
+stnr:              99460
+to_date:           None
+lonDec:            30.041
+amsl:              27
+name:              PASVIK - SVANVIK
+latDec:            69.4552
+utm_e:             1083970
+from_date:         2009-06-01
+department:        FINNMARK
+utm_n:             7777413
+
