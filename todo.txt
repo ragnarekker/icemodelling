@@ -7,5 +7,8 @@
 * make reference list for articles
 * test rho_new_snow with different temps and both methods
 * figurtext med hva som brukes og plottes
-* modell med 2 uker fram
 * comment cloudcover functions
+
+
+* patch weather data for arbtrary timeseries resolution
+* plot by location name no longer works due to get_all_season_ice returnes data grouped be location_id

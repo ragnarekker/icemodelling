@@ -1,0 +1,15 @@
+Døgnverdier	0	Viser døgnverdier for valgt periode, elementer og stasjoner
+Månedsverdier	1	Viser månedsverdier for valgt periode, elementer og stasjoner
+Observasjoner	2	Viser observasjoner for periode og elementer fra valgte stasjoner
+Månedsnormaler	3	Viser månedsnormaler for elementer og stasjoner
+Døgnnormaler	4	Viser døgnnormaler for elementer og stasjoner
+Døgnekstremer	5	Viser døgnekstremer for utvalgte elementer og stasjoner
+Homogene månedsverdier	7	Viser homogene månedsverdier for valgt periode, elementer og stasjoner
+Metardata	8	Viser metardata for periode og elementer fra valgte flyplasser og stasjoner
+Miljødata (Environmental data)	9	Gir data om det fysiske miljø (E-data) fra et utvalg av oljeplattformene på Norsk Kontinentalsokkel.
+Ekstremer per fylke	10	Viser ekstremer for utvalgte elementer og fylker
+Datadekning (månedsvis)	11	Viser datadekning i prosent for valgt periode, elementer og stasjoner
+Observasjoner fra SVV	13	Viser observasjoner fra SVV stasjoner for periode og elementer fra valgte stasjoner
+10 minutts observasjoner	14	Viser observasjoner fra stasjoner med ti minutters oppløsning (hovedsaklig nedbør RR_010)
+10 min maritime data	15	10 min data fra et utvalg av oljeplattformene på Norsk Kontinentalsokkel.
+Ulike prosjekt data	16	Viser prosjekt observasjoner minuttoppløst

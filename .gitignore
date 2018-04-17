@@ -1,0 +1,19 @@
+# Workspace config for PyCharm
+.idea/
+'.idea'
+
+# pyc files (compilations of the .py files..)
+*.pyc
+
+# .pickles are used for local storage in this repo
+*.pickle
+
+# log files are made when executing the code. Not repo material
+*.log
+
+# windows .ini filer
+*.ini
+
+# Handling content of private files when adding to git
+setenvironment.private.py
+setenvironment.public.py
