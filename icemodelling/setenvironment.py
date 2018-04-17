@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-__author__ = 'ragnarekker'
-
 import sys as sys
 import os as os
+
+__author__ = 'ragnarekker'
 
 """Setup work environment
 
