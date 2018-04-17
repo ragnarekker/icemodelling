@@ -1,6 +1,6 @@
 # Workspace config for PyCharm
-#.idea/
-#'.idea'
+.idea/
+'.idea'
 
 # pyc files (compilations of the .py files..)
 *.pyc
