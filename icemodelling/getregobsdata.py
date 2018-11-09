@@ -1018,7 +1018,7 @@ def get_ice_thickness_observations(year, reset_and_get_new=False):
 
 def get_all_season_ice(year, get_new=True):
     """Returns observed ice columns from regObs over a requested season. Ice covers representing first ice
-    or ice cover lois are represented by an ice column of zero height.
+    or ice cover lost are represented by an ice column of zero height.
 
     The workings of this routine:
     1.  Get one season of data from regobs-api, spreads them out to a long list.
@@ -1218,36 +1218,40 @@ def get_observations_on_location(location_name, year, get_new=False):
 
 
 def get_dates_from_year(year, date_format='yyyy-mm-dd'):
-    """Returns start and end dates for given season. Format may be specified for datetime or date or string (default).
+    """Returns start and end dates for given season. Hydrological year from 1. sept.
+     Format may be specified for datetime or date or string (default).
 
-    :param year:
+    :param year:            [String]    E.g. '2018-19'
     :param date_format:     [String]    'yyyy-mm-dd', 'date' or 'datetime'
     :return:
     """
 
     log_ref = 'getregobsdata.py -> get_dates_from_year:'
 
-    if year == '2017-18':
-        from_date = '2017-08-01'
-        to_date = '2018-08-01'
+    if year == '2018-19':
+        from_date = '2018-09-01'
+        to_date = '2019-09-01'
+    elif year == '2017-18':
+        from_date = '2017-09-01'
+        to_date = '2018-09-01'
     elif year == '2016-17':
-        from_date = '2016-08-01'
-        to_date = '2017-08-01'
+        from_date = '2016-09-01'
+        to_date = '2017-09-01'
     elif year == '2015-16':
-        from_date = '2015-08-01'
-        to_date = '2016-08-01'
+        from_date = '2015-09-01'
+        to_date = '2016-09-01'
     elif year == '2014-15':
-        from_date = '2014-08-01'
-        to_date = '2015-08-01'
+        from_date = '2014-09-01'
+        to_date = '2015-09-01'
     elif year == '2013-14':
-        from_date = '2013-08-01'
-        to_date = '2014-08-01'
+        from_date = '2013-09-01'
+        to_date = '2014-09-01'
     elif year == '2012-13':
-        from_date = '2012-08-01'
-        to_date = '2013-08-01'
+        from_date = '2012-09-01'
+        to_date = '2013-09-01'
     elif year == '2011-12':
-        from_date = '2011-08-01'
-        to_date = '2012-08-01'
+        from_date = '2011-09-01'
+        to_date = '2012-09-01'
     else:
         ml.log_and_print('{0} Not supported year.'.format(log_ref))
         return 'Not supported year.'

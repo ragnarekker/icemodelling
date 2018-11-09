@@ -63,9 +63,8 @@ def get_ice_thickness_from_energy_balance(
     return out_column, energy_balance
 
 
-def get_ice_thickness_from_surface_temp(
-        ic, time_step, dh_snow, temp, melt_energy=None, cloud_cover=None):
-    '''Given surface temperature and new snow on an ice-column, ice evolution is estimated. In the simplest case
+def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energy=None, cloud_cover=None):
+    """Given surface temperature and new snow on an ice-column, ice evolution is estimated. In the simplest case
     the surface temp is estimated from air temperature. More advances approaches calculates surface temperature
     by solving er energy balance equation.
 
@@ -79,7 +78,8 @@ def get_ice_thickness_from_surface_temp(
     :param time_step:   In seconds. 60*60*24 = 86400 is 24hrs
     :param cloud_cover: Cloudcover in %. If None one is estimated. If -1, clouds have no affect on temperature.
     :return:            Ice column at end of time step
-    '''
+    """
+
 
     dh_snow = float(dh_snow)
 

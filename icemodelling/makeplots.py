@@ -386,12 +386,23 @@ def plot_ice_cover(ice_cover, observed_ice, date, temp, sno, snotot, filename):
     else:
         modelledLineWeight = 1100 / len(axis_date)
 
-    # dont need to keep the colunm coordinates, but then again, why not..? Usefull for debuging
+    # dont need to keep the colunm coordinates, but then again, why not..? Useful for debuging
     all_column_coordinates = []
 
-    location_name = observed_ice[0].metadata['LocationName']
-    year = '{0:%Y}-{1:%y}'.format(date[0], date[-1])
-    plt.title('{0} sesongen {1}'.format(location_name, year), fontsize=24)
+    if len(observed_ice) > 0:
+        location_name = observed_ice[0].metadata['LocationName']
+        if location_name is None:
+            location_name = 'Ukjent vann'
+    else:
+        location_name = 'Ukjent vann'
+
+    # If from and to dates are within the same, year find the next year in line for season label.
+    from_year = int('{0:%y}'.format(date[0]))
+    to_year = int('{0:%y}'.format(date[-1]))
+    if from_year == to_year:
+        to_year += 1
+    season = '{0:%Y}-{1}'.format(date[0], to_year)
+    plt.title('{0} sesongen {1}'.format(location_name, season), fontsize=24)
 
     # a variable for the lowest point on the ice cover. It is used for setting the lower left y-limit .
     lowest_point = 0.

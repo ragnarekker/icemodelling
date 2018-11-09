@@ -10,6 +10,7 @@ __author__ = 'ragnarekker'
 @var
 @var
 @var database_location:     Database for the CloudMaker experiment
+@var environment_config_complete: If false, no variables are declared. A safeguard so not lots of folders are unintentionally declared.
 """
 
 operational = False
@@ -17,7 +18,7 @@ project_folder_linux_or_darwin = '/Users/ragnarekker/Dropbox/Kode/Python/icemode
 project_folder_developer_windows = 'C:\\Users\\raek\\Dropbox\\Kode\\Python\\icemodelling\\icemodelling\\'
 project_folder_operational_windows = 'C:\\Kode\\icemodelling\\icemodelling\\'
 output_folder_operational = 'Z:\\iceplots\\'
-environment_config_complete = False
+environment_config_complete = True
 
 if environment_config_complete:
 

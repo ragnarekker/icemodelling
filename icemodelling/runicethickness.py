@@ -25,6 +25,15 @@ __author__ = 'ragnarekker'
 
 
 def calculate_ice_cover_air_temp(inn_column_inn, date, temp, sno, cloud_cover=None):
+    """
+
+    :param inn_column_inn:
+    :param date:
+    :param temp:
+    :param sno:     []  new snow over the period (day)
+    :param cloud_cover:
+    :return:
+    """
 
     inn_column = copy.deepcopy(inn_column_inn)
     inn_column.update_water_line()
@@ -284,7 +293,7 @@ def calculate_and_plot_regid(regid, plot_folder=se.plot_folder, observed_ice=Non
 
 
 def calculate_and_plot_location_id(location_id, year, get_new_obs=True):
-    """For a given location_id get all overvations, calculate cover and plot for full season.
+    """For a given location_id get all observations, calculate cover and plot for full season.
 
     :param location_id:
     :param year:
@@ -363,12 +372,12 @@ def _calculate_and_plot_season(location_id, from_date, to_date, observed_ice, ma
     return calculated_ice, observed_ice, plot_filename
 
 
-def plot_season(year='2016-17', calculate_new=False, get_new_obs=False, make_plots=False, delete_old_plots=False):
+def plot_season(year='2018-19', calculate_new=False, get_new_obs=False, make_plots=False, delete_old_plots=False):
     """Method makes a season plot for all ObsLocations where we have a first ice date.
 
     The workings of the method:
     1.  get all locations ids and belonging observations where we have first ice.
-    2.1 if calculate new, empty sesong folder and pickle in localstoragem and calculate (and make plots if requested).
+    2.1 if calculate new, empty sesong folder and pickle in localstorage and calculate (and make plots if requested).
     2.2 Make metadata json for showing files on iskart
     3.  All calculations are compared to observed data in scatter plot.
 
@@ -452,15 +461,15 @@ def plot_season(year='2016-17', calculate_new=False, get_new_obs=False, make_plo
         ml.log_and_print('runicethickness.py -> plot_season: {}. Could not plot scatter {}.'.format(error_msg, year))
 
 
-def plot_regobs_observations(period='2017-18'):
-    """Make plots of all ice thickness for a given season or optionally "Today".
+def plot_regobs_observations(period='2018-19'):
+    """Make plots of all ice thickness for a given season or optionally 'Today'.
 
     The inner workings:
     1.1 Retrieves ice thickness observations from regObs. If period is given as a season, all observations for
         this season will be requested. All previous plots and local storage wil be deleted.
     1.2 If period='Today' ice thickness observations from today will be requested and plotted. Older plots will be
         in the folder. Metadata dict will be merged.
-    2.  Calculate the 9 day progos from the observation time and plots the result.
+    2.  Calculate the 9 day prognosis from the observation time and plots the result.
     3.  Make a metadata json for handling files on iskart.no. Only confirmed files in folder will be
         added to metadata json.
 
@@ -629,7 +638,58 @@ def runSemsvannEB(startDate, endDate):
     #pts.plot_ice_cover_eb_simple(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename)
 
 
+def runMosselva(from_date, to_date, observed_ice=[], make_plots=True, plot_folder=se.plot_folder):
+
+    year = '{0}-{1}'.format(from_date[0:4], to_date[2:4])
+
+    # Change dates to datetime. Some of the getdata modules require datetime
+    from_date = dt.datetime.strptime(from_date, '%Y-%m-%d')
+    to_date = dt.datetime.strptime(to_date, '%Y-%m-%d')
+
+    # if to_date forward in time, make sure it doesnt go to far..
+    if to_date > dt.datetime.now():
+        to_date = dt.datetime.now() + dt.timedelta(days=7)
+
+    location_name = 'Mosselva'
+    y = 6595744
+    x = 255853
+
+    gridTemp = gts.getgts(x, y, 'tm', from_date, to_date)
+    gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
+    gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
+
+    temp, date = we.strip_metadata(gridTemp, get_date_times=True)
+    sno = we.strip_metadata(gridSno)
+    sno_tot = we.strip_metadata(gridSnoTot)
+    cc = dp.clouds_from_precipitation(sno)
+
+    plot_filename = '{0}_{1}.png'.format(location_name, year)
+    plot_path_and_filename = '{0}{1}'.format(plot_folder, plot_filename)
+
+    # try:
+    if len(observed_ice) == 0:
+        calculated_ice = calculate_ice_cover_air_temp(ice.IceColumn(date[0], []), date, temp, sno, cc)
+    else:
+        calculated_ice = calculate_ice_cover_air_temp(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+
+    if make_plots:
+        pts.plot_ice_cover(calculated_ice, observed_ice, date, temp, sno, sno_tot, plot_path_and_filename)
+
+    # except:
+    #    # raise
+    #    error_msg = sys.exc_info()[0]
+    #    ml.log_and_print('runicethickness.py -> _calculate_and_plot_season: {}. Could not plot {}.'.format(error_msg, location_name))
+    #    calculated_ice = None
+
+    return calculated_ice, observed_ice, plot_filename
+
+
+
 if __name__ == "__main__":
+
+    runMosselva('2017-12-31', '2018-07-01')
+    runMosselva('2016-12-31', '2017-07-01')
+    runMosselva('2015-12-31', '2016-07-01')
 
     calculate_and_plot_location_id(17080, '2017-18', get_new_obs=False)
     calculate_and_plot_location_id(57019, '2017-18', get_new_obs=False)
