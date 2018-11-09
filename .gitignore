@@ -17,3 +17,6 @@
 # Handling content of private files when adding to git
 setenvironment.private.py
 setenvironment.public.py
+
+plotsforisvarsling_1h.py
+plotsforisvarsling_24h.py

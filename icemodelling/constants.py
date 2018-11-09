@@ -1,13 +1,8 @@
 #! /usr/bin/python
 # -*- coding: utf-8 -*-
-__author__ = 'ragnarekker'
+"""Describe the universe! All constants for modelling."""
 
-'''Setup work environment
-
-@var :
-@var :
-
-'''
+__author__ = 'Ragnar Ekker'
 
 
 # Misc constants
