@@ -1,6 +1,6 @@
 import datetime as dt
 import os as os
-from config import setenvironment as se
+import setenvironment as se
 
 # -*- coding: utf-8 -*-
 __author__ = 'raek'

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+"""Environment for running plots for iskart.no on hb_datainn"""
 import sys as sys
 import os as os
 import json as json
@@ -34,6 +35,7 @@ def _load_config_json(path, name):
     return dict_of_name
 
 
+# project_path = 'C:\\Kode\\icemodelling\\icemodelling\\'
 project_path = str(Path(__file__).parent.resolve())
 folders = _load_config_json(project_path, 'folders')
 api = _load_config_json(project_path, 'api')
@@ -41,11 +43,11 @@ api = _load_config_json(project_path, 'api')
 # Set project folders
 kdv_elements_folder = project_path + folders['kdv_elements']
 local_storage = project_path + folders['local_storage']
-output_folder = project_path + folders['output']
-plot_folder = project_path + folders['plots']
-sesong_plots_folder = project_path + folders['sesong_plots']
-ni_dogn_plots_folder = project_path + folders['ni_dogn_plots']
-log_folder = project_path + folders['logs']
+output_folder = 'Z:\\iceplots\\'
+plot_folder = 'Z:\\iceplots\\plots\\'
+sesong_plots_folder = 'Z:\\iceplots\\sesong\\'
+ni_dogn_plots_folder = 'Z:\\iceplots\\9dogn\\'
+log_folder = 'Z:\\iceplots\\logs\\'
 
 # Create project folders if missing
 if project_path:

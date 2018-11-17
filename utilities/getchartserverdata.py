@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 import requests
-from config.setenvironment import chart_server_base_url
+from icemodelling import ice as ice, weatherelement as we
+import setenvironment as se
 
 __author__ = 'ragnarekker'
 
@@ -113,7 +114,7 @@ def getGriddata(UTM33X, UTM33Y, elementID, fromDate, toDate, timeseries_type=0, 
     toDate += dt.timedelta(days=1)
 
     url = '{0}&time={1};{2}&chd=ds=hgts,da=29,id={3};{4};{5}'.format(
-        chart_server_base_url, fromDate.strftime('%Y%m%dT%H%M'), toDate.strftime('%Y%m%dT%H%M'), UTM33X, UTM33Y, elementID)
+        se.chart_server_basestring, fromDate.strftime('%Y%m%dT%H%M'), toDate.strftime('%Y%m%dT%H%M'), UTM33X, UTM33Y, elementID)
 
     if output == 'list':
 
@@ -191,7 +192,7 @@ def getYrdata(stationID, elementID, fromDate, toDate, timeseries_type=0, output=
     """
 
     url = "{0}&time={1};{2}&chd=ds=htsry,id=hydx[{3};{4}].6000"\
-        .format(chart_server_base_url,
+        .format(se.chart_server_basestring,
                 fromDate.strftime('%Y%m%dT%H%M'),
                 toDate.strftime('%Y%m%dT%H%M'),
                 stationID.replace('.',';'),
@@ -277,7 +278,7 @@ def getStationdata(stationID, elementID, fromDate, toDate, timeseries_type=0, ou
 
 
     url = "{0}&time={1};{2}&chd=ds=htsr,da=29,id={3}.{4}"\
-        .format(chart_server_base_url, fromDate.strftime('%Y%m%dT%H%M'), toDate.strftime('%Y%m%dT%H%M'), stationID, elementID)
+        .format(se.chart_server_basestring, fromDate.strftime('%Y%m%dT%H%M'), toDate.strftime('%Y%m%dT%H%M'), stationID, elementID)
 
     if output == 'list':
         weatherElementList = _make_weather_element_list_from_url(url, stationID, elementID, {'MethodName': 'Chartserver - getStationdata'})
@@ -358,7 +359,7 @@ if __name__ == "__main__":
     grid =__runHakkloaSnow()
     #yr = __runHakkloaTempYr()
 
-    from utilities import makefiledata as mfd, makelogs as ml, doconversions as dc, weatherelementlistoperations as we
+    from utilities import makefiledata as mfd, makelogs as ml, doconversions as dc
 
     #mfd.write_weather_element_list(station)
     mfd.write_weather_element_list(grid)

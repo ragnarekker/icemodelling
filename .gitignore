@@ -14,9 +14,12 @@
 # windows .ini filer
 *.ini
 
-# Handling content of private files when adding to git
-setenvironment.private.py
-setenvironment.public.py
+# these are the local configurations needed to run the project.
+# When missing, the files with the leading underscore are used as default
+api.json
+folders.json
 
+# Removing other content of private files when adding to git
 plotsforisvarsling_1h.py
 plotsforisvarsling_24h.py
+_setenvironment.py

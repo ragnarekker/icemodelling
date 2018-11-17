@@ -2,10 +2,9 @@ import datetime as dt
 import requests
 import os as os
 import copy as cp
-
-from icemodelling import icemodelclasses as ice, constants as const
+from icemodelling import ice as ice, constants as const
 from utilities import makepickle as mp, makelogs as ml, doconversions as dc
-from config import setenvironment as se
+import setenvironment as se
 import pandas as pd
 
 __author__ = 'ragnarekker'
@@ -23,7 +22,7 @@ def get_obs_location(LocationName):
 
     # get data for current view and dates
     url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/ObsLocation/?$filter=LocationName eq '{1}'&$format=json"\
-        .format(se.odata_api_version, oDataQuery)
+        .format(se.odata_version, oDataQuery)
     data = requests.get(url).json()
     data_dict = data['d']['results'][0]
 
@@ -63,7 +62,7 @@ def get_ice_cover(LocationName, fromDate, toDate):
                      "LangKey eq 1".format(fromDate, toDate, OdataLocationName)
 
         # get data for current view and dates
-        url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".format(se.odata_api_version, oDataQuery, view)
+        url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".format(se.odata_version, oDataQuery, view)
         data = requests.get(url).json()
         datalist = data['d']['results']
 
@@ -157,7 +156,7 @@ def get_ice_thickness_on_regid(regid):
                  "LangKey eq 1".format(regid)
 
     # get data for current view and dates
-    url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".format(se.odata_api_version,
+    url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".format(se.odata_version,
                                                                                                  oDataQuery, view)
     data = requests.get(url).json()
     datalist = data['d']['results']
@@ -192,7 +191,7 @@ def get_ice_thickness_on_location(LocationName, fromDate, toDate):
                      "LangKey eq 1".format(fromDate, toDate, OdataLocationName)
 
         # get data for current view and dates
-        url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".format(se.odata_api_version, oDataQuery, view)
+        url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{2}?$filter={1}&$format=json".format(se.odata_version, oDataQuery, view)
         data = requests.get(url).json()
         datalist = data['d']['results']
 
@@ -320,7 +319,7 @@ def get_ice_thickness_layers(RegID):
 
     url = "http://api.nve.no/hydrology/regobs/{0}/Odata.svc/{1}?" \
           "$filter=RegID eq {2} and LangKey eq 1&$format=json"\
-        .format(se.odata_api_version, view, RegID)
+        .format(se.odata_version, view, RegID)
     data = requests.get(url).json()
     datalist = data['d']['results']
 
@@ -410,7 +409,7 @@ def get_kdv(x_kdv, get_new=False):
 
     if get_new:
         url = 'http://api.nve.no/hydrology/regobs/{0}/OData.svc/{1}?$filter=Langkey%20eq%201%20&$format=json'\
-            .format(se.odata_api_version, x_kdv)
+            .format(se.odata_version, x_kdv)
 
         ml.log_and_print("getregobsdata -> get_kdv: Getting KDV from URL:{0}".format(url))
 
@@ -1047,15 +1046,15 @@ def get_all_season_ice(year, get_new=True):
                     all_locations[o['LocationId']] = [o]
 
         # sort oldest first on each location
-        for l, os in all_locations.items():
-            sorted_list = sorted(os, key=lambda d : d['DtObsTime'])
+        for l, obs in all_locations.items():
+            sorted_list = sorted(obs, key=lambda d : d['DtObsTime'])
             all_locations[l] = sorted_list
 
         # Use only locations with verified "first ice cover" date.
         all_locations_with_first_ice = {}
 
-        for l, os in all_locations.items():
-            for o in os:
+        for l, obs in all_locations.items():
+            for o in obs:
                 if o['RegistrationTid'] == 51:
                     # if the ice cover is partly or fully formed on observation location or the lake
                     # 2) delvis islagt på målestedet
@@ -1070,18 +1069,18 @@ def get_all_season_ice(year, get_new=True):
                         # 20) hele sjøen isfri,  this is fist ice
                         if (o['FullObject']['IceCoverBeforeTID'] == 1) or (o['FullObject']['IceCoverBeforeTID'] == 2) or \
                                 (o['FullObject']['IceCoverBeforeTID'] == 11) or (o['FullObject']['IceCoverBeforeTID'] == 20):
-                            all_locations_with_first_ice[l] = os
+                            all_locations_with_first_ice[l] = obs
 
-        # Map all observations from regObs-webapi result structure to the classes in icemodelclasses.py
+        # Map all observations from regObs-webapi result structure to the classes in ice.py
         all_locations_with_classes = {}
 
-        for l, os in all_locations_with_first_ice.items():
+        for l, obs in all_locations_with_first_ice.items():
             all_locations_with_classes[l] = []
-            location_name = os[0]['LocationName']
+            location_name = obs[0]['LocationName']
 
             previous_cover = ice.IceCover(dt.datetime.strptime(from_date, "%Y-%m-%d").date(), "Ikke gitt", 'Ikke gitt', location_name)
 
-            for o in os:
+            for o in obs:
                 if o['RegistrationTid'] == 51:
 
                     cover_date = dt.datetime.strptime(o['DtObsTime'][0:16], "%Y-%m-%dT%H:%M")
@@ -1162,7 +1161,11 @@ def get_all_season_ice(year, get_new=True):
         mp.pickle_anything(all_locations_with_columns, file_name_and_path)
 
     else:
-        all_locations_with_columns = mp.unpickle_anything(file_name_and_path, print_message=False)
+        # if pickle file with all data for the season does not exist, get data anyway
+        if not os.path.exists(file_name_and_path):
+            all_locations_with_columns = get_all_season_ice(year, get_new=True)
+        else:
+            all_locations_with_columns = mp.unpickle_anything(file_name_and_path, print_message=False)
 
     return all_locations_with_columns
 

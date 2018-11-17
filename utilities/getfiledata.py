@@ -2,10 +2,9 @@ __author__ = 'raek'
 # -*- coding: utf-8 -*-
 
 import datetime as dt
-from utilities import weatherelementlistoperations as we
-from config import setenvironment as se
+import setenvironment as se
 import copy
-from icemodelling import icemodelclasses as ice
+from icemodelling import ice as ice, weatherelement as we
 
 
 def read_weather(from_date, to_date, filename):

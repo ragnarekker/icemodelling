@@ -2,8 +2,9 @@ __author__ = 'ragnarekker'
 
 
 import datetime as dt
-from config import setenvironment as se
-from utilities import makelogs as ml, getregobsdata as gro, weatherelementlistoperations as we
+import setenvironment as se
+from utilities import makelogs as ml, getregobsdata as gro
+from icemodelling import weatherelement as we
 
 
 def write_vardat2(file_name, data, WSYS, OPER, DCHA):

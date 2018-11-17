@@ -6,7 +6,7 @@ import numpy as np
 import datetime as dt
 import collections as collections
 import copy as copy
-from config import setenvironment as se
+import setenvironment as se
 
 __author__ = 'raek'
 

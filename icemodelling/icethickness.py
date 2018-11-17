@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import math
 import numpy as np
-from icemodelling import parameterization as dp, constants as const
+from icemodelling import parameterization as dp, constants as const, weatherelement as we
 from experimental import energybalance as deb
-from icemodelling import icemodelclasses as ice
-from utilities import makelogs as ml, weatherelementlistoperations as we
+from icemodelling import ice as ice
+from utilities import makelogs as ml
 
 __author__  =  'raek'
 

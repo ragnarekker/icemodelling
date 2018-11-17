@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import datetime as dt
 import requests as rq
+from icemodelling import weatherelement as we
+from utilities import makeplots as mplot
 
 __author__ = 'ragnarekker'
 
@@ -34,8 +36,7 @@ def getgts(utm33x, utm33y, element_id, from_date, to_date, timeseries_type=0, pa
         sdfsw:              new snow last 24hrs in cm
     """
 
-    url = 'http://h-web02.nve.no:8080/api/GridTimeSeries/gridtimeserie?theme={0}&startdate={1}&enddate={2}&x={3}&y={4}'\
-        .format(element_id, from_date, to_date, utm33x, utm33y)
+    url = 'http://h-web02.nve.no:8080/api/GridTimeSeries/gridtimeserie?theme={0}&startdate={1}&enddate={2}&x={3}&y={4}'.format(element_id, from_date, to_date, utm33x, utm33y)
 
     responds = rq.get(url)
 
@@ -45,6 +46,7 @@ def getgts(utm33x, utm33y, element_id, from_date, to_date, timeseries_type=0, pa
     weather_element_list = []
     date = dt.datetime.strptime(full_data['StartDate'], '%d.%m.%Y %H:%M:%S')
 
+    # the assigned NoDataValue if one data element is missing.
     no_data_value = int(full_data['NoDataValue'])
 
     for d in data:
@@ -78,8 +80,6 @@ if __name__ == "__main__":
 
     weather_pr_day = getgts(109190, 6817490, 'tm', '2017-12-20', '2017-12-30')
     gts_weather = getgts(109190, 6817490, 'tm', '2017-12-20', '2017-12-30', timeseries_type=-1)
-
-    from utilities import makeplots as mplot, weatherelementlistoperations as we
 
     mplot.plot_weather_elements([weather_pr_day, gts_weather])
 

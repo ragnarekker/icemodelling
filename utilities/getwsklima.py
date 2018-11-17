@@ -4,8 +4,9 @@ from lxml import etree
 import requests as re
 import datetime as dt
 import xml.etree.ElementTree as et      # used in the incomplete methods
-from config import setenvironment as env
-from utilities import makefiledata as mfd, weatherelementlistoperations as we
+import setenvironment as env
+from utilities import makefiledata as mfd
+from icemodelling import weatherelement as we
 
 __author__ = 'ragnarekker'
 

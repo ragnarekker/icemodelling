@@ -7,7 +7,6 @@ from icemodelling import constants as const
 from experimental import energybalancedefaults as defaults
 from utilities import doconversions as dc
 from icemodelling import parameterization as dp
-from utilities.weatherelementlistoperations import EnergyBalanceElement as ebe
 from math import log, exp, sin, cos, pi, fabs, sqrt, acos
 
 
@@ -149,7 +148,7 @@ def energy_balance_from_temp_sfc(
     #    temp_surface = ice_column.get_surface_temperature_estimate(temp_atm)
 
     # Define an energy balance object to put inn all resources data.
-    energy_balance = ebe(date)
+    energy_balance = EnergyBalanceElement(date)
     energy_balance.add_model_input(
         utm33_x_inn=utm33_x, utm33_y_inn=utm33_y, snow_depth_inn=snow_depth, snow_density_inn=snow_density,
         temp_surface_inn=temp_surface, is_ice_inn=is_ice, temp_atm_inn=temp_atm,
@@ -1028,7 +1027,7 @@ def get_surface_heat_conduction(ice_column, temp_surface, time_span_in_sec):
 if __name__ == "__main__":
 
     import getFiledata as gfd
-    from config.setenvironment import data_path
+    from setenvironment import data_path
 
     icecols = gfd.importColumns("{0}Semsvann observasjoner 2012-2013.csv".format(data_path))
     icecol = icecols[6]

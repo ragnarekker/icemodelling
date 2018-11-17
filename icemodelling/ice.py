@@ -767,90 +767,9 @@ class IceCover:
         self.metadata['OriginalObject'] = original_object_inn
 
 
-class WeatherElement:
-    """All weather data for the model is given as lists of weatherElement object.
-
-    The structure is similar to as they are defined in eKlima. The variables are:
-
-    LocationID:     The location number. Preferably a int, but for NVE stations it may be a sting.
-    Date:           Datetime object of the date of the weather element.
-    ElementID:      The element ID. TAM og SA for met but may be numbers from NVE data.
-    Value:          The value of the weather element. Preferably in SI units.
-
-    Special cases:
-    ElementID = SA: Snødybde, totalt fra bakken, måles normalt på morgenen. Kode = -1 betyr snøbart, presenteres
-                    som ".", -3 = "umulig å måle". This variable is also calulated from [cm] to [m]
-    ElementID = RR: Precipitations has -1 for what seems to be noe precipitation. Are removed.
-    ElementID = NNM:Average cloudcover that day (07-07). Comes from met.no in okta.
-
-    Handling data errors:
-    The constructor looks for some known cases that gives errors and corrects them so that the data set returned is
-    complete."""
-
-    def __init__(self, elementLocationID, elementDate, elementID, elementValue):
-
-        self.LocationID = elementLocationID
-        self.Date = elementDate
-        self.ElementID = elementID
-        self.Metadata = {'OriginalValue': elementValue}
-        self.Value = elementValue
-        if elementValue is not None:
-            self.Value = float(elementValue)
-
-            # Met snow is in [cm] and always positive. Convert to [m]
-            if elementID == 'SA':
-                if elementValue >= 0.:
-                    self.Value = elementValue / 100.
-                    self.Metadata.append({'Converted': 'from cm to m'})
-
-            # Met rain is in [mm] and always positive. We use SI and [m]; not [mm].
-            if elementID in ['RR','RR_1']:
-                if self.Value > 0.:
-                    self.Value = elementValue / 1000.
-                    self.Metadata.append({'Converted': 'from mm to m'})
-
-            # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
-            if elementID == 'NNM':
-                if self.Value not in [9., -99999.]:
-                    pecent = int(self.Value/8*100)
-                    self.Value = pecent/100.
-                    self.Metadata.append({'Converted': 'from okta to unit'})
-
-    def fix_data_quick(self):
-
-        if self.Value is None:
-            self.Value = 0.
-
-        # These values should always be positive. -99999 is often used as unknown number in eklima.
-        # RR = 0 or negligible precipitation. RR = -1 is noe precipitation observed.
-        if self.ElementID in ['SA', 'RR','RR_1', 'QLI', 'QSI']:
-            if self.Value < 0.:
-                self.Value = 0.
-                self.Metadata.append({'Value manipulation': 'removed negative value'})
-
-        # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
-        if self.ElementID == 'NNM':
-            if self.Value in [9., -99999]:
-                self.Value = 0.
-                self.Metadata.append({'On import': 'unknown value replaced with 0.'})
-
-        # data corrections. I found errors in data Im using from met
-        if (self.Date).date() == dt.date(2012, 2, 2) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
-            self.Value = 0.45
-            self.Metadata.append({"ManualValue": self.Value})
-
-        if (self.Date).date() == dt.date(2012, 3, 18) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
-            self.Value = 0.89
-            self.Metadata.append({"ManualValue": self.Value})
-
-        if (self.Date).date() == dt.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
-            self.Value = 0.36
-            self.Metadata.append({"ManualValue": self.Value})
-
-
 if __name__ == "__main__":
 
-    from config.setenvironment import data_path
+    from setenvironment import data_path
 
     # some tests of the functions in the IceColumn file
     # date = dt.datetime.strptime("2011-10-05", "%Y-%m-%d")

@@ -2,8 +2,9 @@
 """Module for gathering and saving to file, meteorological parameters needed to run myLake. Module may be
 expanded for preparing other data sets if needed."""
 import datetime as dt
-from config import setenvironment as env
-from utilities import makepickle as mp, makefiledata as mfd, getwsklima as gws, weatherelementlistoperations as we
+import setenvironment as env
+from utilities import makepickle as mp, makefiledata as mfd, getwsklima as gws
+from icemodelling import weatherelement as we
 from utilities import getfiledata as gfd, getchartserverdata as gcs
 
 __author__ = 'ragnarekker'

@@ -2,8 +2,8 @@
 
 import datetime as dt
 import math
-from icemodelling import constants as const
-from utilities import doconversions as dc, getwsklima as gws, weatherelementlistoperations as we
+from icemodelling import constants as const, weatherelement as we
+from utilities import doconversions as dc, getwsklima as gws
 import random as random
 
 

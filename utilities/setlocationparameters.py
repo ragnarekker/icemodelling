@@ -102,7 +102,6 @@ def get_for_location(location_name):
         location.file_name = 'Giljastølsvatnet'
         return location
 
-
     elif location_name == 'Baklidammen 200 moh':
         location = Location(location_name)
 
@@ -114,7 +113,6 @@ def get_for_location(location_name):
 
         location.file_name = 'Baklidammen'
         return location
-
 
     elif location_name == 'Storvannet, 7 moh':
         location = Location(location_name)
@@ -142,7 +140,7 @@ def get_for_location(location_name):
             return location
 
         except:
-            ml.log_and_print('locationparameters.py -> get_for_location: No such location.')
+            ml.log_and_print('setlocationparameters.py -> get_for_location: No such location.')
 
 
 
