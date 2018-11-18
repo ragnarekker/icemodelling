@@ -761,7 +761,6 @@ def get_data(from_date=None, to_date=None, registration_types=None, reg_ids=None
 
     :return:                    [list or int] Depending on output requested.
 
-
     """
 
     # If resources isn't a list, make it so
@@ -1170,11 +1169,11 @@ def get_all_season_ice(year, get_new=True):
     return all_locations_with_columns
 
 
-def get_observations_on_location(location_name, year, get_new=False):
+def get_observations_on_location(location_id, year, get_new=False):
     """Uses new or stored data from get_all_season_ice and picks out one requested location.
     First ice cover is mapped to Ice.IceColumn of zero height. Ice cover lost (mid season or last) the same.
 
-    :param location_name:
+    :param location_id:
     :param year:
     :param get_new:
     :return:
@@ -1187,7 +1186,7 @@ def get_observations_on_location(location_name, year, get_new=False):
     observations_on_location_for_modeling = []
 
     try:
-        for o in all_locations[location_name]:
+        for o in all_locations[location_id]:
             if isinstance(o, ice.IceCover):
 
                 if o.first_ice:
@@ -1212,7 +1211,7 @@ def get_observations_on_location(location_name, year, get_new=False):
                 observations_on_location_for_modeling.append(o)
 
     except Exception as e:
-        ml.log_and_print('getregobsdata.py -> get_observations_on_location: {0} not found probably..'.format(location_name), print_it=True)
+        ml.log_and_print("getregobsdata.py -> get_observations_on_location: {0} not found probably..".format(location_id), print_it=True)
 
     return observations_on_location_for_modeling
 
@@ -1287,14 +1286,6 @@ if __name__ == "__main__":
     # get_new_regobs_data()
     # ice_column = get_ice_thickness_on_regid(130979)
 
-    LocationName1 = 'Hakkloa nord 372 moh'
-    LocationName2 = 'Otrøvatnet v/Nystuen 971 moh'
-    LocationName3 = 'Semsvannet v/Lo 145 moh'
-
-    LocationNames = [LocationName1, LocationName2, LocationName3]
-    from_date = '2016-01-01'
-    to_date = '2016-02-01'
-
     ice_thicks = get_ice_thickness_observations('2017-18')
 
     #ic = get_ice_cover(LocationNames, from_date, to_date)
@@ -1305,8 +1296,4 @@ if __name__ == "__main__":
 
     all_in_all = get_all_season_ice('2016-17', get_new=True)
 
-    #hakkloa = get_observations_on_location(LocationName1, '2015-16', get_new=False)
-    #otrø = get_observations_on_location(LocationName2, '2014-15', get_new=False)
-    Semms = get_observations_on_location(LocationName3, '2014-15', get_new=False)
-
-    b = 1
+    pass

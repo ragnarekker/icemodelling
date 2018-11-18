@@ -38,7 +38,7 @@ def runOrovannEB(startDate, endDate):
     # available_elements = gws.getElementsFromTimeserieTypeStation(54710, 0, 'csv')
     observed_ice = gro.get_all_season_ice_on_location(location_name, startDate, endDate)
 
-    ice_cover, energy_balance = calculate_ice_cover_eb(
+    ice_cover, energy_balance = cap.calculate_ice_cover_eb(
         utm33_x, utm33_y, date, temp, prec, prec_snow, cloud_cover, wind, rel_hum=rel_hum, pressure_atm=pressure_atm,
         inn_column=copy.deepcopy(observed_ice[0]))
 
@@ -77,7 +77,7 @@ def runSemsvannEB(startDate, endDate):
 
     observed_ice = gro.get_all_season_ice_on_location(location_name, startDate, endDate)
 
-    ice_cover, energy_balance = calculate_ice_cover_eb(
+    ice_cover, energy_balance = cap.calculate_ice_cover_eb(
         utm33_x, utm33_y, date,
         temp, prec, prec_snow, cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum, pressure_atm=pressure_atm,
         inn_column=copy.deepcopy(observed_ice[0]))
@@ -124,9 +124,9 @@ def runMosselva(from_date, to_date, observed_ice=[], make_plots=True, plot_folde
 
     # try:
     if len(observed_ice) == 0:
-        calculated_ice = calculate_ice_cover_air_temp(ice.IceColumn(date[0], []), date, temp, sno, cc)
+        calculated_ice = cap.calculate_ice_cover_air_temp(ice.IceColumn(date[0], []), date, temp, sno, cc)
     else:
-        calculated_ice = calculate_ice_cover_air_temp(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+        calculated_ice = cap.calculate_ice_cover_air_temp(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
     if make_plots:
         pts.plot_ice_cover(calculated_ice, observed_ice, date, temp, sno, sno_tot, plot_path_and_filename)
@@ -140,8 +140,10 @@ def runMosselva(from_date, to_date, observed_ice=[], make_plots=True, plot_folde
     return calculated_ice, observed_ice, plot_filename
 
 
-
 if __name__ == "__main__":
+
+    location_name = 'Semsvannet v/Lo 145 moh'
+    cap.calculate_and_plot_location(location_name, '2016-10-01', '2017-07-01')
 
     runMosselva('2017-12-31', '2018-07-01')
     runMosselva('2016-12-31', '2017-07-01')

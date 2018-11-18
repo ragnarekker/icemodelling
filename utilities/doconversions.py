@@ -1,7 +1,11 @@
-__author__ = 'raek'
+# -*- coding: utf-8 -*-
+"""
 
+"""
 from math import pi, sin, cos, tan
 import datetime as dt
+
+__author__ = 'raek'
 
 
 def unix_time_2_normal(unix_date_time):
@@ -81,12 +85,9 @@ if __name__ == "__main__":
     y_tana = 7844353
     lat_tana, long_tana = lat_long_from_utm33(x_tana, y_tana)
 
-
     # Test Filefjell
     y_file = 6802070
     x_file = 130513
     lat_file, long_file = lat_long_from_utm33(x_file, y_file)
 
-    a = 1
-
-
+    pass

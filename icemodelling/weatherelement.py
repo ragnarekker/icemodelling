@@ -41,20 +41,20 @@ class WeatherElement:
             if elementID == 'SA':
                 if elementValue >= 0.:
                     self.Value = elementValue / 100.
-                    self.Metadata.append({'Converted': 'from cm to m'})
+                    self.Metadata['Converted'] = 'from cm to m'
 
             # Met rain is in [mm] and always positive. We use SI and [m]; not [mm].
             if elementID in ['RR','RR_1']:
                 if self.Value > 0.:
                     self.Value = elementValue / 1000.
-                    self.Metadata.append({'Converted': 'from mm to m'})
+                    self.Metadata['Converted'] = 'from mm to m'
 
             # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
             if elementID == 'NNM':
                 if self.Value not in [9., -99999.]:
-                    pecent = int(self.Value/8*100)
-                    self.Value = pecent/100.
-                    self.Metadata.append({'Converted': 'from okta to unit'})
+                    percent = int(self.Value/8*100)
+                    self.Value = percent/100.
+                    self.Metadata['Converted'] = 'from okta to unit'
 
     def fix_data_quick(self):
 
@@ -63,29 +63,29 @@ class WeatherElement:
 
         # These values should always be positive. -99999 is often used as unknown number in eklima.
         # RR = 0 or negligible precipitation. RR = -1 is noe precipitation observed.
-        if self.ElementID in ['SA', 'RR','RR_1', 'QLI', 'QSI']:
+        if self.ElementID in ['SA', 'RR', 'RR_1', 'QLI', 'QSI']:
             if self.Value < 0.:
                 self.Value = 0.
-                self.Metadata.append({'Value manipulation': 'removed negative value'})
+                self.Metadata['Value manipulation'] = 'removed negative value'
 
         # Clouds come in oktas and should be in units (ranging from 0 to 1) for further use
         if self.ElementID == 'NNM':
             if self.Value in [9., -99999]:
                 self.Value = 0.
-                self.Metadata.append({'On import': 'unknown value replaced with 0.'})
+                self.Metadata['On import'] = 'unknown value replaced with 0.'
 
         # data corrections. I found errors in data Im using from met
         if (self.Date).date() == dt.date(2012, 2, 2) and self.ElementID == 'SA' and self.LocationID == 19710 and self.Value == 0.:
             self.Value = 0.45
-            self.Metadata.append({"ManualValue": self.Value})
+            self.Metadata['ManualValue'] = self.Value
 
         if (self.Date).date() == dt.date(2012, 3, 18) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.89
-            self.Metadata.append({"ManualValue": self.Value})
+            self.Metadata['ManualValue'] = self.Value
 
         if (self.Date).date() == dt.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.36
-            self.Metadata.append({"ManualValue": self.Value})
+            self.Metadata['ManualValue'] = self.Value
 
 
 def strip_metadata(weather_element_list, get_date_times=False):
@@ -172,7 +172,7 @@ def millimeter_from_meter(weather_element_list):
         if we.ElementID in ['RR', 'RR_1']:
             if we.Value >= 0:
                 we.Value = we.Value * 1000.
-                we.Metadata.append({'Converted': 'from m to mm'})
+                we.Metadata['Converted'] = 'from m to mm'
         weatherElementListOut.append(we)
 
     return weatherElementListOut
@@ -227,7 +227,7 @@ def make_daily_average(weather_element_list, time_resolution=None):
                     seconds_today = time_resolution
 
             # note that a value is timestamped at the end of the period it represents
-            else: # ie i > 0
+            else:  # ie i > 0
                 current_time = e.Date
                 previous_time = weather_element_list[i-1].Date
 
@@ -327,9 +327,9 @@ def constant_weather_element(location, from_date, to_date, parameter, value):
     for d in dates:
         element = WeatherElement(location, d, parameter, value)
         if value is None:
-            element.Metadata.append({'No value': 'from {0} to {1}'.format(from_date.date(), to_date.date())})
+            element.Metadata['No value'] = 'from {0} to {1}'.format(from_date.date(), to_date.date())
         else:
-            element.Metadata.append({'Constant value': 'from {0} to {1}'.format(from_date.date(), to_date.date())})
+            element.Metadata['Constant value'] = 'from {0} to {1}'.format(from_date.date(), to_date.date())
         weather_element_list.append(element)
 
     return weather_element_list

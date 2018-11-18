@@ -30,7 +30,7 @@ def calculate_ice_cover_air_temp(inn_column_inn, date, temp, sno, cloud_cover=No
     """
 
     :param inn_column_inn:
-    :param date:
+    :param date:    [] dates for plotting
     :param temp:
     :param sno:     []  new snow over the period (day)
     :param cloud_cover:
@@ -115,7 +115,7 @@ def calculate_ice_cover_eb(
     return icecover, energy_balance
 
 
-def DELETE_calculate_and_plot_location(location_name, from_date, to_date, sub_plot_folder='', make_plots=True, return_values=False):
+def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_folder='', make_plots=True, return_values=False):
     """ due to get_all_season_ice returns data grouped be location_id
     For a given LocationName in regObs calculate the ice cover between two dates. Optional, make plots
     and/or return the calculations and observations for this location. Different sources for weather data
@@ -129,12 +129,10 @@ def DELETE_calculate_and_plot_location(location_name, from_date, to_date, sub_pl
     :param return_values:           [bool]  If true the calculated and observed data is returned
     """
 
-
-    """
     loc = slp.get_for_location(location_name)
     year = '{0}-{1}'.format(from_date[0:4], to_date[2:4])
     lake_file_name = '{0} {1}'.format(fe.make_standard_file_name(loc.file_name), year)
-    observed_ice = gro.get_observations_on_location(location_name, year)
+    observed_ice = gro.get_observations_on_location(loc.regobs_location_id, year)
 
     # Change dates to datetime. Some of the getdata modules require datetime
     from_date = dt.datetime.strptime(from_date, '%Y-%m-%d')
@@ -148,7 +146,7 @@ def DELETE_calculate_and_plot_location(location_name, from_date, to_date, sub_pl
     if to_date > dt.datetime.now():
         to_date = dt.datetime.now() + dt.timedelta(days=7)
 
-    if weather_data_scource == 'eKlima':
+    if loc.weather_data_source == 'eKlima':
         wsTemp = gws.getMetData(loc.eklima_TAM, 'TAM', from_date, to_date, 0, 'list')
         temp, date = we.strip_metadata(wsTemp, True)
 
@@ -165,7 +163,7 @@ def DELETE_calculate_and_plot_location(location_name, from_date, to_date, sub_pl
 
         plot_filename = '{0}{1} eklima.png'.format(se.plot_folder + sub_plot_folder, lake_file_name)
 
-    elif weather_data_scource == 'chartserver grid':
+    elif loc.weather_data_source == 'chartserver grid':
         x, y = loc.utm_east, loc.utm_north
 
         gridTemp = gcsd.getGriddata(x, y, 'tm', from_date, to_date)
@@ -188,7 +186,7 @@ def DELETE_calculate_and_plot_location(location_name, from_date, to_date, sub_pl
 
         plot_filename = '{0}{1} grid.png'.format(se.plot_folder + sub_plot_folder, lake_file_name)
 
-    elif weather_data_scource == 'nve':
+    elif loc.weather_data_source == 'nve':
         x, y = loc.utm_east, loc.utm_north
 
         # Temp from NVE station or grid if not.
@@ -218,14 +216,14 @@ def DELETE_calculate_and_plot_location(location_name, from_date, to_date, sub_pl
 
         plot_filename = '{0}{1} nve.png'.format(se.plot_folder + sub_plot_folder, lake_file_name)
 
-    elif weather_data_scource == 'file':
+    elif loc.weather_data_source == 'file':
         date, temp, sno, snotot = gfd.read_weather(from_date, to_date, loc.input_file)
         cc = dp.clouds_from_precipitation(sno)
 
         plot_filename = '{0}{1} file.png'.format(se.plot_folder + sub_plot_folder, lake_file_name)
 
     else:
-        ml.log_and_print('runicethickness -> calculate_and_plot_location: Invalid scource for weather data.')
+        ml.log_and_print("runicethickness -> calculate_and_plot_location: Invalid scource for weather data.")
         return
 
     try:
@@ -239,36 +237,11 @@ def DELETE_calculate_and_plot_location(location_name, from_date, to_date, sub_pl
 
     except:
         error_msg = sys.exc_info()[0]
-        ml.log_and_print('calculateandplot.py -> calculate_and_plot_location: {}. Could not plot {}.'.format(error_msg, location_name))
+        ml.log_and_print("calculateandplot.py -> calculate_and_plot_location: {}. Could not plot {}.".format(error_msg, location_name))
         calculated_ice = None
 
     if return_values:
         return calculated_ice, observed_ice
-    """
-
-
-def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_folder='', make_plots=True, return_values=False):
-
-    from utilities import setlocationparameters as slp
-
-    loc = slp.get_for_location(location_name)
-    year = '{0}-{1}'.format(from_date[0:4], to_date[2:4])
-    lake_file_name = '{0} {1}'.format(fe.make_standard_file_name(loc.file_name), year)
-    observed_ice = gro.get_observations_on_location(location_name, year)
-
-    # Change dates to datetime. Some of the get data modules require datetime
-    from_date = dt.datetime.strptime(from_date, '%Y-%m-%d')
-    to_date = dt.datetime.strptime(to_date, '%Y-%m-%d')
-
-    # special rule for this season.
-    if year == '2018-19':
-        from_date = dt.datetime(2017, 10, 15)
-
-    # if to_date forward in time, make sure it doesnt go to far..
-    if to_date > dt.datetime.now():
-        to_date = dt.datetime.now() + dt.timedelta(days=7)
-
-    pass
 
 
 def plot_season_location_id(location_id, year, get_new_obs=True):

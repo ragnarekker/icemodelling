@@ -1,4 +1,3 @@
-#! /usr/bin/python
 # -*- coding: utf-8 -*-
 """For easy reuse, some locations may be configured with coordinates, and available weather stations."""
 
@@ -12,6 +11,9 @@ class Location:
     def __init__(self, location_name_inn):
 
         self.location_name = location_name_inn
+
+        self.weather_data_source = None
+        self.regobs_location_id = None
 
         self.eklima_TAM = None
         self.eklima_SA = None
@@ -35,6 +37,9 @@ def get_for_location(location_name):
 
     if location_name == 'Semsvannet v/Lo 145 moh':
         location = Location(location_name)
+
+        location.weather_data_source = 'eKlima'
+        location.regobs_location_id = 2227
 
         location.eklima_TAM = 19710
         location.eklima_SA = 19710
