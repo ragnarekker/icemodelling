@@ -289,7 +289,7 @@ def _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True,
 
     # special rule for this season.
     if year == '2018-19':
-        from_date = dt.datetime(2018, 10, 15)
+        from_date = dt.datetime(2018, 9, 1)
 
     # if to_date forward in time, make sure it doesnt go to far..
     if to_date > dt.datetime.now():

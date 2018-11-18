@@ -943,7 +943,7 @@ def get_ice_thickness_observations(year, reset_and_get_new=False):
     """
 
     log_referance = 'getregobsdata.py -> get_ice_thickness_observations'
-    pickle_file_name = '{0}get_ice_thickness_observations{1}.pickle'.format(se.local_storage, year)
+    pickle_file_name = '{0}get_ice_thickness_observations_{1}.pickle'.format(se.local_storage, year)
 
     # 1. Remove pickle if it exists, forcing the get_new
     if reset_and_get_new:
@@ -1294,12 +1294,12 @@ if __name__ == "__main__":
 
     # ice_thicks = get_ice_thickness_observations('2017-18')
 
-    #ic = get_ice_cover(LocationNames, from_date, to_date)
-    #first = get_first_ice_cover(LocationNames, from_date, to_date)
-    #last = get_last_ice_cover(LocationNames, from_date, to_date)
-    #ith = get_ice_thickness(LocationNames, from_date, to_date)
-    #all_on_locations = get_all_season_ice_on_location(LocationNames, from_date, to_date)
+    # ic = get_ice_cover(LocationNames, from_date, to_date)
+    # first = get_first_ice_cover(LocationNames, from_date, to_date)
+    # last = get_last_ice_cover(LocationNames, from_date, to_date)
+    # ith = get_ice_thickness(LocationNames, from_date, to_date)
+    # all_on_locations = get_all_season_ice_on_location(LocationNames, from_date, to_date)
 
-    all_in_all = get_all_season_ice('2016-17', get_new=False)
+    # all_in_all = get_all_season_ice('2016-17', get_new=False)
 
     pass

@@ -14,7 +14,6 @@ __author__ = 'raek'
 class ObsCalScatterData:
     """Class for handling data in the scatter_calculated_vs_observed plot."""
 
-
     def __init__(self, caluclated_draft_inn, observed_draft_inn, date_inn, location_inn):
 
         if caluclated_draft_inn < 0:
@@ -25,7 +24,6 @@ class ObsCalScatterData:
         self.observed_draft = observed_draft_inn
         self.date = date_inn
         self.location = location_inn
-
 
     def marker_color(self):
 
@@ -340,7 +338,7 @@ def plot_ice_cover(ice_cover, observed_ice, date, temp, sno, snotot, filename):
     """
 
     axis_date = copy.deepcopy(date)
-    for i in range(1,7,1):
+    for i in range(1, 7, 1):
         axis_date.append(axis_date[-1] + dt.timedelta(days=1))
 
     # convert sno and snotot from m to cm
@@ -548,122 +546,6 @@ def plot_ice_cover(ice_cover, observed_ice, date, temp, sno, snotot, filename):
 
     plt.savefig(filename)
     plt.close()
-
-
-def plot_ice_cover_copy(ice_cover, observed_ice, date, temp, sno, snotot, filename):
-    """Plots ice cover over a given time period. It also plots observed data and snow and temperature data.
-
-    :param ice_cover:
-    :param observed_ice:    A list of ice_cover objects. If no observed ice use [] for resources.
-    :param date:
-    :param temp:
-    :param snotot:
-    :param filename:
-    """
-
-    # Turn off interactive mode
-    plb.ioff()
-
-    # Figure dimensions
-    fsize = (16, 10)
-
-    plb.figure(figsize=fsize)
-    plb.clf()
-
-    # depending on how many days are in the plot, the lineweight of the modelled data should be adjusted
-    modelledLineWeight = 1100/len(ice_cover)
-
-    # dont need to keep the colunm coordinates, but then again, why not..? Usefull for debuging
-    all_column_coordinates = []
-
-    # plot total snow depth on land
-    plb.plot(date, snotot, "gray")
-
-    plb.title('{0} - {1} days plotted.'.format(filename, len(ice_cover)))
-
-    # a variable for the lowest point on the ice cover. It is used for setting the lower left y-limit .
-    lowest_point = 0.
-
-    # Plot ice cover
-    for ic in ice_cover:
-
-        # some idea of progress on the plotting
-        if ic.date.day == 1:
-            print((ic.date).strftime('%Y%m%d'))
-
-        # make data for plotting. [ice layers.. [fro, too, ice type]].
-        column_coordinates = []
-        too = -ic.water_line  # water line is on xaxis
-
-        for i in range(len(ic.column)-1, -1, -1):
-            layer = ic.column[i]
-            fro = too
-            too = too + layer.height
-            column_coordinates.append([fro, too, layer.type])
-
-            if fro < lowest_point:
-                lowest_point = fro
-
-            # add coordinates to a vline plot
-            plb.vlines(ic.date.date(), fro, too, lw=modelledLineWeight, color=layer.get_colour()) #ic.getColour(layer.type))
-
-        all_column_coordinates.append(column_coordinates)
-
-    # plot observed ice columns
-    for ic in observed_ice:
-
-        if len(ic.column) == 0:
-            height = 0.05
-            plb.vlines(ic.date.date(), -height, height, lw=4, color='white')
-            plb.vlines(ic.date.date(), -height, height, lw=2, color='red')
-        else:
-            # some idea of progress on the plotting
-            print("Plotting observations.")
-
-            # make data for plotting. [ice layers.. [fro, too, icetype]].
-            too = -ic.water_line  # water line is on xaxis
-
-            for i in range(len(ic.column)-1, -1, -1):
-                layer = ic.column[i]
-                fro = too
-                too = too + layer.height
-
-                if fro < lowest_point:
-                    lowest_point = fro
-
-                padding = 0.
-                padding_color = 'white'
-                # outline the observations in orange if I have modelled the ice height after observation.
-                if ic.metadata.get('IceHeightAfter') == 'Modeled':
-                    padding_color = 'orange'
-                # add coordinates to a vline plot
-                plb.vlines(ic.date.date(), fro-padding, too+padding, lw=6, color=padding_color)
-                plb.vlines(ic.date.date(), fro, too, lw=4, color=layer.get_colour())
-
-    # the limits of the left side y-axis is defined relative the lowest point in the ice cover
-    # and the highest point of the observed snow cover.
-    plb.ylim(lowest_point*1.1, max(snotot)*1.05)
-
-    # Plot temperatures on a separate y axis
-    plb.twinx()
-    temp_pluss = []
-    temp_minus = []
-
-    for i in range(0, len(temp), 1):
-        if temp[i] >= 0:
-            temp_pluss.append(temp[i])
-            temp_minus.append(np.nan)
-        else:
-            temp_minus.append(temp[i])
-            temp_pluss.append(np.nan)
-
-    plb.plot(date, temp, "black")
-    plb.plot(date, temp_pluss, "red")
-    plb.plot(date, temp_minus, "blue")
-    plb.ylim(-4*(max(temp)-min(temp)), max(temp))
-
-    plb.savefig(filename)
-    plb.close()
 
 
 def plot_ice_cover_eb(

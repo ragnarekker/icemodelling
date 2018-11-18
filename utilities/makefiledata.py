@@ -1,10 +1,13 @@
-__author__ = 'ragnarekker'
+# -*- coding: utf-8 -*-
+"""
 
-
+"""
 import datetime as dt
 import setenvironment as se
 from utilities import makelogs as ml, getregobsdata as gro
 from icemodelling import weatherelement as we
+
+__author__ = 'ragnarekker'
 
 
 def write_vardat2(file_name, data, WSYS, OPER, DCHA):
@@ -185,11 +188,10 @@ def write_mylake_inputfile(data):
 
 
 def write_used_obs_locations(year='2016-17', get_new_obs=False, ):
-    """Gets all obsLocations used one season and that have icecover. Writes all to csv file.
+    """Gets all obsLocations used one season and that have ice cover. Writes all to csv file.
 
     :param year:
     :param get_new_obs:
-    :return:
     """
 
     file_name_and_path = '{0}all_calculated_ice_{1}.pickle'.format(se.local_storage, year)
@@ -202,6 +204,4 @@ def write_used_obs_locations(year='2016-17', get_new_obs=False, ):
         odata_loc = gro.get_obs_location(l)
         all_locations.append(odata_loc)
 
-    mf.write_dictionary('locations_2016-17', '.csv', all_locations, tabulated=True)
-
-    return
+    write_dictionary('locations_2016-17', '.csv', all_locations, tabulated=True)

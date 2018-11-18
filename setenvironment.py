@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+"""Configures the environment based on config files."""
 import sys as sys
 import os as os
 import json as json
 from pathlib import Path
-from shutil import copyfile
+import shutil as shutil
 
 __author__ = 'raek'
 
@@ -24,7 +25,7 @@ def _load_config_json(path, name):
 
     try:
         if not config_json.exists():
-            copyfile(path_name_template, path_name_json)
+            shutil.copyfile(path_name_template, path_name_json)
         dict_of_name = json.loads(open(config_json).read())
     except:
         error_msg = sys.exc_info()[0]
