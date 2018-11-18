@@ -574,8 +574,8 @@ if __name__ == "__main__":
     # calculate_and_plot9d_season(period='Today')
 
     # ------ One full season may take 3-4 hours to plot since weatherdata is in each case requested ------
-    # calculate_and_plot9d_season(period='2018-19')
-    # plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
+    calculate_and_plot9d_season(period='2018-19')
+    plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
     # calculate_and_plot9d_season(period='2017-18')
     # plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=True, make_plots=True)
     # calculate_and_plot9d_season(period='2016-17')
