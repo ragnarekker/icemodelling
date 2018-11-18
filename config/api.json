@@ -1,7 +1,0 @@
-{
-  "odata_version" : "v3.2.0",
-  "web_api_version" : "v3.2.0",
-  "forecast_api_version" : "v3.0.0",
-  "registration_basestring" : "http://www.regobs.no/Registration/",
-  "chart_server_basestring" : "http://h-web01.nve.no/chartserver/ShowData.aspx?req=getchart&ver=1.0&vfmt=json"
-}
