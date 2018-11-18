@@ -929,13 +929,13 @@ def get_ice_thickness_observations(year, reset_and_get_new=False):
     The inner workings of the method:
     1.   We have an option of resetting local storage (delete pickle) and thus forcing the get_new.
     2.1  Try opening a pickle, if it doesnt exist, an exception is thrown and we get new data.
-    2.2  If the requested data is from a previous season, load the pickle without adding the last observations
-         registered in regObs. Anyway, dont get new data.
+    2.2  If the requested data is from a previous season, no changes are expected, so load the pickle
+         without adding the last observations registered in regObs. Anyway, don't get new data.
     2.3  If the requested data is from this season, set request from_date to the last modified
          date of the pickle and 7 days past that. Add these last obs to the pickle data, and thus it is not
          necessary to get new.
-    3.  If get new, it gets all new data for the season.
-    4.  Else, load pickle and if some last obs are to be added, do so.
+    3.   If get new, it gets all new data for the season.
+    4.   Else, load pickle and if some last obs are to be added, do so.
 
     :param year:                [string] Eg '2017-18'
     :param reset_and_get_new:   [bool]
@@ -943,7 +943,7 @@ def get_ice_thickness_observations(year, reset_and_get_new=False):
     """
 
     log_referance = 'getregobsdata.py -> get_ice_thickness_observations'
-    pickle_file_name = '{}ice_thickness_obs_{}.pickle'.format(se.local_storage, year)
+    pickle_file_name = '{0}get_ice_thickness_observations{1}.pickle'.format(se.local_storage, year)
 
     # 1. Remove pickle if it exists, forcing the get_new
     if reset_and_get_new:
@@ -973,7 +973,7 @@ def get_ice_thickness_observations(year, reset_and_get_new=False):
 
     except OSError:
         # file does not exists, so get_new.
-        ml.log_and_print('{0}: No matching pickle found, getting new data.'.format(log_referance))
+        ml.log_and_print("{0}: No matching pickle found, getting new data.".format(log_referance))
         get_new = True
 
     if get_new:
@@ -993,7 +993,7 @@ def get_ice_thickness_observations(year, reset_and_get_new=False):
         ice_thickeness_obs_dict = mp.unpickle_anything(pickle_file_name)
 
         if add_last_obs:
-            ml.log_and_print('{0}: Adding observations from {1} to {2}.'.format(log_referance, from_date, to_date))
+            ml.log_and_print("{0}: Adding observations from {1} to {2}".format(log_referance, from_date, to_date))
             new_ice_thickeness_obs = get_data(from_date=from_date, to_date=to_date, registration_types=50, geohazard_tids=70)
             new_ice_thickeness_obs_dict = {}
 
@@ -1012,8 +1012,8 @@ def get_ice_thickness_observations(year, reset_and_get_new=False):
 
 
 def get_all_season_ice(year, get_new=True):
-    """Returns observed ice columns from regObs over a requested season. Ice covers representing first ice
-    or ice cover lost are represented by an ice column of zero height.
+    """Returns observed ice columns from regObs-webapi over a requested season. Ice covers representing
+    first ice or ice cover lost are represented by an ice column of zero height.
 
     The workings of this routine:
     1.  Get one season of data from regobs-api, spreads them out to a long list.
@@ -1028,7 +1028,7 @@ def get_all_season_ice(year, get_new=True):
     :return:
     """
 
-    file_name_and_path = '{0}all_season_ice_{1}.pickle'.format(se.local_storage, year)
+    file_name_and_path = '{0}get_all_season_ice_{1}.pickle'.format(se.local_storage, year)
     from_date, to_date = get_dates_from_year(year)
 
     if get_new:
@@ -1046,7 +1046,7 @@ def get_all_season_ice(year, get_new=True):
 
         # sort oldest first on each location
         for l, obs in all_locations.items():
-            sorted_list = sorted(obs, key=lambda d : d['DtObsTime'])
+            sorted_list = sorted(obs, key=lambda d: d['DtObsTime'])
             all_locations[l] = sorted_list
 
         # Use only locations with verified "first ice cover" date.
@@ -1102,7 +1102,7 @@ def get_all_season_ice(year, get_new=True):
                     # 3) helt islagt på målestedet
                     # 21) hele sjøen islagt
                     if cover_tid == 2 or cover_tid == 3 or cover_tid == 21:
-                        # and if icecover before was
+                        # and if ice cover before was
                         # 1) isfritt, nå første is på målestedet på målestedet
                         # 2) delvis islagt på målestedet,
                         # 11) islegging langs land
@@ -1115,19 +1115,19 @@ def get_all_season_ice(year, get_new=True):
                     # 2) delvis islagt på målestedet
                     # 20) Hele sjøen isfri
                     if cover_tid == 1 or cover_tid == 2 or cover_tid == 20:
-                        # 10) isfritt restren av vinteren
+                        # 10) isfritt resten av vinteren
                         if cover_after_tid == 10:
                             this_cover.mark_as_ice_cover_lost()
 
                         # before 10) forrige obs gjelder til i går
                         if cover_before_tid == 10:
-                            # if the frevious ice cover wich was valid yesturday had ice
+                            # if the previous ice cover which was valid yesterday had ice
                             if previous_cover.iceCoverTID == 2 or previous_cover.iceCoverTID == 3 or \
                                previous_cover.iceCoverTID == 10 or previous_cover.iceCoverTID == 11 or \
                                previous_cover.iceCoverTID == 21:
                                 this_cover.mark_as_ice_cover_lost()
 
-                    # copy of this cover so that in next iteration I may look up previous cover..
+                    # copy of this cover so that in next iteration I may look up previous cover.
                     previous_cover = cp.deepcopy(this_cover)
 
                     all_locations_with_classes[l].append(this_cover)
@@ -1169,23 +1169,25 @@ def get_all_season_ice(year, get_new=True):
     return all_locations_with_columns
 
 
-def get_observations_on_location(location_id, year, get_new=False):
+def get_observations_on_location_id(location_id, year, get_new=False):
     """Uses new or stored data from get_all_season_ice and picks out one requested location.
     First ice cover is mapped to Ice.IceColumn of zero height. Ice cover lost (mid season or last) the same.
 
-    :param location_id:
-    :param year:
-    :param get_new:
-    :return:
+    :param location_id:     [int] location id as used in regObs
+    :param year:            [string] Eg '2018-19'
+    :param get_new:         [bool] if get_new, new data is requested from regObs
+    :return:                [list of IceThickness]
     """
 
     all_locations = get_all_season_ice(year, get_new=get_new)
-    ###
-    ### get_all_season_ice returns a dictionary with bservations grouped by location_id.
-    ###
+
+    # get_all_season_ice returns a dictionary with observations grouped by location_id.
     observations_on_location_for_modeling = []
 
     try:
+
+        """get_all_season_ice returns only ice columns. This code is not needed
+        
         for o in all_locations[location_id]:
             if isinstance(o, ice.IceCover):
 
@@ -1208,10 +1210,14 @@ def get_observations_on_location(location_id, year, get_new=False):
                     observations_on_location_for_modeling.append(lc)
 
             elif isinstance(o, ice.IceColumn):
-                observations_on_location_for_modeling.append(o)
+                observations_on_location_for_modeling.append(o)     
+                
+        """
+
+        observations_on_location_for_modeling = all_locations[location_id]
 
     except Exception as e:
-        ml.log_and_print("getregobsdata.py -> get_observations_on_location: {0} not found probably..".format(location_id), print_it=True)
+        ml.log_and_print("getregobsdata.py -> get_observations_on_location_id: {0} not found probably..".format(location_id), print_it=True)
 
     return observations_on_location_for_modeling
 
@@ -1286,7 +1292,7 @@ if __name__ == "__main__":
     # get_new_regobs_data()
     # ice_column = get_ice_thickness_on_regid(130979)
 
-    ice_thicks = get_ice_thickness_observations('2017-18')
+    # ice_thicks = get_ice_thickness_observations('2017-18')
 
     #ic = get_ice_cover(LocationNames, from_date, to_date)
     #first = get_first_ice_cover(LocationNames, from_date, to_date)
@@ -1294,6 +1300,6 @@ if __name__ == "__main__":
     #ith = get_ice_thickness(LocationNames, from_date, to_date)
     #all_on_locations = get_all_season_ice_on_location(LocationNames, from_date, to_date)
 
-    all_in_all = get_all_season_ice('2016-17', get_new=True)
+    all_in_all = get_all_season_ice('2016-17', get_new=False)
 
     pass

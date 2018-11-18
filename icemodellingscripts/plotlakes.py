@@ -149,9 +149,9 @@ if __name__ == "__main__":
     runMosselva('2016-12-31', '2017-07-01')
     runMosselva('2015-12-31', '2016-07-01')
 
-    cap.plot_season_location_id(17080, '2017-18', get_new_obs=False)
-    cap.plot_season_location_id(57019, '2017-18', get_new_obs=False)
-    cap.plot_season_location_id(2227, '2017-18', get_new_obs=False)
-    cap.plot_season_location_id(7642, '2017-18', get_new_obs=False)
+    cap.plot_season_for_location_id(17080, '2017-18', get_new_obs=False)
+    cap.plot_season_for_location_id(57019, '2017-18', get_new_obs=False)
+    cap.plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
+    cap.plot_season_for_location_id(7642, '2017-18', get_new_obs=False)
 
     pass

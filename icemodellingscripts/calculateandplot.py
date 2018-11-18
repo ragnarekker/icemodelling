@@ -132,7 +132,7 @@ def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_fold
     loc = slp.get_for_location(location_name)
     year = '{0}-{1}'.format(from_date[0:4], to_date[2:4])
     lake_file_name = '{0} {1}'.format(fe.make_standard_file_name(loc.file_name), year)
-    observed_ice = gro.get_observations_on_location(loc.regobs_location_id, year)
+    observed_ice = gro.get_observations_on_location_id(loc.regobs_location_id, year)
 
     # Change dates to datetime. Some of the getdata modules require datetime
     from_date = dt.datetime.strptime(from_date, '%Y-%m-%d')
@@ -244,7 +244,7 @@ def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_fold
         return calculated_ice, observed_ice
 
 
-def plot_season_location_id(location_id, year, get_new_obs=True):
+def plot_season_for_location_id(location_id, year, get_new_obs=True):
     """For a given location_id get all observations, calculate cover and plot for full season.
 
     Observed ice is retrieved from get_all_season_ice. Thus, all season ice for all location ids is requested
@@ -267,7 +267,7 @@ def _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True,
     """Given a location id, a time period and some observations on this location id and this method
     calculates and optionally plots the ice evolution that season. Weather data from GTS.
 
-    It is a sub method of plot_season_location_id and plot_season_regobs_observations.
+    It is a sub method of plot_season_for_location_id and plot_season_for_all_regobs_locations.
 
     :param location_id:
     :param from_date:
@@ -329,7 +329,7 @@ def _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True,
     return calculated_ice, observed_ice, plot_filename
 
 
-def plot_season_regobs_observations(year='2018-19', calculate_new=False, get_new_obs=False, make_plots=False, delete_old_plots=False):
+def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, get_new_obs=False, make_plots=False, delete_old_plots=False):
     """Method specialized for scheduled plotting for iskart.no.
     Method makes a season plot for all ObsLocations in regObs where we have a first ice date.
 
@@ -383,7 +383,7 @@ def plot_season_regobs_observations(year='2018-19', calculate_new=False, get_new
                 all_observed[location_id] = observed
             except:
                 error_msg = sys.exc_info()[0]
-                ml.log_and_print("calculateandplot.py -> plot_season_regobs_observations: Error making plot for {}".format(error_msg, location_id))
+                ml.log_and_print("calculateandplot.py -> plot_season_for_all_regobs_locations: Error making plot for {}".format(error_msg, location_id))
 
             # Make the json with metadata needed for iskart.no. Add only if the plot was made and thus file exists.
             if os.path.isfile(se.sesong_plots_folder + plot_filename):
@@ -410,7 +410,7 @@ def plot_season_regobs_observations(year='2018-19', calculate_new=False, get_new
                 f.write(json_string)
         except:
             error_msg = sys.exc_info()[0]
-            ml.log_and_print("calculateandplot.py -> plot_season_regobs_observations: Cant write json. {}".format(error_msg))
+            ml.log_and_print("calculateandplot.py -> plot_season_for_all_regobs_locations: Cant write json. {}".format(error_msg))
 
     else:
         [all_calculated, all_observed] = mp.unpickle_anything(pickle_file_name_and_path)
@@ -419,7 +419,7 @@ def plot_season_regobs_observations(year='2018-19', calculate_new=False, get_new
         pts.scatter_calculated_vs_observed(all_calculated, all_observed, year)
     except:
         error_msg = sys.exc_info()[0]
-        ml.log_and_print("calculateandplot.py -> plot_season_regobs_observations: {}. Could not plot scatter {}.".format(error_msg, year))
+        ml.log_and_print("calculateandplot.py -> plot_season_for_all_regobs_locations: {}. Could not plot scatter {}.".format(error_msg, year))
 
 
 def calculate_and_plot9d_regid(regid, plot_folder=se.plot_folder, observed_ice=None):
@@ -471,7 +471,7 @@ def calculate_and_plot9d_regid(regid, plot_folder=se.plot_folder, observed_ice=N
         ml.log_and_print('calculateandplot.py -> calculate_and_plot9d_regid: {}. Could not plot {}.'.format(error_msg, regid))
 
 
-def plot9d_regobs_observations(period='2018-19'):
+def calculate_and_plot9d_season(period='2018-19'):
     """Calculate ice columns for 9 days and make plots of all ice thickness for a given season or optionally 'Today'.
 
     The inner workings:
@@ -487,7 +487,7 @@ def plot9d_regobs_observations(period='2018-19'):
     :return:
     """
 
-    log_referance = 'calculateandplot.py -> plot9d_regobs_observations'
+    log_referance = 'calculateandplot.py -> calculate_and_plot9d_season'
 
     # File names
     regid_metadata_json = '{}regid_metadata.json'.format(se.ni_dogn_plots_folder)
@@ -571,25 +571,25 @@ def plot9d_regobs_observations(period='2018-19'):
 
 if __name__ == "__main__":
 
-    # plot9d_regobs_observations(period='Today')
+    # calculate_and_plot9d_season(period='Today')
 
     # ------ One full season may take 3-4 hours to plot since weatherdata is in each case requested ------
-    # plot9d_regobs_observations(period='2018-19')
-    # plot_season_regobs_observations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
-    # plot9d_regobs_observations(period='2017-18')
-    # plot_season_regobs_observations(year='2017-18', calculate_new=True, get_new_obs=True, make_plots=True)
-    # plot9d_regobs_observations(period='2016-17')
-    # plot_season_regobs_observations(year='2016-17', calculate_new=True, get_new_obs=True, make_plots=True)
-    # plot9d_regobs_observations(period='2015-16')
-    # plot_season_regobs_observations(year='2015-16', calculate_new=True, get_new_obs=True, make_plots=True)
-    # plot9d_regobs_observations(period='2014-15')
-    # plot_season_regobs_observations(year='2014-15', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2018-19')
+    # plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2017-18')
+    # plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2016-17')
+    # plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2015-16')
+    # plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2014-15')
+    # plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=True, make_plots=True)
 
     # ------ Test some lakes plotted for a season ------
-    # plot_season_location_id(17080, '2017-18', get_new_obs=False)
-    # plot_season_location_id(57019, '2017-18', get_new_obs=False)
-    # plot_season_location_id(2227, '2017-18', get_new_obs=False)
-    # plot_season_location_id(7642, '2017-18', get_new_obs=False)
+    # plot_season_for_location_id(17080, '2017-18', get_new_obs=False)
+    # plot_season_for_location_id(57019, '2017-18', get_new_obs=False)
+    # plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
+    # plot_season_for_location_id(7642, '2017-18', get_new_obs=False)
 
     # ------ Test some 9day plots on a give ice thickness observation -----
     calculate_and_plot9d_regid(138105)

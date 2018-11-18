@@ -222,8 +222,7 @@ class IceColumn:
 
     def remove_time(self):
         """When using observations as initial values the observations normally have date and time .
-        For further modelling the daily values are calculatet so the hour and minutes can be removed.
-        """
+        For further modelling the daily values are calculatet so the hour and minutes can be removed."""
 
         new_time = self.date.replace(hour=00, minute=0)
         self.date = new_time
