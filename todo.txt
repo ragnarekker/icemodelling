@@ -1,14 +1,21 @@
 
 
+Where to start
+* write a readme
+* shorten time steps when large conductivities (thin ice)
+* rethink slush production
+* figure text on whats forcing the model
+* transform weather data for arbitrary time series resolution
+
+Larger nice to have task
+* plot layer temperatures
+
+Energy balance stuff
 * implement second correction routine
 * implement momentum term in turbulent fluxes (eq 1 in On the parameterization of turbulent surface fluxes over heterogeneous sea ice surfaces)
-* plot layer temperatures
 * calculate implement shortwave atuenation in the colomn top layers in energy_balance_from_temp_sfc
 * make reference list for articles
 * test rho_new_snow with different temps and both methods
-* figurtext med hva som brukes og plottes
+
+Will it be done or the code removed?
 * comment cloudcover functions
-
-
-* patch weather data for arbtrary timeseries resolution
-* plot by location name no longer works due to get_all_season_ice returnes data grouped be location_id

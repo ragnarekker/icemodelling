@@ -15,7 +15,7 @@ from utilities import getgts as gts
 __author__ = 'ragnarekker'
 
 
-def runOrovannEB(startDate, endDate):
+def run_otrovann_eb(startDate, endDate):
 
     location_name = 'Otrøvatnet v/Nystuen 971 moh'
     wsTemp = gws.getMetData(54710, 'TAM', startDate, endDate, 0, 'list')
@@ -53,7 +53,7 @@ def runOrovannEB(startDate, endDate):
                        prec=prec, wind=wind, clouds=cloud_cover)
 
 
-def runSemsvannEB(startDate, endDate):
+def run_semsvann_eb(startDate, endDate):
     # TODO: get coordinates from the ObsLocation in regObs
     location_name = 'Semsvannet v/Lo 145 moh'
 
@@ -94,7 +94,97 @@ def runSemsvannEB(startDate, endDate):
     #pts.plot_ice_cover_eb_simple(ice_cover, energy_balance, observed_ice, date, temp, sno_tot, plot_filename)
 
 
-def runMosselva(from_date, to_date, observed_ice=[], make_plots=True, plot_folder=se.plot_folder):
+def run_semsvann(from_date, to_date, make_plots=True, plot_folder=se.plot_folder, forcing='grid'):
+    """
+
+    :param from_date:
+    :param to_date:
+    :param make_plots:
+    :param plot_folder:
+    :return:
+    """
+
+    location_name = 'Semsvann'
+    regobs_location_id = 2227
+
+    x = 243655
+    y = 6644286
+
+    met_stnr = 19710        # Asker (Sem)
+    met_stnr_NNM = 18700    # Blindern
+
+    year = '{0}-{1}'.format(from_date[0:4], to_date[2:4])
+
+    observed_ice = gro.get_observations_on_location_id(regobs_location_id, year)
+    first_ice = observed_ice[0]
+
+    # Change dates to datetime. Some of the getdata modules require datetime
+    from_date = dt.datetime.strptime(from_date, '%Y-%m-%d')
+    to_date = dt.datetime.strptime(to_date, '%Y-%m-%d')
+
+    # if to_date forward in time, make sure it doesnt go to far..
+    if to_date > dt.datetime.now():
+        to_date = dt.datetime.now() + dt.timedelta(days=7)
+
+    if forcing == 'eKlima':
+
+        wsTemp = gws.getMetData(met_stnr, 'TAM', from_date, to_date, 0, 'list')
+        wsSnoTot = gws.getMetData(met_stnr, 'SA', from_date, to_date, 0, 'list')
+        wsCC = gws.getMetData(met_stnr_NNM, 'NNM', from_date, to_date, 0, 'list')
+
+        temp, date = we.strip_metadata(wsTemp, get_date_times=True)
+        sno_tot = we.strip_metadata(wsSnoTot)
+        sno = dp.delta_snow_from_total_snow(sno_tot)
+        cc = we.strip_metadata(wsCC)
+
+        plot_filename = '{0}_{1}_eklima.png'.format(location_name, year)
+
+    elif forcing == 'grid':
+
+        gridTemp = gts.getgts(x, y, 'tm', from_date, to_date)
+        gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
+        gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
+
+        temp, date = we.strip_metadata(gridTemp, get_date_times=True)
+        sno = we.strip_metadata(gridSno)
+        sno_tot = we.strip_metadata(gridSnoTot)
+        cc = dp.clouds_from_precipitation(sno)
+
+        plot_filename = '{0}_{1}_grid.png'.format(location_name, year)
+
+    else:
+        temp, date = None, None
+        sno = None
+        sno_tot = None
+        cc = None
+
+        plot_filename = '{0}_{1}_no_forcing.png'.format(location_name, year)
+
+    calculated_ice = cap.calculate_ice_cover_air_temp(copy.deepcopy(first_ice), date, temp, sno, cc)
+
+    if make_plots:
+        plot_path_and_filename = '{0}{1}'.format(plot_folder, plot_filename)
+        pts.plot_ice_cover(calculated_ice, observed_ice, date, temp, sno, sno_tot, plot_path_and_filename)
+
+
+def run_mosselva(from_date, to_date, make_plots=True, plot_folder=se.plot_folder, forcing='grid'):
+    """
+
+    :param from_date:
+    :param to_date:
+    :param make_plots:
+    :param plot_folder:
+    :return:
+    """
+
+    location_name = 'Mosselva'
+    y = 6595744
+    x = 255853
+    met_stnr = 17150    # Rygge målestasjon (met.no)
+
+    first_ice = ice.IceColumn(dt.datetime(int(from_date[0:4]), 12, 31), [])
+    first_ice.add_metadata('LocationName', location_name)       # used when plotting
+    observed_ice = [first_ice]
 
     year = '{0}-{1}'.format(from_date[0:4], to_date[2:4])
 
@@ -106,52 +196,70 @@ def runMosselva(from_date, to_date, observed_ice=[], make_plots=True, plot_folde
     if to_date > dt.datetime.now():
         to_date = dt.datetime.now() + dt.timedelta(days=7)
 
-    location_name = 'Mosselva'
-    y = 6595744
-    x = 255853
+    if forcing == 'eKlima':
 
-    gridTemp = gts.getgts(x, y, 'tm', from_date, to_date)
-    gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
-    gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
+        wsTemp = gws.getMetData(met_stnr, 'TAM', from_date, to_date, 0, 'list')
+        gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
+        gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
 
-    temp, date = we.strip_metadata(gridTemp, get_date_times=True)
-    sno = we.strip_metadata(gridSno)
-    sno_tot = we.strip_metadata(gridSnoTot)
-    cc = dp.clouds_from_precipitation(sno)
+        temp, date = we.strip_metadata(wsTemp, get_date_times=True)
+        sno = we.strip_metadata(gridSno)
+        sno_tot = we.strip_metadata(gridSnoTot)
+        cc = dp.clouds_from_precipitation(sno)
 
-    plot_filename = '{0}_{1}.png'.format(location_name, year)
-    plot_path_and_filename = '{0}{1}'.format(plot_folder, plot_filename)
+        plot_filename = '{0}_{1}_eklima.png'.format(location_name, year)
 
-    # try:
-    if len(observed_ice) == 0:
-        calculated_ice = cap.calculate_ice_cover_air_temp(ice.IceColumn(date[0], []), date, temp, sno, cc)
+    elif forcing == 'grid':
+
+        gridTemp = gts.getgts(x, y, 'tm', from_date, to_date)
+        gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
+        gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
+
+        temp, date = we.strip_metadata(gridTemp, get_date_times=True)
+        sno = we.strip_metadata(gridSno)
+        sno_tot = we.strip_metadata(gridSnoTot)
+        cc = dp.clouds_from_precipitation(sno)
+
+        plot_filename = '{0}_{1}_grid.png'.format(location_name, year)
+
     else:
-        calculated_ice = cap.calculate_ice_cover_air_temp(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+        temp, date = None, None
+        sno = None
+        sno_tot = None
+        cc = None
+
+        plot_filename = '{0}_{1}_no_forcing.png'.format(location_name, year)
+
+    calculated_ice = cap.calculate_ice_cover_air_temp(copy.deepcopy(first_ice), date, temp, sno, cc)
 
     if make_plots:
+        plot_path_and_filename = '{0}{1}'.format(plot_folder, plot_filename)
         pts.plot_ice_cover(calculated_ice, observed_ice, date, temp, sno, sno_tot, plot_path_and_filename)
-
-    # except:
-    #    # raise
-    #    error_msg = sys.exc_info()[0]
-    #    ml.log_and_print('calculateandplot.py -> _plot_season: {}. Could not plot {}.'.format(error_msg, location_name))
-    #    calculated_ice = None
-
-    return calculated_ice, observed_ice, plot_filename
 
 
 if __name__ == "__main__":
 
-    location_name = 'Semsvannet v/Lo 145 moh'
-    cap.calculate_and_plot_location(location_name, '2016-10-01', '2017-07-01')
+    run_semsvann('2017-11-01', '2018-06-01')
+    run_semsvann('2016-11-01', '2017-06-01')
+    run_semsvann('2015-11-01', '2016-06-01')
 
-    runMosselva('2017-12-31', '2018-07-01')
-    runMosselva('2016-12-31', '2017-07-01')
-    runMosselva('2015-12-31', '2016-07-01')
+    run_semsvann('2017-11-01', '2018-06-01', forcing='eKlima')
+    run_semsvann('2016-11-01', '2017-06-01', forcing='eKlima')
+    run_semsvann('2015-11-01', '2016-06-01', forcing='eKlima')
 
-    cap.plot_season_for_location_id(17080, '2017-18', get_new_obs=False)
-    cap.plot_season_for_location_id(57019, '2017-18', get_new_obs=False)
-    cap.plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
-    cap.plot_season_for_location_id(7642, '2017-18', get_new_obs=False)
+    # run_mosselva('2017-11-01', '2018-06-01')
+    # run_mosselva('2016-11-01', '2017-06-01')
+    # run_mosselva('2015-11-01', '2016-06-01')
+    #
+    # run_mosselva('2017-11-01', '2018-06-01', forcing='eKlima')
+    # run_mosselva('2016-11-01', '2017-06-01', forcing='eKlima')
+    # run_mosselva('2015-11-01', '2016-06-01', forcing='eKlima')
+
+    # cap.calculate_and_plot_location('Semsvannet v/Lo 145 moh', '2016-10-01', '2017-07-01')
+
+    # cap.plot_season_for_location_id(17080, '2017-18', get_new_obs=False)
+    # cap.plot_season_for_location_id(57019, '2017-18', get_new_obs=False)
+    # cap.plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
+    # cap.plot_season_for_location_id(7642, '2017-18', get_new_obs=False)
 
     pass

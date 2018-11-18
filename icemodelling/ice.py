@@ -176,6 +176,8 @@ class IceColumn:
             self.water_line = -1
             self.draft_thickness = -1
 
+        self.add_metadata('LocationName', 'Unknown lake')   # Location name needed for plotting
+
     def add_metadata(self, key, value):
         """
 

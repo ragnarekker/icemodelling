@@ -35,24 +35,7 @@ class Location:
 
 def get_for_location(location_name):
 
-    if location_name == 'Semsvannet v/Lo 145 moh':
-        location = Location(location_name)
-
-        location.weather_data_source = 'eKlima'
-        location.regobs_location_id = 2227
-
-        location.eklima_TAM = 19710
-        location.eklima_SA = 19710
-        location.eklima_NNM = 18700
-
-        location.utm_north = 6644286
-        location.utm_east = 243655
-        location.utm_zone = 33
-
-        location.file_name = 'Semsvann'
-        return location
-
-    elif location_name == 'Hakkloa nord 372 moh':
+    if location_name == 'Hakkloa nord 372 moh':
         location = Location(location_name)
 
         location.eklima_NNM = 18700

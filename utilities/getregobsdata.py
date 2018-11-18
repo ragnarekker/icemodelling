@@ -1,18 +1,19 @@
+# -*- coding: utf-8 -*-
 import datetime as dt
 import requests
 import os as os
 import copy as cp
 from icemodelling import ice as ice, constants as const
 from utilities import makepickle as mp, makelogs as ml, doconversions as dc
+from utilities import getmisc as gm
 import setenvironment as se
 import pandas as pd
 
 __author__ = 'ragnarekker'
-# -*- coding: utf-8 -*-
 
 
 def get_obs_location(LocationName):
-    """
+    """Uses OData query to get the ObsLocation data for a given ObsLocation name.
 
     :param LocationName:
     :return:
@@ -30,8 +31,7 @@ def get_obs_location(LocationName):
 
 
 def get_ice_cover(LocationName, fromDate, toDate):
-    """
-    Method returns a list of IceCover objects from regObs between fromDate to toDate.
+    """Method returns a list of IceCover objects from regObs between fromDate to toDate.
 
     :param LocationName:    [string/list] name as given in regObs in ObsLocation table
     :param fromDate:        [string] The from date as 'YYYY-MM-DD'
@@ -43,7 +43,6 @@ def get_ice_cover(LocationName, fromDate, toDate):
     DtObsTime%20lt%20datetime%272014-06-01%27%20and%20
     LocationName%20eq%20%27Hakkloa%20nord%20372%20moh%27%20and%20
     LangKey%20eq%201
-
     """
 
     iceCoverList = []
@@ -116,8 +115,8 @@ def get_first_ice_cover(LocationName, fromDate, toDate):
 
 
 def get_last_ice_cover(LocationName, fromDate, toDate):
-    """
-    Method gives the observation confirming ice is gone for the season from a lake.
+    """Method gives the observation confirming ice is gone for the season from a lake.
+
     It finds the first observation without ice after an observation(s) with ice.
     If none is found, an "empty" icecover object is returned on the last date in the period.
     Method works best when dates range over whole seasons.
@@ -952,7 +951,7 @@ def get_ice_thickness_observations(year, reset_and_get_new=False):
         except OSError:
             pass
 
-    from_date, to_date = get_dates_from_year(year)
+    from_date, to_date = gm.get_dates_from_year(year)
     add_last_obs = None
     get_new = None
 
@@ -1029,7 +1028,7 @@ def get_all_season_ice(year, get_new=True):
     """
 
     file_name_and_path = '{0}get_all_season_ice_{1}.pickle'.format(se.local_storage, year)
-    from_date, to_date = get_dates_from_year(year)
+    from_date, to_date = gm.get_dates_from_year(year)
 
     if get_new:
 
@@ -1220,60 +1219,6 @@ def get_observations_on_location_id(location_id, year, get_new=False):
         ml.log_and_print("getregobsdata.py -> get_observations_on_location_id: {0} not found probably..".format(location_id), print_it=True)
 
     return observations_on_location_for_modeling
-
-
-def get_dates_from_year(year, date_format='yyyy-mm-dd'):
-    """Returns start and end dates for given season. Hydrological year from 1. sept.
-     Format may be specified for datetime or date or string (default).
-
-    :param year:            [String]    E.g. '2018-19'
-    :param date_format:     [String]    'yyyy-mm-dd', 'date' or 'datetime'
-    :return:
-    """
-
-    log_ref = 'getregobsdata.py -> get_dates_from_year:'
-
-    if year == '2018-19':
-        from_date = '2018-09-01'
-        to_date = '2019-09-01'
-    elif year == '2017-18':
-        from_date = '2017-09-01'
-        to_date = '2018-09-01'
-    elif year == '2016-17':
-        from_date = '2016-09-01'
-        to_date = '2017-09-01'
-    elif year == '2015-16':
-        from_date = '2015-09-01'
-        to_date = '2016-09-01'
-    elif year == '2014-15':
-        from_date = '2014-09-01'
-        to_date = '2015-09-01'
-    elif year == '2013-14':
-        from_date = '2013-09-01'
-        to_date = '2014-09-01'
-    elif year == '2012-13':
-        from_date = '2012-09-01'
-        to_date = '2013-09-01'
-    elif year == '2011-12':
-        from_date = '2011-09-01'
-        to_date = '2012-09-01'
-    else:
-        ml.log_and_print('{0} Not supported year.'.format(log_ref))
-        return 'Not supported year.'
-
-    if 'yyyy-mm-dd' in date_format:
-        return from_date, to_date
-    elif 'date' in date_format:
-        from_date = dt.datetime.strptime(from_date, '%Y-%m-%d').date()
-        to_date = dt.datetime.strptime(to_date, '%Y-%m-%d').date()
-        return from_date, to_date
-    elif 'datetime' in date_format:
-        from_date = dt.datetime.strptime(from_date, '%Y-%m-%d')
-        to_date = dt.datetime.strptime(to_date, '%Y-%m-%d')
-        return from_date, to_date
-    else:
-        ml.log_and_print('{0} Date format not supported.'.format(log_ref))
-        return 'Date format not supported.'
 
 
 def get_new_regobs_data():

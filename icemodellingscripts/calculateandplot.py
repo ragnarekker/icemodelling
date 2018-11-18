@@ -21,6 +21,7 @@ import setenvironment as se
 from utilities import fencoding as fe, makepickle as mp, makelogs as ml, makeplots as pts
 from utilities import getregobsdata as gro, getwsklima as gws
 from utilities import setlocationparameters as slp
+from utilities import getmisc as gm
 from utilities import getgts as gts, getfiledata as gfd, getchartserverdata as gcsd
 
 __author__ = 'ragnarekker'
@@ -163,18 +164,14 @@ def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_fold
 
         plot_filename = '{0}{1} eklima.png'.format(se.plot_folder + sub_plot_folder, lake_file_name)
 
-    elif loc.weather_data_source == 'chartserver grid':
+    elif loc.weather_data_source == 'grid':
         x, y = loc.utm_east, loc.utm_north
 
-        gridTemp = gcsd.getGriddata(x, y, 'tm', from_date, to_date)
-        gridSno = gcsd.getGriddata(x, y, 'fsw', from_date, to_date)
-        gridSnoTot = gcsd.getGriddata(x, y, 'sd', from_date, to_date)
+        gridTemp = gts.getgts(x, y, 'tm', from_date, to_date)
+        gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
+        gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
 
-        gridTemp = we.patch_weather_element_list(gridTemp, from_date, to_date)
-        gridSno = we.patch_weather_element_list(gridSno, from_date, to_date)
-        gridSnoTot = we.patch_weather_element_list(gridSnoTot, from_date, to_date)
-
-        temp, date = we.strip_metadata(gridTemp, get_dates=True)
+        temp, date = we.strip_metadata(gridTemp, get_date_times=True)
         sno = we.strip_metadata(gridSno, False)
         snotot = we.strip_metadata(gridSnoTot, False)
 
@@ -194,7 +191,7 @@ def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_fold
             temp_obj = gcsd.getStationdata(loc.nve_temp, '17.1', from_date, to_date, timeseries_type=0)
         else:
             temp_obj = gcsd.getGriddata(x, y, 'tm', from_date, to_date)
-        temp, date = we.strip_metadata(temp_obj, get_dates=True)
+        temp, date = we.strip_metadata(temp_obj, get_date_times=True)
 
         # Snow from NVE station or grid if not.
         if loc.nve_snow:
@@ -259,7 +256,7 @@ def plot_season_for_location_id(location_id, year, get_new_obs=True):
     all_observations = gro.get_all_season_ice(year, get_new=get_new_obs)
     observed_ice = all_observations[location_id]
 
-    from_date, to_date = gro.get_dates_from_year(year)
+    from_date, to_date = gm.get_dates_from_year(year)
     _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True)
 
 
@@ -370,7 +367,7 @@ def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, ge
                 pass
 
         all_observations = gro.get_all_season_ice(year, get_new=get_new_obs)
-        from_date, to_date = gro.get_dates_from_year(year)
+        from_date, to_date = gm.get_dates_from_year(year)
         all_calculated = {}
         all_observed = {}
         location_id_metadata = {}

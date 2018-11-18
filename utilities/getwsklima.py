@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+"""
 
+"""
 from lxml import etree
 import requests as re
 import datetime as dt
@@ -238,7 +240,7 @@ def getElementsFromTimeserieTypeStation(stationID, timeserietypeID, output='list
     wsKlimaRequest = re.get(url)
 
     stationElementList = []
-    file_name = '{0}Elements on {1}_{2}'.format(env.data_path, stationID, timeserietypeID)
+    file_name = '{0}Elements on {1}_{2}'.format(env.output_folder, stationID, timeserietypeID)
 
     if output == 'xml':
         mfd.write_large_string(file_name, '.xml', wsKlimaRequest.text)
@@ -411,37 +413,33 @@ if __name__ == "__main__":
 
     #__get_data_for_jan_magnusson()
 
-    ### Examles ###
-    getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'xml')
-    #getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'csv')
-    #list = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
+    # -- Examles ---
+    # getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'xml')
+    # getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'csv')
+    # list = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
     # temp = getMetData(19710, 'TAM', '2011-10-01', '2012-06-01', 0, 'list')
     # sno = getMetData(19710, 'SA',  '2011-10-01', '2012-06-01', 0, 'list')
     # CC = getMetData(19710, 'NNM',  '2011-10-01', '2012-07-01', 0, 'list')
     # rr = getMetData(19710, 'RR',  '2011-10-01', '2012-06-01', 0, 'list')
-    # elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
-    # elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
-    #elementsOnEvenes = getElementsFromTimeserieTypeStation(84970, 0, 'list')
-    #getElementsFromTimeserieTypeStation(84970, 0, 'xml')
-    #getElementsFromTimeserieTypeStation(19710, 2, 'txt')
+    # elementsOnRygge = getElementsFromTimeserieTypeStation(17150, 0, 'xml')
+    elementsOn19710 = getElementsFromTimeserieTypeStation(19710, 0, 'list')
+    elementsOn18700 = getElementsFromTimeserieTypeStation(18700, 0, 'list')
+    # elementsOnEvenes = getElementsFromTimeserieTypeStation(84970, 0, 'list')
+    # getElementsFromTimeserieTypeStation(84970, 0, 'xml')
+    # getElementsFromTimeserieTypeStation(19710, 2, 'txt')
 
-    #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='xml')
-    #getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='txt')
-    #getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'QSI', 'TA'], output='txt')
+    # getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='xml')
+    # getStationsFromTimeserieTypeElemCodes(2, ['QLI'], output='txt')
+    # getStationsFromTimeserieTypeElemCodes(2, ['QLI', 'QSI', 'TA'], output='txt')
 
-    # # Snødyp (SA) måles hver dag (kode 0).
-    # # For å finne stasjoner med SA som måles idag kan du bruke:
+    # -- Snødyp (SA) måles hver dag (kode 0).
+    # -- For å finne stasjoner med SA som måles idag kan du bruke:
     # active_snow_stations = getStationsFromTimeserieTypeElemCodes(0, 'SA')
     #
-    # # For å finne ALLE stasjoner som har hatt SA kan du bruke:
+    # -- For å finne ALLE stasjoner som har hatt SA kan du bruke:
     # all_snow_stations = getStationsFromTimeserieTypeElemCodes(0, 'SA', has_all_elems_now=False)
     #
-    # # For å skrive det til fil som legges i en data ut mappe definert i setEnvironment.py:
+    # -- For å skrive det til fil som legges i en data ut mappe definert i setEnvironment.py:
     # getStationsFromTimeserieTypeElemCodes(0, 'SA', output='txt')
 
-
-
-
-
-
-    a = 0
+    pass

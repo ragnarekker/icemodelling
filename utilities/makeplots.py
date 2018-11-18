@@ -386,8 +386,6 @@ def plot_ice_cover(ice_cover, observed_ice, date, temp, sno, snotot, filename):
 
     if len(observed_ice) > 0:
         location_name = observed_ice[0].metadata['LocationName']
-        if location_name is None:
-            location_name = 'Ukjent vann'
     else:
         location_name = 'Ukjent vann'
 
