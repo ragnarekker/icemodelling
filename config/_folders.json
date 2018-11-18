@@ -1,0 +1,15 @@
+{
+    "output" : "/output/",
+    "plots" : "/output/plots/",
+    "sesong_plots" : "/output/plots/sesong/",
+    "ni_dogn_plots" : "/output/plots/9dogn/",
+    "local_storage" : "/localstorage/",
+    "kdv_elements" : "/localstorage/",
+    "logs" : "/logs/",
+    "resources" : "/resources/",
+    "time_series_data" : "/resources/timeseriesdata/",
+    "logos" : "/resources/logos/"
+}
+
+
+

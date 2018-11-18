@@ -1,0 +1,95 @@
+# -*- coding: utf-8 -*-
+"""Misc methods for making life easier."""
+import datetime as dt
+
+__author__ = 'raek'
+
+
+def get_season_from_date(date_inn):
+    """A date belongs to a season. This method returns it.
+
+    :param date_inn:    datetime.date object
+    :return:
+    """
+
+    if date_inn >= dt.date(2020, 9, 1) and date_inn < dt.date(2021, 9, 1):
+        return '2020-21'
+    elif date_inn >= dt.date(2019, 9, 1) and date_inn < dt.date(2020, 9, 1):
+        return '2019-20'
+    elif date_inn >= dt.date(2018, 9, 1) and date_inn < dt.date(2019, 9, 1):
+        return '2018-19'
+    elif date_inn >= dt.date(2017, 9, 1) and date_inn < dt.date(2018, 9, 1):
+        return '2017-18'
+    elif date_inn >= dt.date(2016, 9, 1) and date_inn < dt.date(2017, 9, 1):
+        return '2016-17'
+    elif date_inn >= dt.date(2015, 9, 1) and date_inn < dt.date(2016, 9, 1):
+        return '2015-16'
+    elif date_inn >= dt.date(2014, 9, 1) and date_inn < dt.date(2015, 9, 1):
+        return '2014-15'
+    elif date_inn >= dt.date(2013, 9, 1) and date_inn < dt.date(2014, 9, 1):
+        return '2013-14'
+    elif date_inn >= dt.date(2012, 9, 1) and date_inn < dt.date(2013, 9, 1):
+        return '2014-13'
+    elif date_inn >= dt.date(2011, 9, 1) and date_inn < dt.date(2012, 9, 1):
+        return '2011-12'
+    else:
+        return 'Requested date is before the beginning of time.'
+
+
+def get_dates_from_year(year, date_format='yyyy-mm-dd'):
+    """Returns start and end dates for given season. Hydrological year from 1. sept.
+     Format may be specified for datetime or date or string (default).
+
+    :param year:            [String]    E.g. '2018-19'
+    :param date_format:     [String]    'yyyy-mm-dd', 'date' or 'datetime'
+    :return:
+    """
+
+    log_ref = 'getregobsdata.py -> get_dates_from_year:'
+
+    if year == '2018-19':
+        from_date = '2018-09-01'
+        to_date = '2019-09-01'
+    elif year == '2017-18':
+        from_date = '2017-09-01'
+        to_date = '2018-09-01'
+    elif year == '2016-17':
+        from_date = '2016-09-01'
+        to_date = '2017-09-01'
+    elif year == '2015-16':
+        from_date = '2015-09-01'
+        to_date = '2016-09-01'
+    elif year == '2014-15':
+        from_date = '2014-09-01'
+        to_date = '2015-09-01'
+    elif year == '2013-14':
+        from_date = '2013-09-01'
+        to_date = '2014-09-01'
+    elif year == '2012-13':
+        from_date = '2012-09-01'
+        to_date = '2013-09-01'
+    elif year == '2011-12':
+        from_date = '2011-09-01'
+        to_date = '2012-09-01'
+    else:
+        ml.log_and_print('{0} Not supported year.'.format(log_ref))
+        return 'Not supported year.'
+
+    if 'yyyy-mm-dd' in date_format:
+        return from_date, to_date
+    elif 'date' in date_format:
+        from_date = dt.datetime.strptime(from_date, '%Y-%m-%d').date()
+        to_date = dt.datetime.strptime(to_date, '%Y-%m-%d').date()
+        return from_date, to_date
+    elif 'datetime' in date_format:
+        from_date = dt.datetime.strptime(from_date, '%Y-%m-%d')
+        to_date = dt.datetime.strptime(to_date, '%Y-%m-%d')
+        return from_date, to_date
+    else:
+        ml.log_and_print('{0} Date format not supported.'.format(log_ref))
+        return 'Date format not supported.'
+
+
+if __name__ == "__main__":
+
+    pass

@@ -5,15 +5,27 @@
 # pyc files (compilations of the .py files..)
 *.pyc
 
-# .pickles are used for local storage in this repo
+# .pickles are used for local storage in this repo.
 *.pickle
 
-# log files are made when executing the code. Not repo material
+# log files are made when executing the code. Not repo material.
 *.log
 
 # windows .ini filer
 *.ini
 
-# Handling content of private files when adding to git
-setenvironment.private.py
-setenvironment.public.py
+# osX .DS_Store files
+*.DS_Store
+
+# Major output folders not needed in repo.
+9dogn/
+sesong/
+
+# The local configurations to run the project. When missing, files with the leading underscore are used as default.
+api.json
+folders.json
+
+# Removing other content of private files when adding to git.
+plotsforisvarsling_1h.py
+plotsforisvarsling_24h.py
+setenvironment_hb_datainn.py

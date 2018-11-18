@@ -1,19 +1,18 @@
 # -*- coding: utf-8 -*-
-__author__ = 'ragnarekker'
-
+"""Classes for handling ice Thickness and Ice Cover. Much of the ice model is in the methods in these classes."""
 
 import math
 import datetime as dt
-from icemodelling import doparameterization as pz
-from icemodelling import constants as const
-from icemodelling import getregobsdata as gro
+from icemodelling import parameterization as pz, constants as const
+from utilities import getregobsdata as gro, getfiledata as gfd
+
+__author__ = 'ragnarekker'
 
 
 class IceLayer:
-    '''Each layer in the ice column is given its own IceLayer object. The constructor takes as minimum
+    """Each layer in the ice column is given its own IceLayer object. The constructor takes as minimum
     height and type and sets conductivity and density from constants.
-    '''
-
+    """
 
     def __init__(self, height_inn, type_inn):
 
@@ -26,19 +25,15 @@ class IceLayer:
         self.temperature = None
         self.metadata = {} # Metadata given as dictionary {key:value , key:value, ... }
 
-
     def set_temperature(self, temperature_inn):
         # Avarage temp of layer
         self.temperature = temperature_inn
 
-
     def set_temperature_top(self, temperature_top_inn):
         self.temperature_top = temperature_top_inn
 
-
     def set_temperature_bottom(self, temperature_bottom_inn):
         self.temperature_bottom = temperature_bottom_inn
-
 
     def set_conductivity(self):
         # sets conductivity for a given snow or ice type
@@ -52,7 +47,6 @@ class IceLayer:
         elif self.type == 'water':      self.conductivity = const.k_water
         elif self.type == 'unknown':    self.conductivity = const.k_slush_ice
 
-
     def set_density(self):
         # Desities [kg m-3]
         # Method should only be used when initialising a new IceLayer
@@ -65,10 +59,8 @@ class IceLayer:
         elif self.type == 'water':      self.density = const.rho_water
         elif self.type == 'unknown':    self.density = const.rho_slush_ice
 
-
     def add_metadata(self, key, value):
         self.metadata[key] = value
-
 
     def get_colour(self):
         # returns the color used for plotting a given snow or ice type
@@ -82,7 +74,6 @@ class IceLayer:
         elif self.type == 'unknown': return "orange"
         else: return "yellow"
 
-
     def get_norwegian_name(self):
         # returns the norwegian name of the ice layer type. Used for legend in plots.
         if self.type == 'new_snow': return 'Nysnø'
@@ -94,7 +85,6 @@ class IceLayer:
         elif self.type == 'water': return 'Vann'
         elif self.type == 'unknown': return 'Ukjent istype'
         else: return 'Ukjent forespørsel'
-
 
     def get_enum(self):
         # returns the get_enum used for a given snow or ice type
@@ -109,7 +99,6 @@ class IceLayer:
         elif self.type == 'unknown': return 11      # unknown icetype is treated as slush_ice
         else: return -1
 
-
     def get_heat_capacity(self):
         # returns heat capacity given the type of layer
         if self.type == 'new_snow': return const.c_snow
@@ -122,7 +111,6 @@ class IceLayer:
         elif self.type == 'unknown': return const.c_ice
         else: return -1
 
-
     def get_surface_roughness(self):
         # Surface roughness [m] as used to calculate turbulent fluxes
         if self.type == 'new_snow': return const.z_new_snow
@@ -134,7 +122,6 @@ class IceLayer:
         elif self.type == 'water': return const.z_water
         elif self.type == 'unknown': return const.z_black_ice
         else: return -1
-
 
     def get_thermal_diffusivity(self):
         """returns Thermal diffusivity given the type of layer
@@ -162,16 +149,15 @@ class IceLayer:
 
 class IceColumn:
 
-
     def __init__(self, date_inn, column_inn):
-        '''This initializes the object
+        """This initializes the object.
         An empty column is initialized as iceColumn(date as datetime, 0)
         Column_inn includes new snow layer on index 0.
 
         :param date_inn:        [datetime]
         :param column_inn:      list[IceLayers]
         :return:
-        '''
+        """
 
         self.date = date_inn                # Date
         self.column = 0                     # Ice column with [IceLayers].
@@ -190,6 +176,7 @@ class IceColumn:
             self.water_line = -1
             self.draft_thickness = -1
 
+        self.add_metadata('LocationName', 'Unknown lake')   # Location name needed for plotting
 
     def add_metadata(self, key, value):
         """
@@ -199,27 +186,23 @@ class IceColumn:
         """
         self.metadata[key] = value
 
-
     def remove_metadata(self):
         self.metadata.clear()
-
 
     def set_water_line(self, water_line_inn):
         self.water_line = water_line_inn
 
-
     def set_surface_temperature(self, surface_temperature_inn):
         self.temp_surface = surface_temperature_inn
 
-
     def add_layer_at_index(self, index, layer):
-        '''Adds a new layer at a given index in ice column. Subsequent layers are added after the new layer.
+        """Adds a new layer at a given index in ice column. Subsequent layers are added after the new layer.
         If layer.height is None nothing is done.
 
         :param index:           -1 is last index
         :param layer:
         :return:                no return
-        '''
+        """
 
         if layer.height != None:
             if index == -1:
@@ -227,39 +210,30 @@ class IceColumn:
             else:
                 self.column.insert(index, layer)
 
-
     def remove_layer_at_index(self, index):
-        # Removes a layer at a given index
+        """Removes a layer at a given index."""
         self.column.pop(index)
 
-
     def time_step_forward(self, time_step):
-        '''
-        Step the date forward the timedelta of "timestep"
+        """Step the date forward the timedelta of "timestep"
+
         :param timestep:
         :return:
-        '''
+        """
         self.date = self.date + dt.timedelta(seconds=time_step)
-
 
     def remove_time(self):
         """When using observations as initial values the observations normally have date and time .
-        For further modelling the daily values are calculatet so the hour and minutes can be removed.
+        For further modelling the daily values are calculatet so the hour and minutes can be removed."""
 
-        :return:
-        """
         new_time = self.date.replace(hour=00, minute=0)
         self.date = new_time
 
         return
 
-
     def merge_and_remove_excess_layers(self):
         """Cleans up the icecolumn a bit. Removes layers of zero height if they occur and merges layers of equal type
-        if the exist
-
-        :return:
-        """
+        if the exist"""
 
         # If no column there is nothing to merge
         if self.column is not None and len(self.column) > 0:
@@ -274,7 +248,6 @@ class IceColumn:
                 i = i + 1
                 if i >= len(self.column):
                     condition = False
-
 
         # Find neighbouring layers of equal type and merges them
         if self.column is not None and len(self.column) > 0:
@@ -321,7 +294,6 @@ class IceColumn:
                 i = i + 1
                 if i >= len(self.column):
                     condition = False
-
 
     def merge_snow_layers_and_compress(self, temp_atm):
         """Merges the snow layers and compresses the snow. This method updates the snow density in the object and the
@@ -374,7 +346,6 @@ class IceColumn:
 
         return
 
-
     def get_snow_height(self):
 
         snow_height = 0.
@@ -383,7 +354,6 @@ class IceColumn:
             snow_height = self.column[0].height
 
         return snow_height
-
 
     def get_layer_at_z(self, depth_inn):
         """
@@ -410,7 +380,6 @@ class IceColumn:
 
         return layer_out, depth_layer_top, rest_height
 
-
     def get_surface_temperature(self):
         """
         Retruns surface temperature if on exists.
@@ -421,7 +390,6 @@ class IceColumn:
         except Exception as e:
             print(e)
             print("No surface temperature on object. Try using the get_surface_temperature_estimate function.")
-
 
     def update_column_temperatures(self, temp_sfc=None):
         """Column temperatures calculated under the assumption that over 24hrs temperature
@@ -516,12 +484,11 @@ class IceColumn:
 
         return
 
-
     def update_slush_level(self):
-        '''Updates slush level by balancing bouyency of icelayers with weight of snow
+        """Updates slush level by balancing bouyency of icelayers with weight of snow
 
         :return:
-        '''
+        """
 
         self.update_draft_thickness()
         self.update_water_line()
@@ -591,7 +558,6 @@ class IceColumn:
         self.merge_and_remove_excess_layers()
         self.update_water_line()  # due to the snow pulling water up in the snow the waterline is shifted since before uppdatig the slushlevel
 
-
     def update_draft_thickness(self):
         """Method updates the iceColumns draft_thickness variable.
         The draft height given by summing ice, slush ice and
@@ -610,7 +576,6 @@ class IceColumn:
 
         self.draft_thickness = draft_thickness
 
-
     def update_total_column_height(self):
         """Sum  of all layers in column. also snow.
         :return:
@@ -622,14 +587,13 @@ class IceColumn:
 
         self.total_column_height = total_height
 
-
     def update_water_line(self):
-        '''
+        """
         Method updates the iceColumns water line variable. This is the distance from the bottom of the ice to the
         waterline. The height of the draft submerged under the water line given by Arkimedes law.
 
         :return:
-        '''
+        """
 
         column_mass = 0
         for layer in self.column:
@@ -637,13 +601,12 @@ class IceColumn:
         water_line = column_mass / const.rho_water  # [kg/m2]*[m3/kg]
         self.water_line = water_line
 
-
     def update_top_layer_is_slush(self):
-        '''Tests if the top most ice column layer is slush. Updates the objects top_layer_is_slush prameter.
+        """Tests if the top most ice column layer is slush. Updates the objects top_layer_is_slush prameter.
         Returns true if it is.
 
         :return: [Bool] True if topp layer is slush. False if not.
-        '''
+        """
 
         for layer in self.column:
             if layer.get_enum() > 20:  # material types >= 20 are snow
@@ -654,7 +617,6 @@ class IceColumn:
             else:
                 self.top_layer_is_slush = False
                 return False
-
 
     def get_conductance_at_z(self, depth_inn=None):
         """Retruns conductance from surface to a certain depth.
@@ -711,7 +673,6 @@ class IceColumn:
 
         return U_total
 
-
     def get_depth_at_conductance(self, conductance_limit):
         """Given a desired conductance, this method returns the height from the surface to get this
         conductance
@@ -753,7 +714,6 @@ class IceColumn:
 
 class IceCover:
 
-
     def __init__(self, date_inn, iceCoverName_inn, iceCoverBeforeName_inn, locationName_inn):
         self.date = date_inn
         self.iceCoverName = iceCoverName_inn
@@ -775,7 +735,6 @@ class IceCover:
         self.metadata = {}
         # self.original_object = None
 
-
     def add_metadata(self, key, value):
         """
 
@@ -784,50 +743,42 @@ class IceCover:
         """
         self.metadata[key] = value
 
-
     def set_regid(self, regid_inn):
         self.RegID = int(regid_inn)
 
-
     def set_locationid(self, locationid_inn):
         self.LocationID = int(locationid_inn)
-
 
     def set_utm(self, utm_north_inn, utm_east_inn, utm_zone_inn):
         self.metadata['UTMNorth'] = int(utm_north_inn)
         self.metadata['UTMEast'] = int(utm_east_inn)
         self.metadata['UTMZone'] = int(utm_zone_inn)
 
-
     def set_cover_after(self, cover_after_name_inn, cover_after_tid_inn):
         self.iceCoverAfterName = cover_after_name_inn
         self.iceCoverAfterTID = cover_after_tid_inn
 
-
     def mark_as_first_ice(self):
         self.first_ice = True
 
-
     def mark_as_ice_cover_lost(self):
         self.ice_cover_lost = True
-
 
     def add_original_object(self, original_object_inn):
         self.metadata['OriginalObject'] = original_object_inn
 
 
-
 if __name__ == "__main__":
-    from icemodelling import getfiledata as gfd
-    from icemodelling.setenvironment import data_path
+
+    from setenvironment import data_path
 
     # some tests of the functions in the IceColumn file
-    #date = dt.datetime.strptime("2011-10-05", "%Y-%m-%d")
-    #icecol = IceColumn(date, 0)
+    # date = dt.datetime.strptime("2011-10-05", "%Y-%m-%d")
+    # icecol = IceColumn(date, 0)
     # icecol.add_layer_at_index(0, 0.1, 'new_snow')
-    #icecol.update_slush_level()
-    #icecol.merge_and_remove_excess_layers()
-    #icecol.merge_snow_layers_and_compress(-5)
+    # icecol.update_slush_level()
+    # icecol.merge_and_remove_excess_layers()
+    # icecol.merge_snow_layers_and_compress(-5)
 
     icecols = gfd.importColumns("{0}test ice columns.csv".format(data_path))
     icecol = icecols[4]
@@ -844,5 +795,4 @@ if __name__ == "__main__":
     U13 = 1 / (1/0.346 + 0.28/2.24)
     R13_2 = 1/U13
 
-    a = 1
-
+    pass
