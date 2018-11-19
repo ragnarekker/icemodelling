@@ -3,6 +3,7 @@
 
 import datetime as dt
 from utilities import makelogs as ml, getgts as gts, makeplots as mplots
+from icemodelling import constants as const
 
 __author__ = 'Ragnar Ekker'
 
@@ -32,7 +33,7 @@ class WeatherElement:
         self.LocationID = elementLocationID
         self.Date = elementDate
         self.ElementID = elementID
-        self.Metadata = {'OriginalValue': elementValue}
+        self.Metadata = {'OriginalValue': elementValue}  # Metadata given as dictionary {key:value , key:value, ... }
         self.Value = elementValue
         if elementValue is not None:
             self.Value = float(elementValue)
@@ -86,6 +87,24 @@ class WeatherElement:
         if (self.Date).date() == dt.date(2012, 12, 31) and self.ElementID == 'SA' and self.LocationID == 54710 and self.Value == 0.:
             self.Value = 0.36
             self.Metadata['ManualValue'] = self.Value
+
+    def add_metadata(self, key, value):
+        """Add metadata of any kind to the weather element. Meta data is stored as a dictionary.
+
+        :param key:
+        :param value:
+        """
+
+        self.Metadata[key] = value
+
+    def add_weather_data_altitude(self, altitude):
+        """
+
+        :param altitude:    [float or int] in meters above sea level
+        :return:
+        """
+
+        self.Metadata['WeatherDataAltitude'] = altitude
 
 
 def strip_metadata(weather_element_list, get_date_times=False):
@@ -176,6 +195,27 @@ def millimeter_from_meter(weather_element_list):
         weatherElementListOut.append(we)
 
     return weatherElementListOut
+
+
+def adjust_temperature_to_new_altitude(weather_element_list, new_altitude):
+    """If the weather parameter represents a different altitude, adjust the time series to a new altitude
+    given a laps rate given in constants.
+
+    :param weather_element_list:
+    :param new_altitude:
+    :return:
+    """
+
+    original_altitude = weather_element_list[0].Metadata['WeatherDataAltitude']
+
+    for we in weather_element_list:
+        original_value = we.Value
+        we.Value -= (new_altitude - original_altitude)*const.laps_rate
+        we.Metadata['WeatherDataAltitude'] = new_altitude
+        we.Metadata['OriginalAltitude'] = original_altitude
+        we.Metadata['AltitudeAdjustment'] = 'Adjusting elevation by {0} m, thus also temp from {1}C to {2}C.'.format(new_altitude-original_altitude, original_value, we.Value)
+
+    return weather_element_list
 
 
 def make_daily_average(weather_element_list, time_resolution=None):

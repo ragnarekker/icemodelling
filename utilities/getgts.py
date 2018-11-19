@@ -9,8 +9,12 @@ __author__ = 'ragnarekker'
 
 def getgts(utm33x, utm33y, element_id, from_date, to_date, timeseries_type=0, patch_missing_values=True):
     """Retrieves data from the grid time series application (GTS) and maps it to a list of WeatherElements.
+
     Values in WeatherElements are given in meters, i.e in some cases they are converted from cm to m.
-    Optionally the data is patched up if data is missing and dayly avarages from 00-24 are calculated.
+    Optionally the data is patched up if data is missing and daily averages from 00-24 are calculated.
+
+    GTS data is given as 24hour avarages from 0600-0600. If timeseries_type=0 is requested, data
+    is converted to daily average from 00-24hrs, time stamped at the end of the period (23:59:59).
 
     :param utm33x:              [int] X coordinate in utm33N
     :param utm33y:              [int] Y coordinate in utm33N
@@ -83,4 +87,4 @@ if __name__ == "__main__":
 
     mplot.plot_weather_elements([weather_pr_day, gts_weather])
 
-    a = 1
+    pass

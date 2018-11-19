@@ -179,7 +179,7 @@ class IceColumn:
         self.add_metadata('LocationName', 'Unknown lake')   # Location name needed for plotting
 
     def add_metadata(self, key, value):
-        """
+        """Add metadata of any kind to the ice column. Metadata is stored as a dictionary.
 
         :param key:
         :param value:

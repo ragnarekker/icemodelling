@@ -109,6 +109,7 @@ def run_semsvann(from_date, to_date, make_plots=True, plot_folder=se.plot_folder
 
     x = 243655
     y = 6644286
+    altitude = 145
 
     met_stnr = 19710        # Asker (Sem)
     met_stnr_NNM = 18700    # Blindern
@@ -145,6 +146,9 @@ def run_semsvann(from_date, to_date, make_plots=True, plot_folder=se.plot_folder
         gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
         gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
 
+        # Grid altitude and lake at same elevations.
+        # gridTempNewElevation = we.adjust_temperature_to_new_altitude(gridTemp, altitude)
+
         temp, date = we.strip_metadata(gridTemp, get_date_times=True)
         sno = we.strip_metadata(gridSno)
         sno_tot = we.strip_metadata(gridSnoTot)
@@ -180,6 +184,8 @@ def run_mosselva(from_date, to_date, make_plots=True, plot_folder=se.plot_folder
     location_name = 'Mosselva'
     y = 6595744
     x = 255853
+    altitude = 25
+
     met_stnr = 17150    # Rygge målestasjon (met.no)
 
     first_ice = ice.IceColumn(dt.datetime(int(from_date[0:4]), 12, 31), [])
@@ -215,7 +221,9 @@ def run_mosselva(from_date, to_date, make_plots=True, plot_folder=se.plot_folder
         gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
         gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
 
-        temp, date = we.strip_metadata(gridTemp, get_date_times=True)
+        gridTempNewElevation = we.adjust_temperature_to_new_altitude(gridTemp, altitude)
+
+        temp, date = we.strip_metadata(gridTempNewElevation, get_date_times=True)
         sno = we.strip_metadata(gridSno)
         sno_tot = we.strip_metadata(gridSnoTot)
         cc = dp.clouds_from_precipitation(sno)
@@ -239,15 +247,15 @@ def run_mosselva(from_date, to_date, make_plots=True, plot_folder=se.plot_folder
 
 if __name__ == "__main__":
 
-    run_semsvann('2017-11-01', '2018-06-01')
-    run_semsvann('2016-11-01', '2017-06-01')
-    run_semsvann('2015-11-01', '2016-06-01')
+    # run_semsvann('2017-11-01', '2018-06-01')
+    # run_semsvann('2016-11-01', '2017-06-01')
+    # run_semsvann('2015-11-01', '2016-06-01')
+    #
+    # run_semsvann('2017-11-01', '2018-06-01', forcing='eKlima')
+    # run_semsvann('2016-11-01', '2017-06-01', forcing='eKlima')
+    # run_semsvann('2015-11-01', '2016-06-01', forcing='eKlima')
 
-    run_semsvann('2017-11-01', '2018-06-01', forcing='eKlima')
-    run_semsvann('2016-11-01', '2017-06-01', forcing='eKlima')
-    run_semsvann('2015-11-01', '2016-06-01', forcing='eKlima')
-
-    # run_mosselva('2017-11-01', '2018-06-01')
+    run_mosselva('2017-11-01', '2018-06-01')
     # run_mosselva('2016-11-01', '2017-06-01')
     # run_mosselva('2015-11-01', '2016-06-01')
     #

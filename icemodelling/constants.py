@@ -19,6 +19,7 @@ g = 9.81                        # [m/s2] Acceleration of gravity
 avg_wind_const = 3.74           # [m/s] if nothing else is given. From TVEDALEN 2015
 pressure_atm = 101.1            # [kPa] if nothing else is given.
 rel_hum_air = 0.8349            # [-] if nothing else is given. From TVEDALEN 2015
+laps_rate = 2./300              # [C/m] temperature in atmosphere decreases by 2C pr 300 meters elevation
 
 
 # Thermal Conductivities [W/m/K]
