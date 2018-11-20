@@ -35,9 +35,15 @@ class IceLayer:
     def set_temperature_bottom(self, temperature_bottom_inn):
         self.temperature_bottom = temperature_bottom_inn
 
+    def set_type(self, type_inn):
+        """Set the layer material type and update material properties."""
+        self.type = type_inn
+        self.set_density()
+        self.set_conductivity()
+
     def set_conductivity(self):
-        # sets conductivity for a given snow or ice type
-        # Method should only be used when initialising a new IceLayer
+        """Sets conductivity for a given snow or ice type. Method should only be used
+        when initialising a new IceLayer or layer type is converted."""
         if self.type == 'new_snow':     self.conductivity = const.k_new_snow
         elif self.type == 'snow':       self.conductivity = const.k_snow
         elif self.type == 'drained_snow': self.conductivity = const.k_drained_snow
@@ -446,7 +452,7 @@ class IceColumn:
             AA = np.zeros([num_boundaries, num_boundaries])
 
             for i in range(num_boundaries):
-                AA[i,i] = self.column[i].conductivity * self.column[i].height \
+                AA[i, i] = self.column[i].conductivity * self.column[i].height \
                         + self.column[i+1].conductivity * self.column[i+1].height
 
             for i in range(num_boundaries-1):
@@ -485,7 +491,7 @@ class IceColumn:
         return
 
     def update_slush_level(self):
-        """Updates slush level by balancing bouyency of icelayers with weight of snow
+        """Updates slush level by balancing buoyancy of ice layers with weight of snow
 
         :return:
         """
@@ -514,10 +520,9 @@ class IceColumn:
                 # if the layer is to shallow all is flooded with water and made to slush.
                 # Note that the layer is compressed as a result of adding water to snow.
                 if dh_slush > self.column[index].height * const.snow_to_slush_ratio:
-                    self.column[index].type = 'slush'
+                    self.column[index].set_type('slush')
                     self.column[index].height = self.column[index].height * const.snow_to_slush_ratio
-                    dh_slush = dh_slush - self.column[
-                        index].height  # remember that this layer has been updated to the new layer height on the previous line
+                    dh_slush = dh_slush - self.column[index].height  # remember that this layer has been updated to the new layer height on the previous line
                     index = index - 1
                 # take a part of the layer and make a new slush layer under it.
                 else:
@@ -567,7 +572,7 @@ class IceColumn:
         draft_thickness = 0
 
         for layer in self.column:
-            if draft_thickness == 0 and layer.get_enum() > 20:  # material types >= 20 are snow
+            if draft_thickness == 0 and layer.get_enum() >= 20:  # material types >= 20 are snow
                 continue
             # elif draft_thickness == 0 and layer.get_enum() == 2:    # slush over the ice does not count
             #    continue

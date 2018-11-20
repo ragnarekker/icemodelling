@@ -7,12 +7,29 @@ import datetime as dt
 import collections as collections
 import copy as copy
 import setenvironment as se
+from utilities import getmisc as gm
 
 __author__ = 'raek'
 
 
 class ObsCalScatterData:
-    """Class for handling data in the scatter_calculated_vs_observed plot."""
+    """Class for handling data in the scatter_calculated_vs_observed plot.
+
+    self.legend_colors_al = collections.OrderedDict({
+    8: 'gold',
+    9: 'goldenrod',
+    10: 'darkgoldenrod',
+    11: 'lightskyblue',
+    12: 'deepskyblue',
+    1: 'blue',
+    2: 'violet',
+    3: 'magenta',
+    4: 'tomato',
+    5: 'red',
+    6: 'lime',
+    7: 'green'})
+
+    """
 
     def __init__(self, caluclated_draft_inn, observed_draft_inn, date_inn, location_inn):
 
@@ -20,40 +37,33 @@ class ObsCalScatterData:
             caluclated_draft_inn = 0
         if observed_draft_inn < 0:
             observed_draft_inn = 0
+
         self.caluclated_draft = caluclated_draft_inn
         self.observed_draft = observed_draft_inn
         self.date = date_inn
         self.location = location_inn
 
-    def marker_color(self):
+        self.legend_colors = collections.OrderedDict({
+            'june-sept': 'green',
+            'okt-nov': 'darkgoldenrod',
+            'des-jan': 'lightskyblue',
+            'feb-mar': 'blue',
+            'apr-may': 'tomato'
+        })
 
-        if self.date.month == 8:
-            return 'gold'
-        elif self.date.month == 9:
-            return 'goldenrod'
-        elif self.date.month == 10:
-            return 'darkgoldenrod'
-        elif self.date.month == 11:
-            return 'lightskyblue'
-        elif self.date.month == 12:
-            return 'deepskyblue'
-        elif self.date.month == 1:
-            return 'blue'
-        elif self.date.month == 2:
-            return 'violet'
-        elif self.date.month == 3:
-            return 'magenta'
-        elif self.date.month == 4:
-            return 'tomato'
-        elif self.date.month == 5:
-            return 'red'
-        elif self.date.month == 6:
-            return 'lime'
-        elif self.date.month == 7:
-            return 'green'
+    def marker_color(self):
+        if self.date.month in [8, 9, 6, 7]:
+            return self.legend_colors['june-sept']
+        elif self.date.month in [10, 11]:
+            return self.legend_colors['okt-nov']
+        elif self.date.month in [12, 1]:
+            return self.legend_colors['des-jan']
+        elif self.date.month in [2, 3]:
+            return self.legend_colors['feb-mar']
+        elif self.date.month in [4, 5]:
+            return self.legend_colors['apr-may']
         else:
             return 'pink'
-
 
     def marker(self):
 
@@ -87,7 +97,7 @@ class ObsCalScatterData:
 
 def scatter_calculated_vs_observed(all_calculated, all_observed, year):
     """For yearly data setts og all observed ice from regObs and all calculations on lakes where these observations
-    are made, a scatter plot is made, comaring calculations vs. observations.
+    are made, a scatter plot is made, comparing calculations vs. observations.
 
     :param all_calculated:
     :param all_observed:
@@ -132,17 +142,31 @@ def scatter_calculated_vs_observed(all_calculated, all_observed, year):
     plb.figure(figsize=fsize)
     plb.clf()
 
-    plt.scatter(x,y,c=color)
-    plt.plot([-0.5, 3],[-0.5, 3], 'k--')
+    plt.scatter(x, y, c=color, alpha=0.5)
+    plt.plot([-0.5, 3], [-0.5, 3], 'k--')
 
-    plb.title('Calculated vs. observed {0}'.format(year))
-    plt.xlabel("Observed")
-    plt.ylabel("Calculated")
+    plb.title('Calculated vs. observed ice thickness {0}'.format(year))
+    plt.xlabel('Observed thickness [m]')
+    plt.ylabel('Calculated thickness [m]')
 
-    #plb.xlim(min(x+y), max(x+y))
-    #plb.ylim(min(x+y), max(x+y))
-    plb.xlim(-0.05, 1)
-    plb.ylim(-0.05, 1)
+    # Make legend
+    legend_symbols = []
+    legend_names = []
+    for k, v in scatter_plot_data[0].legend_colors.items():
+        legend_symbols.append(mpatches.Circle((0, 0), radius=5, facecolor=v, alpha=0.5))
+        legend_names.append(k)
+    plt.legend(legend_symbols, legend_names)
+
+    # axis limits
+    plb.xlim(-0.05, 1.1)
+    plb.ylim(-0.05, 1.1)
+
+    # root mean squared
+    error = gm.nash_sutcliffe_efficiancy_coefficient(x, y)
+    plt.gcf().text(0.40, 0.85, 'N: {0}  and  Nash-Sutcliffe: {1:.3f}'.format(len(x), error))
+
+    # Plot created text
+    plt.gcf().text(0.7, 0.05, 'Figure created {0:%Y-%m-%d %H:%M}'.format(dt.datetime.now()), color='0.5')
 
     plb.savefig(file_name)
 

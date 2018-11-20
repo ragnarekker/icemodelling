@@ -299,6 +299,10 @@ def _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True,
     gridSno = gts.getgts(x, y, 'sdfsw', from_date, to_date)
     gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
 
+    # adjust grid temperature (at grid elevation) to lake elevation.
+    # lake_altitude = None
+    # gridTempNewElevation = we.adjust_temperature_to_new_altitude(gridTemp, lake_altitude)
+
     # strip metadata
     temp, date = we.strip_metadata(gridTemp, get_date_times=True)
     sno = we.strip_metadata(gridSno, False)
@@ -330,8 +334,7 @@ def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, ge
     """Method specialized for scheduled plotting for iskart.no.
     Method makes a season plot for all ObsLocations in regObs where we have a first ice date.
 
-    It may take 3hrs to plot one full season. 250 lakes for a season and 1000 observations for 9 days.
-    For each plot weather params are requested from the GTS.
+    It may take some time to plot. 250 lakes for a season and for each plot weather params are requested from the GTS.
 
     The workings of the method:
     1.  get all locations ids and belonging observations where we have first ice.
@@ -413,10 +416,10 @@ def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, ge
         [all_calculated, all_observed] = mp.unpickle_anything(pickle_file_name_and_path)
 
     try:
-        pts.scatter_calculated_vs_observed(all_calculated, all_observed, year)
+       pts.scatter_calculated_vs_observed(all_calculated, all_observed, year)
     except:
-        error_msg = sys.exc_info()[0]
-        ml.log_and_print("calculateandplot.py -> plot_season_for_all_regobs_locations: {}. Could not plot scatter {}.".format(error_msg, year))
+       error_msg = sys.exc_info()[0]
+       ml.log_and_print("calculateandplot.py -> plot_season_for_all_regobs_locations: {}. Could not plot scatter {}.".format(error_msg, year))
 
 
 def calculate_and_plot9d_regid(regid, plot_folder=se.plot_folder, observed_ice=None):
@@ -570,35 +573,35 @@ if __name__ == "__main__":
 
     # calculate_and_plot9d_season(period='Today')
 
-    # ------ One full season may take 3-4 hours to plot since weatherdata is in each case requested ------
-    calculate_and_plot9d_season(period='2018-19')
-    plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
+    # ------ One full season may take 3-4 hours to plot since weather data is in each case requested ------
+    # calculate_and_plot9d_season(period='2018-19')
+    plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=False, make_plots=True)
     # calculate_and_plot9d_season(period='2017-18')
-    # plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=True, make_plots=True)
+    plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=False, make_plots=True)
     # calculate_and_plot9d_season(period='2016-17')
-    # plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=True, make_plots=True)
+    plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=False, make_plots=True)
     # calculate_and_plot9d_season(period='2015-16')
-    # plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=True, make_plots=True)
+    plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=False, make_plots=True)
     # calculate_and_plot9d_season(period='2014-15')
-    # plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=True, make_plots=True)
+    plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=False, make_plots=True)
 
-    # ------ Test some lakes plotted for a season ------
+    # # ------ Test some lakes plotted for a season ------
     # plot_season_for_location_id(17080, '2017-18', get_new_obs=False)
     # plot_season_for_location_id(57019, '2017-18', get_new_obs=False)
     # plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
     # plot_season_for_location_id(7642, '2017-18', get_new_obs=False)
-
-    # ------ Test some 9day plots on a give ice thickness observation -----
-    calculate_and_plot9d_regid(138105)
-    calculate_and_plot9d_regid(137767)
-    calculate_and_plot9d_regid(131390)
-    calculate_and_plot9d_regid(95811)         # has warm temps that fall behind
-    calculate_and_plot9d_regid(136868)        # Burudvann lille julaften
-    calculate_and_plot9d_regid(130979)        # Uskeput tidlig høst
-    calculate_and_plot9d_regid(112366)
-    calculate_and_plot9d_regid(130988)
-    calculate_and_plot9d_regid(132133)
-    calculate_and_plot9d_regid(133488)
-    calculate_and_plot9d_regid(131705)        # has newsnow on first day and there is a frame
+    #
+    # # ------ Test some 9day plots on a give ice thickness observation -----
+    # calculate_and_plot9d_regid(138105)
+    # calculate_and_plot9d_regid(137767)
+    # calculate_and_plot9d_regid(131390)
+    # calculate_and_plot9d_regid(95811)         # has warm temps that fall behind
+    # calculate_and_plot9d_regid(136868)        # Burudvann lille julaften
+    # calculate_and_plot9d_regid(130979)        # Uskeput tidlig høst
+    # calculate_and_plot9d_regid(112366)
+    # calculate_and_plot9d_regid(130988)
+    # calculate_and_plot9d_regid(132133)
+    # calculate_and_plot9d_regid(133488)
+    # calculate_and_plot9d_regid(131705)        # has newsnow on first day and there is a frame
 
     pass

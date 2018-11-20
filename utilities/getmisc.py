@@ -1,8 +1,39 @@
 # -*- coding: utf-8 -*-
 """Misc methods for making life easier."""
 import datetime as dt
+import numpy as np
+from utilities import makelogs as ml
 
 __author__ = 'raek'
+
+
+def root_mean_squared_error(predictions, targets):
+    """My own root mean squared error method. Using the other libs seems like over engineering."""
+
+    predictions = np.array(predictions)
+    targets = np.array(targets)
+
+    error = np.sqrt(((predictions - targets) ** 2).mean())
+
+    return error
+
+
+def nash_sutcliffe_efficiancy_coefficient(predictions, targets):
+    """Nash Sutcliffe efficiency coefficient
+
+    :param predictions:     [list] simulated
+    :param targets:         [list] observed
+    :return nsec:           [float] Nash Sutcliffe efficient coefficient
+
+    https://en.wikipedia.org/wiki/Nash%E2%80%93Sutcliffe_model_efficiency_coefficient
+    """
+
+    predictions = np.array(predictions)
+    targets = np.array(targets)
+
+    nsec = 1 - sum((predictions - targets) ** 2) / sum((targets - np.mean(targets)) ** 2)
+
+    return nsec
 
 
 def get_season_from_date(date_inn):

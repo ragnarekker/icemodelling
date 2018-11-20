@@ -206,16 +206,22 @@ def adjust_temperature_to_new_altitude(weather_element_list, new_altitude):
     :return:
     """
 
-    original_altitude = weather_element_list[0].Metadata['WeatherDataAltitude']
+    if new_altitude is None:
+        ml.log_and_print("weatherelement.py -> adjust_temperature_to_new_altitude: new_element=None and no adjustments made.")
 
-    for we in weather_element_list:
-        original_value = we.Value
-        we.Value -= (new_altitude - original_altitude)*const.laps_rate
-        we.Metadata['WeatherDataAltitude'] = new_altitude
-        we.Metadata['OriginalAltitude'] = original_altitude
-        we.Metadata['AltitudeAdjustment'] = 'Adjusting elevation by {0} m, thus also temp from {1}C to {2}C.'.format(new_altitude-original_altitude, original_value, we.Value)
+        return weather_element_list
 
-    return weather_element_list
+    else:
+        original_altitude = weather_element_list[0].Metadata['WeatherDataAltitude']
+
+        for we in weather_element_list:
+            original_value = we.Value
+            we.Value -= (new_altitude - original_altitude)*const.laps_rate
+            we.Metadata['WeatherDataAltitude'] = new_altitude
+            we.Metadata['OriginalAltitude'] = original_altitude
+            we.Metadata['AltitudeAdjustment'] = 'Adjusting elevation by {0} m, thus also temp from {1}C to {2}C.'.format(new_altitude-original_altitude, original_value, we.Value)
+
+        return weather_element_list
 
 
 def make_daily_average(weather_element_list, time_resolution=None):
