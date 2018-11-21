@@ -3,6 +3,7 @@ import datetime as dt
 import requests as rq
 from icemodelling import weatherelement as we
 from utilities import makeplots as mplot
+from utilities import makelogs as ml
 
 __author__ = 'ragnarekker'
 
@@ -45,39 +46,44 @@ def getgts(utm33x, utm33y, element_id, from_date, to_date, timeseries_type=0, pa
     responds = rq.get(url)
 
     full_data = responds.json()
-    data = full_data['Data']
+    if 'Error' in full_data:
+        ml.log_and_print("[error] getgts.py -> getgts: {0}".format(full_data))
+        return []
 
-    weather_element_list = []
-    date = dt.datetime.strptime(full_data['StartDate'], '%d.%m.%Y %H:%M:%S')
+    else:
+        data = full_data['Data']
 
-    # the assigned NoDataValue if one data element is missing.
-    no_data_value = int(full_data['NoDataValue'])
+        weather_element_list = []
+        date = dt.datetime.strptime(full_data['StartDate'], '%d.%m.%Y %H:%M:%S')
 
-    for d in data:
-        value = float(d)
-        if value == no_data_value:
-            value = None
-        weather_element = we.WeatherElement('UTM33 X{0} Y{1}'.format(utm33x, utm33y), date, element_id, value)
-        weather_element.Metadata['DataSource'] = 'GTS'
-        weather_element.Metadata['TimeResolution'] = full_data['TimeResolution']
-        weather_element.Metadata['FullName'] = full_data['FullName']
-        weather_element.Metadata['WeatherDataAltitude'] = full_data['Altitude']
-        weather_element_list.append(weather_element)
-        date += dt.timedelta(minutes=full_data['TimeResolution'])
+        # the assigned NoDataValue if one data element is missing.
+        no_data_value = int(full_data['NoDataValue'])
 
-    if patch_missing_values:
-        weather_element_list = we.patch_novalue_in_weather_element_list(weather_element_list)
+        for d in data:
+            value = float(d)
+            if value == no_data_value:
+                value = None
+            weather_element = we.WeatherElement('UTM33 X{0} Y{1}'.format(utm33x, utm33y), date, element_id, value)
+            weather_element.Metadata['DataSource'] = 'GTS'
+            weather_element.Metadata['TimeResolution'] = full_data['TimeResolution']
+            weather_element.Metadata['FullName'] = full_data['FullName']
+            weather_element.Metadata['WeatherDataAltitude'] = full_data['Altitude']
+            weather_element_list.append(weather_element)
+            date += dt.timedelta(minutes=full_data['TimeResolution'])
 
-    if element_id == 'fsw' or element_id == 'sd' or element_id == 'sdfsw':
-        weather_element_list = we.meter_from_centimeter(weather_element_list)  # convert for [cm] til [m]
+        if patch_missing_values:
+            weather_element_list = we.patch_novalue_in_weather_element_list(weather_element_list)
 
-    if timeseries_type == 0:
-        weather_element_list = we.make_daily_average(weather_element_list)
+        if element_id == 'fsw' or element_id == 'sd' or element_id == 'sdfsw':
+            weather_element_list = we.meter_from_centimeter(weather_element_list)  # convert for [cm] til [m]
 
-        # fist element after doing daily avarage represents the day before the requested time period
-        del weather_element_list[0]
+        if timeseries_type == 0:
+            weather_element_list = we.make_daily_average(weather_element_list)
 
-    return weather_element_list
+            # fist element after doing daily avarage represents the day before the requested time period
+            del weather_element_list[0]
+
+        return weather_element_list
 
 
 if __name__ == "__main__":

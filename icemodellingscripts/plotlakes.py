@@ -147,9 +147,9 @@ def run_semsvann(from_date, to_date, make_plots=True, plot_folder=se.plot_folder
         gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
 
         # Grid altitude and lake at same elevations.
-        # gridTempNewElevation = we.adjust_temperature_to_new_altitude(gridTemp, altitude)
+        gridTempNewElevation = we.adjust_temperature_to_new_altitude(gridTemp, altitude)
 
-        temp, date = we.strip_metadata(gridTemp, get_date_times=True)
+        temp, date = we.strip_metadata(gridTempNewElevation, get_date_times=True)
         sno = we.strip_metadata(gridSno)
         sno_tot = we.strip_metadata(gridSnoTot)
         cc = dp.clouds_from_precipitation(sno)

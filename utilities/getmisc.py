@@ -3,6 +3,8 @@
 import datetime as dt
 import numpy as np
 from utilities import makelogs as ml
+import requests as requests
+
 
 __author__ = 'raek'
 
@@ -121,6 +123,33 @@ def get_dates_from_year(year, date_format='yyyy-mm-dd'):
         return 'Date format not supported.'
 
 
+def get_masl_from_utm33(x, y):
+    """Returns the altitude of a given UTM33N coordinate.
+
+    Method uses an NVE map service which covers only Norway. If NoData method returns None
+
+    :param x:       [int] east
+    :param y:       [int] north
+    :return masl:   [int] meters above sea level
+    """
+
+    url = 'https://gis3.nve.no/arcgis/rest/services/ImageService/SK_DTM20_NSF/ImageServer/identify' \
+          '?geometry={0},{1}&geometryType=esriGeometryPoint&inSR=32633&spatialRel=esriSpatialRelIntersects' \
+          '&relationParam=&objectIds=&where=&time=&returnCountOnly=false&returnIdsOnly=false&returnGeometry=false' \
+          '&maxAllowableOffset=&outSR=&outFields=*&f=pjson'.format(x, y)
+
+    data = requests.get(url).json()
+    masl = data['value']
+
+    if 'NoData' in masl:
+        ml.log_and_print("[warning] getmisc.py -> get_masl_from_utm33: No data elevation data for x:{} y:{}".format(x,y))
+        return None
+    else:
+        return int(masl)
+
+
 if __name__ == "__main__":
+
+    # height = get_masl_from_utm33(120613, 6834932)
 
     pass

@@ -300,11 +300,11 @@ def _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True,
     gridSnoTot = gts.getgts(x, y, 'sd', from_date, to_date)
 
     # adjust grid temperature (at grid elevation) to lake elevation.
-    # lake_altitude = None
-    # gridTempNewElevation = we.adjust_temperature_to_new_altitude(gridTemp, lake_altitude)
+    lake_altitude = gm.get_masl_from_utm33(x, y)
+    gridTempNewElevation = we.adjust_temperature_to_new_altitude(gridTemp, lake_altitude)
 
     # strip metadata
-    temp, date = we.strip_metadata(gridTemp, get_date_times=True)
+    temp, date = we.strip_metadata(gridTempNewElevation, get_date_times=True)
     sno = we.strip_metadata(gridSno, False)
     snotot = we.strip_metadata(gridSnoTot, False)
     cc = dp.clouds_from_precipitation(sno)
@@ -383,7 +383,7 @@ def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, ge
                 all_observed[location_id] = observed
             except:
                 error_msg = sys.exc_info()[0]
-                ml.log_and_print("calculateandplot.py -> plot_season_for_all_regobs_locations: Error making plot for {}".format(error_msg, location_id))
+                ml.log_and_print("[error] calculateandplot.py -> plot_season_for_all_regobs_locations: Error making plot for {}".format(error_msg, location_id))
 
             # Make the json with metadata needed for iskart.no. Add only if the plot was made and thus file exists.
             if os.path.isfile(se.sesong_plots_folder + plot_filename):
@@ -410,7 +410,7 @@ def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, ge
                 f.write(json_string)
         except:
             error_msg = sys.exc_info()[0]
-            ml.log_and_print("calculateandplot.py -> plot_season_for_all_regobs_locations: Cant write json. {}".format(error_msg))
+            ml.log_and_print("[error]calculateandplot.py -> plot_season_for_all_regobs_locations: Cant write json. {}".format(error_msg))
 
     else:
         [all_calculated, all_observed] = mp.unpickle_anything(pickle_file_name_and_path)
@@ -419,7 +419,7 @@ def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, ge
        pts.scatter_calculated_vs_observed(all_calculated, all_observed, year)
     except:
        error_msg = sys.exc_info()[0]
-       ml.log_and_print("calculateandplot.py -> plot_season_for_all_regobs_locations: {}. Could not plot scatter {}.".format(error_msg, year))
+       ml.log_and_print("[error] calculateandplot.py -> plot_season_for_all_regobs_locations: {}. Could not plot scatter {}.".format(error_msg, year))
 
 
 def calculate_and_plot9d_regid(regid, plot_folder=se.plot_folder, observed_ice=None):
@@ -602,6 +602,6 @@ if __name__ == "__main__":
     # calculate_and_plot9d_regid(130988)
     # calculate_and_plot9d_regid(132133)
     # calculate_and_plot9d_regid(133488)
-    # calculate_and_plot9d_regid(131705)        # has newsnow on first day and there is a frame
+    # calculate_and_plot9d_regid(131705)        # has news now on first day and there is a frame
 
     pass

@@ -207,20 +207,21 @@ def adjust_temperature_to_new_altitude(weather_element_list, new_altitude):
     """
 
     if new_altitude is None:
-        ml.log_and_print("weatherelement.py -> adjust_temperature_to_new_altitude: new_element=None and no adjustments made.")
-
+        ml.log_and_print("[warning] weatherelement.py -> adjust_temperature_to_new_altitude: new_element=None and no adjustments made.")
         return weather_element_list
 
     else:
         original_altitude = weather_element_list[0].Metadata['WeatherDataAltitude']
+        temp_delta = (new_altitude - original_altitude) * const.laps_rate
 
         for we in weather_element_list:
             original_value = we.Value
-            we.Value -= (new_altitude - original_altitude)*const.laps_rate
+            we.Value -= temp_delta
             we.Metadata['WeatherDataAltitude'] = new_altitude
             we.Metadata['OriginalAltitude'] = original_altitude
             we.Metadata['AltitudeAdjustment'] = 'Adjusting elevation by {0} m, thus also temp from {1}C to {2}C.'.format(new_altitude-original_altitude, original_value, we.Value)
 
+        ml.log_and_print("[info] weatherelement.py -> adjust_temperature_to_new_altitude: old:{0}masl and new:{1}masl and tempdelta:{2}C".format(original_altitude, new_altitude, temp_delta))
         return weather_element_list
 
 
