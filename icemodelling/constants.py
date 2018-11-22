@@ -114,7 +114,7 @@ snow_to_slush_ratio = 0.33      # [-] When snow becomes slush when water is pull
 
 
 # Model adjustables to tweek performence
-U_limit_for_reduced_time_step = 20   # If total conductance between air and freezing layer is higher than this value (~ 15cm black ice) when calculating with a 24h timestep, smaller timesteps must be applied. This value is puerly empirical and should in som way be verified analytically.
+U_limit_for_reduced_time_step = 20   # If total conductance between air and freezing layer is higher than this value (10 W/K/m2 ~ 15cm black ice) when calculating with a 24h timestep, smaller timesteps must be applied.
 reduce_time_step_to_n = 12           # number of time steps to apply within the original time step
 
 
