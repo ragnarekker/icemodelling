@@ -17,6 +17,8 @@ def getgts(utm33x, utm33y, element_id, from_date, to_date, timeseries_type=0, pa
     GTS data is given as 24hour avarages from 0600-0600. If timeseries_type=0 is requested, data
     is converted to daily average from 00-24hrs, time stamped at the end of the period (23:59:59).
 
+    For wind data, fist data in the data set is from 1st march 2018.
+
     :param utm33x:              [int] X coordinate in utm33N
     :param utm33y:              [int] Y coordinate in utm33N
     :param element_id:          [string] Element ID in seNorge. Ex: elementID = 'fsw' is 24hr new snow depth in [cm]
@@ -39,6 +41,16 @@ def getgts(utm33x, utm33y, element_id, from_date, to_date, timeseries_type=0, pa
         sd:                 snow depth in cm
         tm:                 temperature average 24hrs
         sdfsw:              new snow last 24hrs in cm
+        windSpeed10m24h06:  10m wind speed over 24hrs ranging from 06-06
+
+    Wind is not tested yet:
+
+    Vindretning døgn:      http://h-web02:8080/api/GridTimeSeries/953709/7938592/2018-03-26/2018-04-17/windDirection10m24h06.json
+    Vindretning 3 timer:   http://h-web02:8080/api/GridTimeSeries/953709/7938592/2018-03-26/2018-04-17/windDirection10m3h.json
+
+    Vind hastighet døgn:   http://h-web02:8080/api/GridTimeSeries/953709/7938592/2018-03-26/2018-04-17/windSpeed10m24h06.json
+    Vindhastighet 3 timer: http://h-web02:8080/api/GridTimeSeries/953709/7938592/2018-03-26/2018-04-17/windSpeed10m3h.json
+
     """
 
     url = 'http://h-web02.nve.no:8080/api/GridTimeSeries/gridtimeserie?theme={0}&startdate={1}&enddate={2}&x={3}&y={4}'.format(element_id, from_date, to_date, utm33x, utm33y)
@@ -80,7 +92,7 @@ def getgts(utm33x, utm33y, element_id, from_date, to_date, timeseries_type=0, pa
         if timeseries_type == 0:
             weather_element_list = we.make_daily_average(weather_element_list)
 
-            # fist element after doing daily avarage represents the day before the requested time period
+            # fist element after doing daily average represents the day before the requested time period
             del weather_element_list[0]
 
         return weather_element_list
@@ -88,9 +100,11 @@ def getgts(utm33x, utm33y, element_id, from_date, to_date, timeseries_type=0, pa
 
 if __name__ == "__main__":
 
-    weather_pr_day = getgts(109190, 6817490, 'tm', '2017-12-20', '2017-12-30')
-    gts_weather = getgts(109190, 6817490, 'tm', '2017-12-20', '2017-12-30', timeseries_type=-1)
+    # temperature_pr_day_00_00 = getgts(109190, 6817490, 'tm', '2017-12-20', '2017-12-30')
+    # temperature_raw = getgts(109190, 6817490, 'tm', '2017-12-20', '2017-12-30', timeseries_type=-1)
+    # mplot.plot_weather_elements([temperature_pr_day_00_00, temperature_raw])
 
-    mplot.plot_weather_elements([weather_pr_day, gts_weather])
+    # Fist data in the data set is from 1st march 2018.
+    wind10m_pr_day = getgts(109190, 6817490, 'windSpeed10m24h06', '2018-03-01', '2018-03-20', timeseries_type=-1)
 
     pass
