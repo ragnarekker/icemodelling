@@ -166,9 +166,9 @@ class IceColumn:
         """
 
         self.date = date_inn                # Date
-        self.column = 0                     # Ice column with [IceLayers].
-        self.water_line = -1                # Distance from bottom of ice column to the water surface. Negative number meens not initiallized
-        self.draft_thickness = -1           # This is ice, slush ice and slush layers. I.e. not snow layers
+        self.column = None                  # Ice column with [IceLayers].
+        self.water_line = None              # Distance from bottom of ice column to the water surface. Negative number meens not initiallized
+        self.draft_thickness = None         # This is ice, slush ice and slush layers. I.e. not snow layers
         self.total_column_height = None
         self.metadata = {}                  # Metadata given as dictionary {key:value , key:value, ... }
         self.top_layer_is_slush = None      # [Bool] True if top layer is slush. False if not.
