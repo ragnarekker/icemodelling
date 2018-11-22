@@ -221,11 +221,7 @@ class IceColumn:
         self.column.pop(index)
 
     def time_step_forward(self, time_step):
-        """Step the date forward the timedelta of "timestep"
-
-        :param timestep:
-        :return:
-        """
+        """Step the date forward the timedelta of time_step."""
         self.date = self.date + dt.timedelta(seconds=time_step)
 
     def remove_time(self):
@@ -308,7 +304,6 @@ class IceColumn:
         Snow compaction may be referenced in article in literature folder or evernote.
 
         :param temp_atm: [float] Temperature in Celsius used in the compaction routine.
-        :return:
         """
 
         # If no layers, compaction of snow is not needed
@@ -346,28 +341,24 @@ class IceColumn:
                 self.column[0].density = min([rho_snow_new, const.rho_snow_max])
                 self.column[0].conductivity = min([k_snow_new, const.k_snow_max])
 
-                h_snow_new = self.column[0].height / self.column[
-                    0].density * rho_snow_old  # Asume a inverse linear correlation between density and the height (preservation og mass?)
+                # Assume a inverse linear correlation between density and the height (preservation og mass?)
+                h_snow_new = self.column[0].height / self.column[0].density * rho_snow_old
                 self.column[0].height = h_snow_new
 
-        return
-
     def get_snow_height(self):
-
+        """Returns the height of the snow in top of the ice. This is located at index 0 in the ice column."""
         snow_height = 0.
-
         if self.column[0].type == "snow":
             snow_height = self.column[0].height
-
         return snow_height
 
     def get_layer_at_z(self, depth_inn):
-        """
+        """Finds the layer which is at a given depth in meters.
 
         :param depth_inn: [m]
-        :return layer_out:          the actual laye object
-                depth_layer_top:    the depth of the topp of the layer
-                rest_height:        to the requested depth, ho far is it from the top of the layer?
+        :return layer_out:          the actual layer object
+                depth_layer_top:    the depth of the top of the layer
+                rest_height:        to the requested depth, how far is it from the top of the layer
         """
 
         current_depth = 0.
@@ -387,10 +378,8 @@ class IceColumn:
         return layer_out, depth_layer_top, rest_height
 
     def get_surface_temperature(self):
-        """
-        Retruns surface temperature if on exists.
-        :return:
-        """
+        """Returns surface temperature if it exists."""
+
         try:
             return self.temp_surface
         except Exception as e:
@@ -410,6 +399,8 @@ class IceColumn:
 
         :param temp_sfc:        Temp in atmosphere
         :return:
+
+        TODO: method need to be properly tested.
         """
 
         import numpy as np
@@ -491,10 +482,7 @@ class IceColumn:
         return
 
     def update_slush_level(self):
-        """Updates slush level by balancing buoyancy of ice layers with weight of snow
-
-        :return:
-        """
+        """Updates slush level by balancing buoyancy of ice layers with weight of snow."""
 
         self.update_draft_thickness()
         self.update_water_line()
@@ -716,6 +704,20 @@ class IceColumn:
 
         return current_depth
 
+    def get_conductance_between_air_and_freezing(self):
+        """Find total conductance between air and water or slush."""
+
+        U_total = None
+
+        # IceLayers listed from the top and down in IceColumn.
+        for l in self.column:
+
+            # If the layer is a solid, it only adds to the total isolation.
+            if (l.get_enum()) > 9:
+                U_total = add_layer_conductance_to_total(U_total, l.conductivity, l.height)
+
+        return U_total
+
 
 class IceCover:
 
@@ -771,6 +773,21 @@ class IceCover:
 
     def add_original_object(self, original_object_inn):
         self.metadata['OriginalObject'] = original_object_inn
+
+
+def add_layer_conductance_to_total(u_total, k, h):
+    """Adds a layers conductance to a total conductance
+    Conductance is conductivity pr unit length. I.e. U = k/h where k is conductivity and h is height of icelayer
+    Sum of conductance follows the rule 1/U = 1/U1 + 1/U2 + ... + 1/Un
+    """
+
+    # In case of None, there is no insulating materials between the air and water/slush (u_total -> infinity)
+    if u_total is None:
+        u_total = k/h
+    else:
+        u_total = 1/(1/u_total+h/k)
+
+    return u_total
 
 
 if __name__ == "__main__":

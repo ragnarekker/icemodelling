@@ -14,7 +14,7 @@ import os as os
 import json as json
 import copy
 import datetime as dt
-from icemodelling import icethickness as dit, constants as const, weatherelement as we
+from icemodelling import icethickness as it, weatherelement as we
 from icemodelling import parameterization as dp
 from icemodelling import ice as ice
 import setenvironment as se
@@ -25,95 +25,6 @@ from utilities import getmisc as gm
 from utilities import getgts as gts, getfiledata as gfd, getchartserverdata as gcsd
 
 __author__ = 'ragnarekker'
-
-
-def calculate_ice_cover_air_temp(inn_column_inn, date, temp, sno, cloud_cover=None):
-    """
-
-    :param inn_column_inn:
-    :param date:    [] dates for plotting
-    :param temp:
-    :param sno:     []  new snow over the period (day)
-    :param cloud_cover:
-    :return:
-    """
-
-    inn_column = copy.deepcopy(inn_column_inn)
-    inn_column.update_water_line()
-    inn_column.remove_metadata()
-    inn_column.remove_time()
-
-    icecover = []
-    timestep = 60*60*24     # fixed timestep of 24hrs given in seconds
-
-    icecover.append(copy.deepcopy(inn_column))
-
-    for i in range(0, len(date), 1):
-        if date[i] < inn_column.date:
-            i = i + 1
-        else:
-            if cloud_cover != None:
-                out_column = dit.get_ice_thickness_from_surface_temp(inn_column, timestep, sno[i], temp[i], cloud_cover=cloud_cover[i])
-            else:
-                out_column = dit.get_ice_thickness_from_surface_temp(inn_column, timestep, sno[i], temp[i])
-            icecover.append(out_column)
-            inn_column = copy.deepcopy(out_column)
-
-    return icecover
-
-
-def calculate_ice_cover_eb(
-        utm33_x, utm33_y, date, temp_atm, prec, prec_snow, cloud_cover, wind, rel_hum, pressure_atm, inn_column=None):
-    """
-
-    :param utm33_x:
-    :param utm33_y:
-    :param date:
-    :param temp_atm:
-    :param prec:
-    :param prec_snow:
-    :param cloud_cover:
-    :param wind:
-    :param inn_column:
-    :return:
-    """
-
-    if inn_column is None:
-        inn_column = ice.IceColumn(date[0], [])
-
-    icecover = []
-    time_span_in_sec = 60*60*24     # fixed timestep of 24hrs given in seconds
-    inn_column.remove_metadata()
-    inn_column.remove_time()
-    icecover.append(copy.deepcopy(inn_column))
-    energy_balance = []
-
-    age_factor_tau = 0.
-    albedo_prim = const.alfa_black_ice
-
-    for i in range(0, len(date), 1):
-        print("{0}".format(date[i]))
-        if date[i] < inn_column.date:
-            i = i + 1
-        else:
-            out_column, eb = dit.get_ice_thickness_from_energy_balance(
-                utm33_x=utm33_x, utm33_y=utm33_y, ice_column=inn_column, temp_atm=temp_atm[i],
-                prec=prec[i], prec_snow=prec_snow[i], time_span_in_sec=time_span_in_sec,
-                albedo_prim=albedo_prim, age_factor_tau=age_factor_tau, wind=wind[i], cloud_cover=cloud_cover[i],
-                rel_hum=rel_hum[i], pressure_atm=pressure_atm[i])
-
-            icecover.append(out_column)
-            energy_balance.append(eb)
-            inn_column = copy.deepcopy(out_column)
-
-            if eb.EB is None:
-                age_factor_tau = 0.
-                albedo_prim = const.alfa_black_ice
-            else:
-                age_factor_tau = eb.age_factor_tau
-                albedo_prim = eb.albedo_prim
-
-    return icecover, energy_balance
 
 
 def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_folder='', make_plots=True, return_values=False):
@@ -225,9 +136,9 @@ def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_fold
 
     try:
         if len(observed_ice) == 0:
-            calculated_ice = calculate_ice_cover_air_temp(ice.IceColumn(date[0], []), date, temp, sno, cc)
+            calculated_ice = it.calculate_ice_cover_air_temp(ice.IceColumn(date[0], []), date, temp, sno, cc)
         else:
-            calculated_ice = calculate_ice_cover_air_temp(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+            calculated_ice = it.calculate_ice_cover_air_temp(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
         if make_plots:
             pts.plot_ice_cover(calculated_ice, observed_ice, date, temp, sno, snotot, plot_filename)
@@ -314,9 +225,9 @@ def _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True,
 
     try:
         if len(observed_ice) == 0:
-            calculated_ice = calculate_ice_cover_air_temp(ice.IceColumn(date[0], []), date, temp, sno, cc)
+            calculated_ice = it.calculate_ice_cover_air_temp(ice.IceColumn(date[0], []), date, temp, sno, cc)
         else:
-            calculated_ice = calculate_ice_cover_air_temp(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
+            calculated_ice = it.calculate_ice_cover_air_temp(copy.deepcopy(observed_ice[0]), date, temp, sno, cc)
 
         if make_plots:
             pts.plot_ice_cover(calculated_ice, observed_ice, date, temp, sno, snotot, plot_path_and_filename)
@@ -463,12 +374,12 @@ def calculate_and_plot9d_regid(regid, plot_folder=se.plot_folder, observed_ice=N
     plot_filename = '{0}{1}.png'.format(plot_folder, regid)
 
     try:
-        icecover = calculate_ice_cover_air_temp(observed_ice[0], date_times, temp, sno, cc)
+        icecover = it.calculate_ice_cover_air_temp(observed_ice[0], date_times, temp, sno, cc)
         pts.plot_ice_cover_9dogn(icecover, observed_ice[0], dates, temp, sno, snotot, plot_filename)
     except:
         # raise
         error_msg = sys.exc_info()[0]
-        ml.log_and_print('calculateandplot.py -> calculate_and_plot9d_regid: {}. Could not plot {}.'.format(error_msg, regid))
+        ml.log_and_print("calculateandplot.py -> calculate_and_plot9d_regid: {}. Could not plot {}.".format(error_msg, regid))
 
 
 def calculate_and_plot9d_season(period='2018-19'):
@@ -573,17 +484,17 @@ if __name__ == "__main__":
 
     # calculate_and_plot9d_season(period='Today')
 
-    # ------ One full season may take 3-4 hours to plot since weather data is in each case requested ------
-    # calculate_and_plot9d_season(period='2018-19')
-    plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=False, make_plots=True)
-    # calculate_and_plot9d_season(period='2017-18')
-    plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=False, make_plots=True)
-    # calculate_and_plot9d_season(period='2016-17')
-    plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=False, make_plots=True)
-    # calculate_and_plot9d_season(period='2015-16')
-    plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=False, make_plots=True)
-    # calculate_and_plot9d_season(period='2014-15')
-    plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=False, make_plots=True)
+    # # ------ One full season may take 3-4 hours to plot since weather data is in each case requested ------
+    # # calculate_and_plot9d_season(period='2018-19')
+    # plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=False, make_plots=True)
+    # # calculate_and_plot9d_season(period='2017-18')
+    # plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=False, make_plots=True)
+    # # calculate_and_plot9d_season(period='2016-17')
+    # plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=False, make_plots=True)
+    # # calculate_and_plot9d_season(period='2015-16')
+    # plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=False, make_plots=True)
+    # # calculate_and_plot9d_season(period='2014-15')
+    # plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=False, make_plots=True)
 
     # # ------ Test some lakes plotted for a season ------
     # plot_season_for_location_id(17080, '2017-18', get_new_obs=False)

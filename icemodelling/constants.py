@@ -100,7 +100,7 @@ meltingcoeff_black_ice = -0.02 /(60*60*24) / 5  # 2cm melting pr day at 5degC
 
 
 # Conductance = thermal conductivity over height (k/h) [W/K/m2]
-U_surface = k_snow/0.01          # surface conductance defined by the active part of column during 24hrs temperature oscylations
+U_surface = k_snow/0.01          # surface conductance defined by the active part of column during 24hrs temperature oscillations
 
 
 # On the energy used to freeze slush
@@ -113,7 +113,9 @@ min_slush_change = 0.05         # [m] If slush level change is lower than this v
 snow_to_slush_ratio = 0.33      # [-] When snow becomes slush when water is pulled up it also is compressed
 
 
-
+# Model adjustables to tweek performence
+U_limit_for_reduced_time_step = 20   # If total conductance between air and freezing layer is higher than this value (~ 15cm black ice) when calculating with a 24h timestep, smaller timesteps must be applied. This value is puerly empirical and should in som way be verified analytically.
+reduce_time_step_to_n = 12           # number of time steps to apply within the original time step
 
 
 

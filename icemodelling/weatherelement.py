@@ -312,7 +312,11 @@ def make_daily_average(weather_element_list, time_resolution=None):
         new_weather_element.Metadata['DataManipulation'] = 'Made 00-24H average with data for {}% of 24hrs.'.format(seconds_today/(60*60*24)*100)
         new_weather_element_list.append(new_weather_element)
 
-    return new_weather_element_list
+        return new_weather_element_list
+
+    # if no data, return the list unchanged
+    else:
+        return weather_element_list
 
 
 def fix_data_quick(weather_element_list):
