@@ -105,7 +105,7 @@ def get_dates_from_year(year, date_format='yyyy-mm-dd'):
         from_date = '2011-09-01'
         to_date = '2012-09-01'
     else:
-        ml.log_and_print('{0} Not supported year.'.format(log_ref))
+        ml.log_and_print("[Error] {0} Not supported year.".format(log_ref))
         return 'Not supported year.'
 
     if 'yyyy-mm-dd' in date_format:
@@ -119,7 +119,7 @@ def get_dates_from_year(year, date_format='yyyy-mm-dd'):
         to_date = dt.datetime.strptime(to_date, '%Y-%m-%d')
         return from_date, to_date
     else:
-        ml.log_and_print('{0} Date format not supported.'.format(log_ref))
+        ml.log_and_print("[Error] {0} Date format not supported.".format(log_ref))
         return 'Date format not supported.'
 
 

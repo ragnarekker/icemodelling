@@ -221,7 +221,7 @@ def adjust_temperature_to_new_altitude(weather_element_list, new_altitude):
             we.Metadata['OriginalAltitude'] = original_altitude
             we.Metadata['AltitudeAdjustment'] = 'Adjusting elevation by {0} m, thus also temp from {1}C to {2}C.'.format(new_altitude-original_altitude, original_value, we.Value)
 
-        ml.log_and_print("[info] weatherelement.py -> adjust_temperature_to_new_altitude: old:{0}masl and new:{1}masl and tempdelta:{2}C".format(original_altitude, new_altitude, temp_delta))
+        # ml.log_and_print("[info] weatherelement.py -> adjust_temperature_to_new_altitude: old:{0}masl and new:{1}masl and tempdelta:{2}C".format(original_altitude, new_altitude, temp_delta))
         return weather_element_list
 
 

@@ -131,7 +131,7 @@ def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_fold
         plot_filename = '{0}{1} file.png'.format(se.plot_folder + sub_plot_folder, lake_file_name)
 
     else:
-        ml.log_and_print("runicethickness -> calculate_and_plot_location: Invalid scource for weather data.")
+        ml.log_and_print("[Error] runicethickness -> calculate_and_plot_location: Invalid scource for weather data.")
         return
 
     try:
@@ -145,7 +145,7 @@ def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_fold
 
     except:
         error_msg = sys.exc_info()[0]
-        ml.log_and_print("calculateandplot.py -> calculate_and_plot_location: {}. Could not plot {}.".format(error_msg, location_name))
+        ml.log_and_print("[Error] calculateandplot.py -> calculate_and_plot_location: {}. Could not plot {}.".format(error_msg, location_name))
         calculated_ice = None
 
     if return_values:
@@ -235,7 +235,7 @@ def _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True,
     except:
         # raise
         error_msg = sys.exc_info()[0]
-        ml.log_and_print("calculateandplot.py -> _plot_season: {}. Could not plot {}.".format(error_msg, location_id))
+        ml.log_and_print("[Error] calculateandplot.py -> _plot_season: {}. Could not plot {}.".format(error_msg, location_id))
         calculated_ice = None
 
     return calculated_ice, observed_ice, plot_filename
@@ -379,7 +379,7 @@ def calculate_and_plot9d_regid(regid, plot_folder=se.plot_folder, observed_ice=N
     except:
         # raise
         error_msg = sys.exc_info()[0]
-        ml.log_and_print("calculateandplot.py -> calculate_and_plot9d_regid: {}. Could not plot {}.".format(error_msg, regid))
+        ml.log_and_print("[Error] calculateandplot.py -> calculate_and_plot9d_regid: {}. Could not plot {}.".format(error_msg, regid))
 
 
 def calculate_and_plot9d_season(period='2018-19'):
@@ -446,7 +446,7 @@ def calculate_and_plot9d_season(period='2018-19'):
                 calculate_and_plot9d_regid(k, plot_folder=se.ni_dogn_plots_folder, observed_ice=v)
             except:
                 error_msg = sys.exc_info()[0]
-                ml.log_and_print('{} Error making plot for {} {}'.format(log_referance, k, error_msg))
+                ml.log_and_print("[Error] {} Error making plot for {} {}".format(log_referance, k, error_msg))
 
     # Make json with metadata for using files on iskart.no. Load metadata from pickle if available and
     # new observations where a plot is available will be made.
@@ -486,7 +486,7 @@ if __name__ == "__main__":
 
     # # ------ One full season may take 3-4 hours to plot since weather data is in each case requested ------
     # # calculate_and_plot9d_season(period='2018-19')
-    # plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=False, make_plots=True)
+    # plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
     # # calculate_and_plot9d_season(period='2017-18')
     # plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=False, make_plots=True)
     # # calculate_and_plot9d_season(period='2016-17')
@@ -501,7 +501,9 @@ if __name__ == "__main__":
     # plot_season_for_location_id(57019, '2017-18', get_new_obs=False)
     # plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
     # plot_season_for_location_id(7642, '2017-18', get_new_obs=False)
-    #
+    plot_season_for_location_id(8572, '2018-19', get_new_obs=False)
+    plot_season_for_location_id(7903, '2018-19', get_new_obs=False)
+
     # # ------ Test some 9day plots on a give ice thickness observation -----
     # calculate_and_plot9d_regid(138105)
     # calculate_and_plot9d_regid(137767)

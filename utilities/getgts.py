@@ -105,6 +105,6 @@ if __name__ == "__main__":
     # mplot.plot_weather_elements([temperature_pr_day_00_00, temperature_raw])
 
     # Fist data in the data set is from 1st march 2018.
-    wind10m_pr_day = getgts(109190, 6817490, 'windSpeed10m24h06', '2018-03-01', '2018-03-20', timeseries_type=-1)
+    # wind10m_pr_day = getgts(109190, 6817490, 'windSpeed10m24h06', '2018-03-01', '2018-03-20', timeseries_type=-1)
 
     pass
