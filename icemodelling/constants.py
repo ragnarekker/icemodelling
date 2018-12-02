@@ -113,9 +113,12 @@ min_slush_change = 0.05         # [m] If slush level change is lower than this v
 snow_to_slush_ratio = 0.33      # [-] When snow becomes slush when water is pulled up it also is compressed
 
 
-# Model adjustables to tweek performence
-U_limit_for_reduced_time_step = 10  # If total conductance between air and freezing layer is higher than this value (10 W/K/m2 ~ 15cm black ice) when calculating with a 24h timestep, smaller timesteps must be applied.
-reduce_time_step_to_n = 24          # number of time steps to apply within the original time step
-
+# Adjustable conductivity to tweak performance in finding total conductance according to Ashton (1989)
+h_min_for_conductivity_black_ice = 0.03     # The top layer is special. This defines how thick it is.
+surface_k_reduction_black_ice = 0.25        # The top layers conductivity is reduced by a factor
+h_min_for_conductivity_slush_ice = 0.03
+surface_k_reduction_slush_ice = 1.          # no reduction factor before we test more
+h_min_for_conductivity_snow = 0.03
+surface_k_reduction_snow = 1.               # no reduction factor before we test more
 
 

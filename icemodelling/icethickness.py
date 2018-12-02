@@ -11,7 +11,7 @@ from icemodelling import ice as ice
 from utilities import makelogs as ml
 
 
-__author__  =  'raek'
+__author__ = 'raek'
 
 
 def calculate_ice_cover_air_temp(inn_column_inn, date, temp, dh_sno, cloud_cover=None, time_step=60*60*24):
@@ -47,31 +47,14 @@ def calculate_ice_cover_air_temp(inn_column_inn, date, temp, dh_sno, cloud_cover
         # else calculate ice evolution
         else:
 
-            # Find total conductance beween air and water og slush. IceLAyer's listed from the top and down in IceColumn.
-            U_total = inn_column.get_conductance_between_air_and_freezing()
-
             # Cloudless sky gives a lower surface temperature
             if cloud_cover[i] is not None:
                 temp_surf = dp.temperature_from_temperature_and_clouds(temp[i], cloud_cover[i])
-
-            # If temperature is melting or if layer conductance below a threshold, do normal calculation.
-            # The special cast U_total=None is the exception where we have no ice layers (U->infinity).
-            # if U_total and U_total < const.U_limit_for_24h_time_step:
-            if (temp[i] > const.temp_f and inn_column.draft_thickness <= 0) or (U_total and U_total < const.U_limit_for_reduced_time_step):
-                out_column = get_ice_thickness_from_surface_temp(inn_column, time_step, dh_sno[i], temp_surf)
-                inn_column = copy.deepcopy(out_column)
-
-            # Else make finer time resolution and calculate over the period. Note, we append only the last colomn to the ice_cover list
             else:
-                n = const.reduce_time_step_to_n
-                shorter_time_step = time_step/n     # time step reduced to n shorter intervals
-                dh_snow_avg = dh_sno[i]/n
-                # ml.log_and_print("[info] icethickness.py -> calculate_ice_cover_air_temp_conductance_fix: U_total={0} applying n={1} time steps within the initial time step.".format(U_total, n))
+                temp_surf = temp[i]
 
-                for j in range(0, n, 1):
-                    out_column = get_ice_thickness_from_surface_temp(inn_column, shorter_time_step, dh_snow_avg, temp_surf)
-                    inn_column = copy.deepcopy(out_column)
-
+            out_column = get_ice_thickness_from_surface_temp(inn_column, time_step, dh_sno[i], temp_surf)
+            inn_column = copy.deepcopy(out_column)
             ice_cover.append(out_column)
 
     return ice_cover
@@ -131,56 +114,6 @@ def calculate_ice_cover_eb(
     return icecover, energy_balance
 
 
-def get_ice_thickness_from_energy_balance(
-        utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, time_span_in_sec,
-        albedo_prim=None, age_factor_tau=None, cloud_cover=None, wind=None, rel_hum=None, pressure_atm=None):
-    """
-
-    :param utm33_x:
-    :param utm33_y:
-    :param ice_column:
-    :param temp_atm:
-    :param prec:
-    :param prec_snow:
-    :param albedo_prim:
-    :param time_span_in_sec:
-    :param age_factor_tau:
-    :param cloud_cover:
-    :param wind:
-    :param pressure_atm:
-    :return:
-    """
-
-    out_column = None
-    energy_balance = None
-
-    # No ice?, dont do EB and use air temp as surface temp
-    if len(ice_column.column) == 0:
-        energy_balance = deb.EnergyBalanceElement(ice_column.date)
-        energy_balance.add_no_energy_balance(is_ice_inn=False)
-        out_column = get_ice_thickness_from_surface_temp(ice_column, time_span_in_sec, prec_snow, temp_atm)
-    else:
-        energy_balance = deb.temp_surface_from_eb(
-            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
-            age_factor_tau=age_factor_tau,
-            cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum, pressure_atm=pressure_atm)
-
-        surface_temp = energy_balance.temp_surface
-        out_column = None
-
-        if surface_temp < 0.:
-            out_column = get_ice_thickness_from_surface_temp(
-                ice_column, time_span_in_sec, prec_snow, surface_temp)
-        elif surface_temp == 0.:
-            melt_energy = energy_balance.SM
-            out_column = get_ice_thickness_from_surface_temp(
-                ice_column, time_span_in_sec, prec_snow, surface_temp, melt_energy=melt_energy)
-        else:
-            print("doicethicckness --> get_ice_thickness_from_energy_balance: Surface temp cant be above 0C in the method get_ice_thickness_from_energy_balance")
-
-    return out_column, energy_balance
-
-
 def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energy=None):
     """Given surface temperature and new snow on an ice-column, ice evolution is estimated. In the simplest case
     the surface temp is estimated from air temperature. More advances approaches calculates surface temperature
@@ -210,7 +143,9 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
 
         # If no ice, freeze water to ice
         if len(ic.column) == 0:
-            dh = math.sqrt(np.absolute(2 * const.k_black_ice / const.rho_black_ice / const.L_fusion * temp * time_step))
+            # The heat flux equation gives how much water will freeze. U_total for the equation is estimated.
+            U_total = ice.add_layer_conductance_to_total(None, const.k_black_ice, 0, 10)
+            dh = - temp * U_total * time_step / const.rho_water / const.L_fusion
             ic.add_layer_at_index(0, ice.IceLayer(dh, 'black_ice'))
             pass
 
@@ -220,9 +155,9 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
             i = 0
             while time_step > 0 and i <= len(ic.column)-1:
 
-                # If the layer is a solid, it only adds to the total isolation. Unless it is the last..
+                # If the layer is a solid, it only adds to the total isolation. Unless it is the last and water is frozen to ice.
                 if (ic.column[i].get_enum()) > 9:
-                    U_total = ice.add_layer_conductance_to_total(U_total, ic.column[i].conductivity, ic.column[i].height)
+                    U_total = ice.add_layer_conductance_to_total(U_total, ic.column[i].conductivity, ic.column[i].height, ic.column[i].get_enum())
 
                     # If the layer is the last layer of solids and thus at the bottom, we get freezing at the bottom
                     if i == len(ic.column)-1:
@@ -247,7 +182,7 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
                     if ic.column[i].height < dh:
                         ic.column[i].type = 'slush_ice'
                         time_step = time_step - time_step_used
-                        U_total = ice.add_layer_conductance_to_total(U_total, ic.column[i].conductivity, ic.column[i].height)
+                        U_total = ice.add_layer_conductance_to_total(U_total, ic.column[i].conductivity, ic.column[i].height, ic.column[i].get_enum())
 
                     # Else all energy is used to freeze the layer only partially
                     else:
@@ -331,3 +266,53 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
     ic.set_surface_temperature(temp)
 
     return ic
+
+
+def get_ice_thickness_from_energy_balance(
+        utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, time_span_in_sec,
+        albedo_prim=None, age_factor_tau=None, cloud_cover=None, wind=None, rel_hum=None, pressure_atm=None):
+    """
+
+    :param utm33_x:
+    :param utm33_y:
+    :param ice_column:
+    :param temp_atm:
+    :param prec:
+    :param prec_snow:
+    :param albedo_prim:
+    :param time_span_in_sec:
+    :param age_factor_tau:
+    :param cloud_cover:
+    :param wind:
+    :param pressure_atm:
+    :return:
+    """
+
+    out_column = None
+    energy_balance = None
+
+    # No ice?, dont do EB and use air temp as surface temp
+    if len(ice_column.column) == 0:
+        energy_balance = deb.EnergyBalanceElement(ice_column.date)
+        energy_balance.add_no_energy_balance(is_ice_inn=False)
+        out_column = get_ice_thickness_from_surface_temp(ice_column, time_span_in_sec, prec_snow, temp_atm)
+    else:
+        energy_balance = deb.temp_surface_from_eb(
+            utm33_x, utm33_y, ice_column, temp_atm, prec, prec_snow, albedo_prim, time_span_in_sec,
+            age_factor_tau=age_factor_tau,
+            cloud_cover=cloud_cover, wind=wind, rel_hum=rel_hum, pressure_atm=pressure_atm)
+
+        surface_temp = energy_balance.temp_surface
+        out_column = None
+
+        if surface_temp < 0.:
+            out_column = get_ice_thickness_from_surface_temp(
+                ice_column, time_span_in_sec, prec_snow, surface_temp)
+        elif surface_temp == 0.:
+            melt_energy = energy_balance.SM
+            out_column = get_ice_thickness_from_surface_temp(
+                ice_column, time_span_in_sec, prec_snow, surface_temp, melt_energy=melt_energy)
+        else:
+            print("doicethicckness --> get_ice_thickness_from_energy_balance: Surface temp cant be above 0C in the method get_ice_thickness_from_energy_balance")
+
+    return out_column, energy_balance

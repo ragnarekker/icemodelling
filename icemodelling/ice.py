@@ -4,7 +4,7 @@
 import math
 import datetime as dt
 from icemodelling import parameterization as pz, constants as const
-from utilities import getregobsdata as gro, getfiledata as gfd
+from utilities import getregobsdata as gro, getfiledata as gfd, makelogs as ml
 
 __author__ = 'ragnarekker'
 
@@ -612,10 +612,13 @@ class IceColumn:
                 return False
 
     def get_conductance_at_z(self, depth_inn=None):
-        """Retruns conductance from surface to a certain depth.
+        """Returns conductance from surface to a certain depth.
 
-        Conductance is conductivity pr unit lenght.
-        I.e. U = k/h where k is conductivity and h is height of icelayer
+        Note, this method does not apply Ashtons method for thin ice growth (1989)
+        used in add_layer_conductance_to_total.
+
+        Conductance is conductivity pr unit length.
+        I.e. U = k/h where k is conductivity and h is height of ice layer
         Sum of conductance follows the rule 1/U = 1/U1 + 1/U2 + ... + 1/Un
 
         From https://en.wikipedia.org/wiki/Thermal_conductivity:
@@ -626,7 +629,6 @@ class IceColumn:
         thermal insulance = L/k, measured in K·m2·W−1.
 
         where k is thermal conductivity, A is area and L is thickness.
-
 
         :param depth_inn: [m] If None total column height is used. I.e. No water conductance below
         :return:
@@ -641,7 +643,7 @@ class IceColumn:
             depth_inn = self.total_column_height
 
         for l in self.column:
-            if U_total == 0.: # case for the first layer
+            if U_total == 0.:  # case for the first layer
                 if l.height > depth_inn:
                     U_total = l.conductivity / (depth_inn-current_depth)
                     current_depth = depth_inn
@@ -658,7 +660,6 @@ class IceColumn:
                 current_depth += l.height
             else:
                 break
-
 
         # if requested depth is deeper than the column, add water conductance
         if current_depth < depth_inn:
@@ -714,7 +715,7 @@ class IceColumn:
 
             # If the layer is a solid, it only adds to the total isolation.
             if (l.get_enum()) > 9:
-                U_total = add_layer_conductance_to_total(U_total, l.conductivity, l.height)
+                U_total = add_layer_conductance_to_total(U_total, l.conductivity, l.height, l.get_enum)
 
         return U_total
 
@@ -775,24 +776,66 @@ class IceCover:
         self.metadata['OriginalObject'] = original_object_inn
 
 
-def add_layer_conductance_to_total(u_total, k, h):
-    """Adds a layers conductance to a total conductance
-    Conductance is conductivity pr unit length. I.e. U = k/h where k is conductivity and h is height of icelayer
+def add_layer_conductance_to_total(u_total, k, h, layer_enum):
+    """Adds a layers conductance to a total conductance.
+
+    Conductance is conductivity pr unit length. I.e. U = k/h where k is conductivity and h is height of ice layer
     Sum of conductance follows the rule 1/U = 1/U1 + 1/U2 + ... + 1/Un
+
+    Method incorporates Ashtons (1989) method for thin ice growth, declaring that the top part of ice has a lower
+    conductivity.
     """
 
-    # In case of None, there is no insulating materials between the air and water/slush (u_total -> infinity)
-    if u_total is None:
-        u_total = k/h
+    if layer_enum == 10:    # Black ice
+        surface_k_reduction = const.surface_k_reduction_black_ice
+        h_min_for_conductivity = const.h_min_for_conductivity_black_ice
+    elif layer_enum == 11:  # slush ice
+        surface_k_reduction = const.surface_k_reduction_slush_ice
+        h_min_for_conductivity = const.h_min_for_conductivity_slush_ice
+    elif layer_enum >= 20:  # Snow
+        surface_k_reduction = const.surface_k_reduction_snow
+        h_min_for_conductivity = const.h_min_for_conductivity_snow
+    else:   # If enum is unknown (most likely slush or water layer), use black_ice conditions
+        ml.log_and_print("[warning] ice.py -> add_layer_conductance_to_total: Unknown layer enum {}".format(layer_enum))
+        surface_k_reduction = const.surface_k_reduction_black_ice
+        h_min_for_conductivity = const.h_min_for_conductivity_black_ice
+
+    # Max conductance always defined by black ice material constants.
+    u_max = const.k_black_ice * const.surface_k_reduction_black_ice / const.h_min_for_conductivity_black_ice
+
+    # No Ice? Set initial conductance to the max possible
+    if h == 0 and u_total is None:
+        u_total = u_max
+
+    # Else we have ice height
     else:
-        u_total = 1/(1/u_total+h/k)
+
+        # if u_total is None, this is the surface layer.
+        if u_total is None:
+
+            # If height is less than minimum height for conductivity, all ice conductivity is reduced
+            if h <= h_min_for_conductivity:
+                u_total = k * surface_k_reduction / h
+
+            # Else if height is more than minimum height, split layer in two, adding reduced conductivity to the rest
+            else:
+                u_total = u_max
+                u_total = 1/(1/u_total+(h-h_min_for_conductivity)/k)
+
+        # Else we are in deeper layers and we dont need to adjust for surface effects
+        else:
+            u_total = 1/(1/u_total + h/k)
+
+    # Too large conductance. Decrease to max value
+    if u_total > u_max:
+        u_total = u_max
 
     return u_total
 
 
 if __name__ == "__main__":
 
-    from setenvironment import data_path
+    from setenvironment import time_series_data
 
     # some tests of the functions in the IceColumn file
     # date = dt.datetime.strptime("2011-10-05", "%Y-%m-%d")
@@ -802,7 +845,7 @@ if __name__ == "__main__":
     # icecol.merge_and_remove_excess_layers()
     # icecol.merge_snow_layers_and_compress(-5)
 
-    icecols = gfd.importColumns("{0}test ice columns.csv".format(data_path))
+    icecols = gfd.importColumns("{0}test ice columns.csv".format(time_series_data))
     icecol = icecols[4]
     icecol.update_column_temperatures(-15)
     icecol.update_total_column_height()

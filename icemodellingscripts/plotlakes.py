@@ -264,9 +264,4 @@ if __name__ == "__main__":
 
     # cap.calculate_and_plot_location('Semsvannet v/Lo 145 moh', '2016-10-01', '2017-07-01')
 
-    # cap.plot_season_for_location_id(17080, '2017-18', get_new_obs=False)
-    # cap.plot_season_for_location_id(57019, '2017-18', get_new_obs=False)
-    # cap.plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
-    # cap.plot_season_for_location_id(7642, '2017-18', get_new_obs=False)
-
     pass

@@ -155,8 +155,13 @@ def calculate_and_plot_location(location_name, from_date, to_date, sub_plot_fold
 def plot_season_for_location_id(location_id, year, get_new_obs=True):
     """For a given location_id get all observations, calculate cover and plot for full season.
 
-    Observed ice is retrieved from get_all_season_ice. Thus, all season ice for all location ids is requested
-    even though only one location id is requested. Weather data from GTS.
+    Observed ice is retrieved from get_all_season_ice. No observed Ice, the modelling will fail since
+    there is no initiating date on that lake.
+
+    If get_new_obs, all season ice for all location ids is requested  even though only one location id
+    is requested.
+
+    Weather data from GTS.
 
     :param location_id:
     :param year:
@@ -488,22 +493,26 @@ if __name__ == "__main__":
     # # calculate_and_plot9d_season(period='2018-19')
     # plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
     # # calculate_and_plot9d_season(period='2017-18')
-    # plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=False, make_plots=True)
+    # plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=True, make_plots=True)
     # # calculate_and_plot9d_season(period='2016-17')
-    # plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=False, make_plots=True)
+    # plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=True, make_plots=True)
     # # calculate_and_plot9d_season(period='2015-16')
-    # plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=False, make_plots=True)
+    # plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=True, make_plots=True)
     # # calculate_and_plot9d_season(period='2014-15')
-    # plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=False, make_plots=True)
+    # plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=True, make_plots=True)
 
     # # ------ Test some lakes plotted for a season ------
     # plot_season_for_location_id(17080, '2017-18', get_new_obs=False)
     # plot_season_for_location_id(57019, '2017-18', get_new_obs=False)
-    # plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
     # plot_season_for_location_id(7642, '2017-18', get_new_obs=False)
-    plot_season_for_location_id(8572, '2018-19', get_new_obs=False)
-    plot_season_for_location_id(7903, '2018-19', get_new_obs=False)
-
+    # plot_season_for_location_id(8572, '2018-19', get_new_obs=False)
+    # plot_season_for_location_id(7903, '2018-19', get_new_obs=False)
+    # # ------- # Semsvannet -------
+    # plot_season_for_location_id(2227, '2014-15', get_new_obs=False)
+    # plot_season_for_location_id(2227, '2015-16', get_new_obs=False)
+    # plot_season_for_location_id(2227, '2016-17', get_new_obs=False)
+    # plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
+    #
     # # ------ Test some 9day plots on a give ice thickness observation -----
     # calculate_and_plot9d_regid(138105)
     # calculate_and_plot9d_regid(137767)
