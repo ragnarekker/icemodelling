@@ -1,12 +1,12 @@
 # icemodelling
-A one dimentional ice thickness model.
+A one dimensional ice thickness model.
 
 ## About the model
 We model the ice thickness evolution given daily averages for temperatures and precipitation (preferably new sno).
 
 ### The math and methods
 With these few parameters we:
-* Model ice thickness, including the thin ice evolution approach suggested by Ashton in his paper in 1989.
+* Model ice thickness, including the thin ice growth approach suggested by Ashton in his paper in 1989.
 * We model buoyancy change when the snow weighs down the ice, thus at some critical level water flows through the ice and slush an slush ice layers are created.
 * The dry snow sno is compacted.
 * Cloudless skies decrease the temperature.
@@ -27,16 +27,16 @@ Observations of ice thickness and ice coverage may be used to initiate the model
 * regObs observation type ice thickness from the regObs web api.
 
 ### Use
-For daily operations and based on observations from regObs, the model is used to calculate seasonal ice evolution on all lakes with sufficient observations. Sufficient observations being enough to estimate an initiation date to start calculating daily ice thickness change. See example in figure below.
+For daily operations and based on observations from regObs, the model is used to calculate seasonal ice evolution on all lakes with sufficient observations. Sufficient observations being enough to estimate an initiation date to start calculating daily ice thickness change.
 
-We also calculate a 9 day prognosis for all ice thickness observed in regObs. See example in figure below.
+We also calculate a 9 day prognosis for all ice thickness observed in regObs.
 
 These plots are presented on [iskart.no](http://www.iskart.no/) along with observations.
 
 ### Performance
 There is still allot of work to be done on the model. But it does a decent job in the big picture.
 
-Based on the 1093 observations of ice coverage and ice thickness during the winter 2017-18, and based on the gridded time series data provided by the GTS the model gains a Nash-Sutcliffe model efficiency coefficient of 0.44. See figure below.
+Based on the 1093 observations of ice coverage and ice thickness during the winter 2017-18, and based on the gridded time series data provided by the GTS the model gains a Nash-Sutcliffe model efficiency coefficient of 0.44.
 
 ## Getting started
 These instructions will get you a copy of the project up and running on your local machine.
