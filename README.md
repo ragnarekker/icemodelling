@@ -31,6 +31,7 @@ For daily operations and based on observations from regObs, the model is used to
 ![Seasonal ice cover plot](output/plots/2227_2016-17.png)
 
 We also calculate a 9 day prognosis for all ice thickness observed in regObs.
+![9 day ice cover plot](output/plots/133488.png)
 
 These plots are presented on [iskart.no](http://www.iskart.no/) along with observations.
 
@@ -38,6 +39,7 @@ These plots are presented on [iskart.no](http://www.iskart.no/) along with obser
 There is still allot of work to be done on the model. But it does a decent job in the big picture.
 
 Based on the 1093 observations of ice coverage and ice thickness during the winter 2017-18, and based on the gridded time series data provided by the GTS the model gains a Nash-Sutcliffe model efficiency coefficient of 0.44.
+![Scatter plot and Nash-Sutcliffe model coefficient](output/plots/calculated_vs_observed 2017-18.png)
 
 ## Getting started
 These instructions will get you a copy of the project up and running on your local machine.
