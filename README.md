@@ -28,6 +28,7 @@ Observations of ice thickness and ice coverage may be used to initiate the model
 
 ### Use
 For daily operations and based on observations from regObs, the model is used to calculate seasonal ice evolution on all lakes with sufficient observations. Sufficient observations being enough to estimate an initiation date to start calculating daily ice thickness change.
+![Seasonal ice cover plot](output/plots/2227_2016-17.png)
 
 We also calculate a 9 day prognosis for all ice thickness observed in regObs.
 

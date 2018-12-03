@@ -169,14 +169,14 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
 
                 # Else the layer is a slush layer above or in the ice column and it will freeze fully or partially
                 else:
-                    # time_step_used = 0
+
                     L_slush_ice = const.part_ice_in_slush*const.L_fusion
-                    if i == 0:    # there is slush surface with no layers with conductance above
-                        dh = math.sqrt(np.absolute(2 * const.k_slush_ice / const.rho_slush_ice / L_slush_ice * temp * time_step))    # formula X?
-                        time_step_used = ic.column[i].height**2 * const.rho_slush_ice * L_slush_ice / 2 / -temp / const.k_slush_ice  # formula X sorted for time
-                    else:
-                        dh = - temp * U_total * time_step / ic.column[i].density / L_slush_ice                       # The heat flux equation gives how much slush will freeze
-                        time_step_used = ic.column[i].height * const.rho_slush_ice * L_slush_ice / -temp / U_total   # The heat flux equation sorted for time
+
+                    if U_total is None:     # case of slush on top
+                        U_total = ice.add_layer_conductance_to_total(None, const.k_slush_ice, 0, 11)
+
+                    dh = - temp * U_total * time_step / ic.column[i].density / L_slush_ice                       # The heat flux equation gives how much slush will freeze
+                    time_step_used = ic.column[i].height * const.rho_slush_ice * L_slush_ice / -temp / U_total   # The heat flux equation sorted for time
 
                     # If a layer totaly freezes during the timeperiod, the rest of the time will be used to freeze a layer further down
                     if ic.column[i].height < dh:
