@@ -28,10 +28,10 @@ Observations of ice thickness and ice coverage may be used to initiate the model
 
 ### Use
 For daily operations and based on observations from regObs, the model is used to calculate seasonal ice evolution on all lakes with sufficient observations. Sufficient observations being enough to estimate an initiation date to start calculating daily ice thickness change.
-![Seasonal ice cover plot](output/plots/2227_2016-17.png)
+<img src="output/plots/2227_2016-17.png" alt="Seasonal ice cover plot" height="60" width="60">
 
 We also calculate a 9 day prognosis for all ice thickness observed in regObs.
-![9 day ice cover plot](output/plots/133488.png)
+<img src="output/plots/133488.png" alt="9 day ice cover plot" height="60" width="60">
 
 These plots are presented on [iskart.no](http://www.iskart.no/) along with observations.
 
@@ -39,7 +39,7 @@ These plots are presented on [iskart.no](http://www.iskart.no/) along with obser
 There is still allot of work to be done on the model. But it does a decent job in the big picture.
 
 Based on the 1093 observations of ice coverage and ice thickness during the winter 2017-18, and based on the gridded time series data provided by the GTS the model gains a Nash-Sutcliffe model efficiency coefficient of 0.44.
-<img src="output/plots/calculated_vs_observed%202017-18.png" alt="Scatter plot and Nash-Sutcliffe model coefficient" height="200px" width="200px">
+<img src="output/plots/calculated_vs_observed%202017-18.png" alt="Scatter plot and Nash-Sutcliffe model coefficient" height="600px" width="600px">
 
 ## Getting started
 These instructions will get you a copy of the project up and running on your local machine.
