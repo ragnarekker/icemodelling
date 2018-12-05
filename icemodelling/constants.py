@@ -24,8 +24,7 @@ laps_rate = 2./300              # [C/m] temperature in atmosphere decreases by 2
 
 # Base properties of slush. The relation between ice and water influences the properties:
 # k_slush_ice, rho_slush, c_slush, snow_to_slush_ratio
-part_ice_in_slush = 0.66         # How big part of slush is frozen?
-
+part_ice_in_slush = 0.70         # How big part of slush is frozen?
 
 
 # Thermal Conductivities [W/m/K]
