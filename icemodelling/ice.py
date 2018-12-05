@@ -172,6 +172,7 @@ class IceColumn:
         self.total_column_height = None
         self.metadata = {}                  # Metadata given as dictionary {key:value , key:value, ... }
         self.top_layer_is_slush = None      # [Bool] True if top layer is slush. False if not.
+        self.in_slush_event = False         # [Bool] True if a slush event just happened due to heavy snowfall.
 
         if column_inn == 0:  # the case of no ice
             self.column = list()
@@ -234,8 +235,9 @@ class IceColumn:
         return
 
     def merge_and_remove_excess_layers(self):
-        """Cleans up the icecolumn a bit. Removes layers of zero height if they occur and merges layers of equal type
-        if the exist"""
+        """Cleans up the icecolumn a bit.
+           Removes layers of zero height if they occur and merges layers of equal type if they exist
+        """
 
         # If no column there is nothing to merge
         if self.column is not None and len(self.column) > 0:
@@ -492,8 +494,10 @@ class IceColumn:
 
         # We also have a constant regulating the minimum change before we get a slush event
         if dh_slush > const.min_slush_change:
+            # Update the variable that tells that snow presses water up, but do not create ice in the first time step
+            self.in_slush_event = True
 
-            # Cappilary forces pull water up past the equlibrium line
+            # Capillary forces pull water up past the equlibrium line
             dh_slush = dh_slush + const.snow_pull_on_water
 
             # find index of deepest snow layer. Slush forms at the bottom of this layer.
@@ -502,19 +506,30 @@ class IceColumn:
                 if self.column[i].get_enum() >= 20:  # material types >= 20 are snow
                     index = i  # keep counting the index until we reach bottom of the snow.
 
-            # reduce the deepest snow layer with the dh_slush and if snowlayer isnt big enough go to the
-            # abowe and make this layer wet aswell (and so on).
+            # reduce the deepest snow layer with the dh_slush and if snow layer isnt big enough go to the
+            # above and make this layer wet as well (and so on).
             while dh_slush > 0 and index >= 0:
                 # if the layer is to shallow all is flooded with water and made to slush.
-                # Note that the layer is compressed as a result of adding water to snow.
-                if dh_slush > self.column[index].height * const.snow_to_slush_ratio:
+
+                # When snow is turned into slush, we think of it as two processes:
+                # 1. Compress the snow to the density of slush_ice
+                # 2. Fill it up with water so the ice part is "part_ice_in_slush"
+                #
+                # 1 gives h_snow * rho_snow = h_slush_ice * rho_slush_ice
+                # 2 gives h_slush * part_ice_in_slush = h_slush_ice
+                #
+                # Define snow_to_slush_ratio = h_slush / h_snow, we end up with:
+                snow_to_slush_ratio = self.column[index].density / (const.rho_slush_ice * const.part_ice_in_slush)
+                # ml.log_and_print("[info] ice.py -> update_slush_level: Snow to slush ratio = {}".format(snow_to_slush_ratio), log_it=False, print_it=True)
+
+                if dh_slush > self.column[index].height * snow_to_slush_ratio:
                     self.column[index].set_type('slush')
-                    self.column[index].height = self.column[index].height * const.snow_to_slush_ratio
+                    self.column[index].height = self.column[index].height * snow_to_slush_ratio
                     dh_slush = dh_slush - self.column[index].height  # remember that this layer has been updated to the new layer height on the previous line
                     index = index - 1
                 # take a part of the layer and make a new slush layer under it.
                 else:
-                    self.column[index].height = self.column[index].height - dh_slush / const.snow_to_slush_ratio
+                    self.column[index].height = self.column[index].height - dh_slush / snow_to_slush_ratio
                     self.add_layer_at_index(index + 1, IceLayer(dh_slush, 'slush'))
                     index = -1
 

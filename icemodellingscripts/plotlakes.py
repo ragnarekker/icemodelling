@@ -249,6 +249,7 @@ if __name__ == "__main__":
     run_semsvann('2017-11-01', '2018-06-01')
     run_semsvann('2016-11-01', '2017-06-01')
     run_semsvann('2015-11-01', '2016-06-01')
+    run_semsvann('2014-11-01', '2015-06-01')
 
     run_semsvann('2017-11-01', '2018-06-01', forcing='eKlima')
     run_semsvann('2016-11-01', '2017-06-01', forcing='eKlima')

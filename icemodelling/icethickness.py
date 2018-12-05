@@ -162,33 +162,55 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
                     # If the layer is the last layer of solids and thus at the bottom, we get freezing at the bottom
                     if i == len(ic.column)-1:
 
-                        # The heat flux equation gives how much water will freeze
+                        # The heat flux equation gives how much water will freeze.
                         dh = - temp * U_total * time_step / const.rho_water / const.L_fusion
                         ic.add_layer_at_index(i+1, ice.IceLayer(dh, 'black_ice'))
                         time_step = 0
 
-                # Else the layer is a slush layer above or in the ice column and it will freeze fully or partially
-                else:
+                # Else the layer is a slush layer above or in the ice column and it will freeze fully or partially.
+                # Note, we do not freeze slush in the same time step it occurs.
+                elif not ic.in_slush_event:
 
-                    L_slush_ice = const.part_ice_in_slush*const.L_fusion
-
-                    if U_total is None:     # case of slush on top
+                    # If the total conductance is None, we are dealing with the top layer and a surface/thin ice conductance mut be defined.
+                    if U_total is None:
                         U_total = ice.add_layer_conductance_to_total(None, const.k_slush_ice, 0, 11)
 
-                    dh = - temp * U_total * time_step / ic.column[i].density / L_slush_ice                       # The heat flux equation gives how much slush will freeze
-                    time_step_used = ic.column[i].height * const.rho_slush_ice * L_slush_ice / -temp / U_total   # The heat flux equation sorted for time
+                    # Only the water part in the slush freezes
+                    dh = - temp * U_total * time_step / const.rho_water / const.L_fusion / (1 - const.part_ice_in_slush)
 
-                    # If a layer totaly freezes during the timeperiod, the rest of the time will be used to freeze a layer further down
+                    # If a layer totaly freezes during the tieme period, the rest of the time will be used to freeze a layer further down.
                     if ic.column[i].height < dh:
-                        ic.column[i].type = 'slush_ice'
+
+                        ic.column[i].set_type('slush_ice')
+
+                        # The heat flux equation sorted for time
+                        time_step_used = ic.column[i].height * const.rho_water * const.L_fusion * (1 - const.part_ice_in_slush) / -temp / U_total
                         time_step = time_step - time_step_used
+
+                        # Layer height increases when water in the layer freezes
+                        ic.column[i].height += ic.column[i].height * (1 - const.part_ice_in_slush) * ((const.rho_water - const.rho_slush_ice) / const.rho_slush_ice)
+
+                        # Update conductance
                         U_total = ice.add_layer_conductance_to_total(U_total, ic.column[i].conductivity, ic.column[i].height, ic.column[i].get_enum())
 
                     # Else all energy is used to freeze the layer only partially
                     else:
-                        ic.column[i].height = ic.column[i].height - dh
+                        # The thickness that remains slush
+                        ic.column[i].height -= dh
+
+                        # dh has frozen to slush ice. Layer height increases when water in the layer freezes.
+                        dh += dh * (1 - const.part_ice_in_slush) * ((const.rho_water - const.rho_slush_ice) / const.rho_slush_ice)
                         ic.add_layer_at_index(i, ice.IceLayer(dh, 'slush_ice'))
+
+                        # Nothing more to freeze
                         time_step = 0
+
+                # Slush event has happened and this is the first time step after the slush event. Do not create ice in the first time step.
+                else:
+                    # ml.log_and_print("[info] icethickness.py -> get_ice_thickness_from_surface_temp: No freezing event in the current time step due to slush event.", log_it=False, print_it=True)
+                    ic.in_slush_event = False
+                    # If we don't set time step to 0, layers further down will freeze
+                    # time_step = 0
 
                 # Go to next ice layer
                 i += 1

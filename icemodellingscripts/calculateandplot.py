@@ -489,17 +489,17 @@ if __name__ == "__main__":
 
     # calculate_and_plot9d_season(period='Today')
 
-    # # ------ One full season may take 3-4 hours to plot since weather data is in each case requested ------
-    # # # calculate_and_plot9d_season(period='2018-19')
-    # plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
-    # # # calculate_and_plot9d_season(period='2017-18')
-    # plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=True, make_plots=True)
-    # # # calculate_and_plot9d_season(period='2016-17')
-    # plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=True, make_plots=True)
-    # # # calculate_and_plot9d_season(period='2015-16')
-    # plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=True, make_plots=True)
-    # # # calculate_and_plot9d_season(period='2014-15')
-    # plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=True, make_plots=True)
+    # ------ One full season may take 3-4 hours to plot since weather data is in each case requested ------
+    # calculate_and_plot9d_season(period='2018-19')
+    plot_season_for_all_regobs_locations(year='2018-19', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2017-18')
+    plot_season_for_all_regobs_locations(year='2017-18', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2016-17')
+    plot_season_for_all_regobs_locations(year='2016-17', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2015-16')
+    plot_season_for_all_regobs_locations(year='2015-16', calculate_new=True, get_new_obs=True, make_plots=True)
+    # calculate_and_plot9d_season(period='2014-15')
+    plot_season_for_all_regobs_locations(year='2014-15', calculate_new=True, get_new_obs=True, make_plots=True)
 
     # # ------ Test some lakes plotted for a season ------
     # plot_season_for_location_id(17080, '2017-18', get_new_obs=False)
@@ -513,17 +513,18 @@ if __name__ == "__main__":
     # plot_season_for_location_id(2227, '2016-17', get_new_obs=False)
     # plot_season_for_location_id(2227, '2017-18', get_new_obs=False)
     #
-    # ------ Test some 9day plots on a give ice thickness observation -----
-    calculate_and_plot9d_regid(138105)
-    calculate_and_plot9d_regid(137767)
-    calculate_and_plot9d_regid(131390)
-    calculate_and_plot9d_regid(95811)         # has warm temps that fall behind
-    calculate_and_plot9d_regid(136868)        # Burudvann lille julaften
-    calculate_and_plot9d_regid(130979)        # Uskeput tidlig høst
-    calculate_and_plot9d_regid(112366)
-    calculate_and_plot9d_regid(130988)
-    calculate_and_plot9d_regid(132133)
-    calculate_and_plot9d_regid(133488)
-    calculate_and_plot9d_regid(131705)        # has news now on first day and there is a frame
+    # # ------ Test some 9day plots on a give ice thickness observation -----
+    # calculate_and_plot9d_regid(138105)
+    # calculate_and_plot9d_regid(137767)
+    # calculate_and_plot9d_regid(131390)
+    # calculate_and_plot9d_regid(95811)         # has warm temps that fall behind
+    # calculate_and_plot9d_regid(136868)        # Burudvann lille julaften
+    # calculate_and_plot9d_regid(130979)        # Uskeput tidlig høst
+    # calculate_and_plot9d_regid(112366)
+    # calculate_and_plot9d_regid(130988)
+    # calculate_and_plot9d_regid(132133)
+    # calculate_and_plot9d_regid(133488)
+    # calculate_and_plot9d_regid(131705)        # has news now on first day and there is a frame
 
     pass
+
