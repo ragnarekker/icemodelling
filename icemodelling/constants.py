@@ -27,6 +27,7 @@ laps_rate = 2./300              # [C/m] temperature in atmosphere decreases by 2
 part_ice_in_slush = 0.66         # How big part of slush is frozen?
 
 
+
 # Thermal Conductivities [W/m/K]
 k_snow_max = 0.25               # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
 k_new_snow = 0.05               # from http://www.engineeringtoolbox.com/thermal-conductivity-d_429.html
