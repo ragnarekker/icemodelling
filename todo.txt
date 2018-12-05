@@ -1,9 +1,6 @@
 
 
 Where to start
-* write a readme
-* shorten time steps when large conductivities (thin ice)
-* rethink slush production
 * figure text on whats forcing the model
 * transform weather data for arbitrary time series resolution
 
