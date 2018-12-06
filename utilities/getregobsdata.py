@@ -1103,10 +1103,9 @@ def get_all_season_ice(year, get_new=True):
                     if cover_tid == 2 or cover_tid == 3 or cover_tid == 21:
                         # and if ice cover before was
                         # 1) isfritt, nå første is på målestedet på målestedet
-                        # 2) delvis islagt på målestedet,
-                        # 11) islegging langs land
-                        # 20) hele sjøen isfri,  this is fist ice
-                        if cover_before_tid == 1 or cover_before_tid == 2 or cover_before_tid == 11 or cover_before_tid == 20:
+                        # 2) isfritt, nå første is ved land
+                        # 4) Gradvis islegging
+                        if cover_before_tid == 1 or cover_before_tid == 2 or cover_before_tid == 4:
                             this_cover.mark_as_first_ice()
 
                     # if the ice cover is partly or fully gone on location and there was ice yesterday
@@ -1115,16 +1114,12 @@ def get_all_season_ice(year, get_new=True):
                     # 20) Hele sjøen isfri
                     if cover_tid == 1 or cover_tid == 2 or cover_tid == 20:
                         # 10) isfritt resten av vinteren
-                        if cover_after_tid == 10:
+                        # Accepts also ice free observation after 15. March
+                        to_year = this_cover.date.year
+                        first_accepted_date = dt.datetime(to_year, 3, 15)
+                        last_accepted_date = dt.datetime(to_year, 9, 1)
+                        if cover_after_tid == 10 or (cover_date > first_accepted_date and cover_date < last_accepted_date):
                             this_cover.mark_as_ice_cover_lost()
-
-                        # before 10) forrige obs gjelder til i går
-                        if cover_before_tid == 10:
-                            # if the previous ice cover which was valid yesterday had ice
-                            if previous_cover.iceCoverTID == 2 or previous_cover.iceCoverTID == 3 or \
-                               previous_cover.iceCoverTID == 10 or previous_cover.iceCoverTID == 11 or \
-                               previous_cover.iceCoverTID == 21:
-                                this_cover.mark_as_ice_cover_lost()
 
                     # copy of this cover so that in next iteration I may look up previous cover.
                     previous_cover = cp.deepcopy(this_cover)
@@ -1245,6 +1240,6 @@ if __name__ == "__main__":
     # ith = get_ice_thickness(LocationNames, from_date, to_date)
     # all_on_locations = get_all_season_ice_on_location(LocationNames, from_date, to_date)
 
-    # all_in_all = get_all_season_ice('2016-17', get_new=False)
+    # all_in_all = get_all_season_ice('2016-17', get_new=True)
 
     pass

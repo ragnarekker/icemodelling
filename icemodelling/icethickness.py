@@ -209,8 +209,8 @@ def get_ice_thickness_from_surface_temp(ic, time_step, dh_snow, temp, melt_energ
                 else:
                     # ml.log_and_print("[info] icethickness.py -> get_ice_thickness_from_surface_temp: No freezing event in the current time step due to slush event.", log_it=False, print_it=True)
                     ic.in_slush_event = False
-                    # If we don't set time step to 0, layers further down will freeze
-                    # time_step = 0
+                    # If we don't set time step to 0, layers further down will freeze.
+                    time_step = 0
 
                 # Go to next ice layer
                 i += 1

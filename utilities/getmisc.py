@@ -80,33 +80,20 @@ def get_dates_from_year(year, date_format='yyyy-mm-dd'):
 
     log_ref = 'getregobsdata.py -> get_dates_from_year:'
 
-    if year == '2018-19':
-        from_date = '2018-09-01'
-        to_date = '2019-09-01'
-    elif year == '2017-18':
-        from_date = '2017-09-01'
-        to_date = '2018-09-01'
-    elif year == '2016-17':
-        from_date = '2016-09-01'
-        to_date = '2017-09-01'
-    elif year == '2015-16':
-        from_date = '2015-09-01'
-        to_date = '2016-09-01'
-    elif year == '2014-15':
-        from_date = '2014-09-01'
-        to_date = '2015-09-01'
-    elif year == '2013-14':
-        from_date = '2013-09-01'
-        to_date = '2014-09-01'
-    elif year == '2012-13':
-        from_date = '2012-09-01'
-        to_date = '2013-09-01'
-    elif year == '2011-12':
-        from_date = '2011-09-01'
-        to_date = '2012-09-01'
+    from_year = int(year[0:4])
+    century = int(year[0:2]) * 100
+    year_in_century = int(year[5:7])
+
+    # We build for the future. Method will work for passing centuries.
+    if year_in_century != 0:
+        # Same century
+        last_year = century + year_in_century
     else:
-        ml.log_and_print("[Error] {0} Not supported year.".format(log_ref))
-        return 'Not supported year.'
+        # New century
+        last_year = century + 100 + year_in_century
+
+    from_date = str(from_year) + '-09-01'
+    to_date = str(last_year) + '-09-01'
 
     if 'yyyy-mm-dd' in date_format:
         return from_date, to_date
@@ -151,5 +138,6 @@ def get_masl_from_utm33(x, y):
 if __name__ == "__main__":
 
     # height = get_masl_from_utm33(120613, 6834932)
+    # from_date, to_date = get_dates_from_year('2099-00')
 
     pass

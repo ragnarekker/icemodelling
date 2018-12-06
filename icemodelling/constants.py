@@ -53,12 +53,12 @@ k_slush = (k_slush_ice * k_water) / (k_slush_ice * (1 - part_ice_in_slush) + k_w
 
 
 # Densities [kg m^-3]
-# rho_snow_max = 450.             # maximum snow density (kg m-3)
-# rho_new_snow = 250.             # new-snow density (kg m-3)
-# rho_snow = 350.                 # average of max and min densities.
-rho_snow_max = 400.             # maximum snow density (kg m-3)
-rho_new_snow = 200.             # new-snow density (kg m-3)
-rho_snow = 300.                 # average of max and min densities.
+rho_snow_max = 450.             # maximum snow density (kg m-3)
+rho_new_snow = 250.             # new-snow density (kg m-3)
+rho_snow = 350.                 # average of max and min densities.
+# rho_snow_max = 400.             # maximum snow density (kg m-3)
+# rho_new_snow = 200.             # new-snow density (kg m-3)
+# rho_snow = 300.                 # average of max and min densities.
 rho_drained_snow = rho_snow     #
 rho_slush_ice = 0.875*10**3     # from Vehvilainen (2008) and again Saloranta (2000)
 rho_black_ice = 0.917*10**3     # ice (incl. snow ice) density [kg m-3]
@@ -77,10 +77,7 @@ rho_slush = part_ice_in_slush * rho_slush_ice + (1 - part_ice_in_slush) * rho_wa
 L_fusion = 333.5 * 10**3        # latent heat of fusion
 L_vapour = 2260. * 10**3        # latent heat of vapour
 L_0to100C = 418 * 10**3         # heat in warming 1kg water from 0 to 100 C
-# L_sublimation = L_fusion + L_vapour + L_0to100C  # Latent heat of sublimation
-
-# ??? Sublimation is from solid to vapour, thus also heating between the phases?
-L_sublimation = L_fusion + L_vapour  # Latent heat of sublimation
+L_sublimation = L_fusion + L_vapour  # Latent heat of sublimation. A solid going directly to vapor
 
 
 # Molecular wights
