@@ -570,6 +570,226 @@ def plot_ice_cover(ice_cover, observed_ice, date, temp, sno, snotot, filename):
     plt.close()
 
 
+def plot_reference_lake(ice_cover, observed_ice, date, temp, sno, snotot, filename):
+    """Plots ice cover for a reference lake centered on the reference date +/- 10 days. It also plots
+    observed data and snow and temperature data.
+
+    :param ice_cover:
+    :param observed_ice:    A list of ice_cover objects. If no observed ice use [] for resources.
+    :param date:
+    :param temp:
+    :param sno:
+    :param snotot:
+    :param filename:
+    """
+
+    axis_date = copy.deepcopy(date)
+
+    # convert sno and snotot from m to cm
+    sno = [s * 100 for s in sno]
+    snotot = [st * 100 for st in snotot]
+
+    # convert ice_cover and observed_ice from m to cm
+    for oc in observed_ice:
+        if oc.water_line != -1:
+            oc.water_line *= 100
+        for l in oc.column:
+            l.height *= 100
+
+    for c in ice_cover:
+        c.water_line *= 100
+        for l in c.column:
+            l.height *= 100
+
+    # Turn off interactive mode
+    plt.ioff()
+
+    # Figure dimensions
+    plt.figure(figsize=(16, 14))
+    plt.clf()
+
+    ########## Ice columns sub plot
+    plt.subplot2grid((4, 1), (0, 0), rowspan=3)
+    plt.grid(color='0.6', linestyle='--', linewidth=0.7, zorder=0)
+    plt.plot(axis_date, [0] * len(axis_date), 'k--', linewidth=2, zorder=0)
+    plt.text(axis_date[3], 1, 'Vannlinje', color='0.3', fontsize=12)
+    plt.text(axis_date[3], 4, '-7', color='0', fontsize=18, horizontalalignment='center')
+    plt.text(axis_date[10], 4, '0', color='0', fontsize=18, horizontalalignment='center')
+    plt.text(axis_date[17], 4, '+7', color='0', fontsize=18, horizontalalignment='center')
+    plt.xlim(axis_date[0], axis_date[-1])
+
+    # depending on how many days are in the plot, the lineweight of the modelled data should be adjusted
+    if len(axis_date) < 15:
+        modelledLineWeight = 400 / len(axis_date)
+    elif len(axis_date) >= 15 and len(axis_date) < 50:
+        modelledLineWeight = 500 / len(axis_date)
+    elif len(axis_date) >= 50 and len(axis_date) < 70:
+        modelledLineWeight = 900 / len(axis_date)
+    else:
+        modelledLineWeight = 1100 / len(axis_date)
+
+    # dont need to keep the column coordinates, but then again, why not..? Useful for debugging.
+    all_column_coordinates = []
+
+    if len(observed_ice) > 0:
+        location_name = observed_ice[0].metadata['LocationName']
+    else:
+        location_name = 'Ukjent vann'
+
+    # Label with reference calculation date. The middle of the series.
+    ref_date = date[0] + (date[-1] - date[0])/2 + dt.timedelta(days=1)
+    plt.title("{0} - referanseberegning for {1}".format(location_name, ref_date.strftime('%Y%m%d')), fontsize=24)
+
+    # a variable for the lowest point on the ice cover. It is used for setting the lower left y-limit .
+    lowest_point = 0.
+    highest_point = 0.
+    legend = {}
+
+    # Plot ice cover
+    for ic in ice_cover:
+
+        # some idea of progress on the plotting
+        if ic.date.day == 1:
+            print((ic.date).strftime('%Y%m%d'))
+
+        # make data for plotting. [ice layers.. [fro, too, ice type]].
+        column_coordinates = []
+        too = -ic.water_line  # water line is on xaxis
+
+        for i in range(len(ic.column)-1, -1, -1):
+            layer = ic.column[i]
+            fro = too
+            too = too + layer.height
+            column_coordinates.append([fro, too, layer.type])
+
+            if fro < lowest_point:
+                lowest_point = fro
+
+            if too > highest_point:
+                highest_point = too
+
+            # add coordinates to a vline plot
+            plt.vlines(ic.date.date(), fro, too, lw=modelledLineWeight, color=layer.get_colour())
+
+            if 'unknown' in layer.type:  # in IceLayer class, the enum for unknown ice is the same as for slush ice.
+                legend[-1] = [layer.get_colour(), layer.get_norwegian_name()]
+            else:
+                legend[layer.get_enum()] = [layer.get_colour(), layer.get_norwegian_name()]
+
+        all_column_coordinates.append(column_coordinates)
+
+    # plot observed ice columns
+    for ic in observed_ice:
+
+        if len(ic.column) == 0:
+            height = 3.
+            plt.vlines(ic.date.date(), -height*0.6, height, lw=6, color='white')
+            plt.vlines(ic.date.date(), -height*0.6, height, lw=4, color='red')
+
+        else:
+            # some idea of progress on the plotting
+            print("Plotting observations.")
+
+            # make data for plotting. [ice layers.. [fro, too, icetype]].
+            too = -ic.water_line  # water line is on xaxis
+
+            for i in range(len(ic.column)-1, -1, -1):
+                layer = ic.column[i]
+                fro = too
+                too = too + layer.height
+
+                if fro < lowest_point:
+                    lowest_point = fro
+
+                if too > highest_point:
+                    highest_point = too
+
+                padding = 0.
+                padding_color = 'white'
+                # outline the observations in orange if I have modelled the ice height after observation.
+                if ic.metadata.get('IceHeightAfter') == 'Modeled':
+                    padding_color = 'orange'
+                # add coordinates to a vline plot
+                plt.vlines(ic.date.date(), fro-padding, too+padding, lw=8, color=padding_color)
+                plt.vlines(ic.date.date(), fro, too, lw=6, color=layer.get_colour())
+
+                if 'unknown' in layer.type:  # in IceLayer class, the enum for unknown ice is the same as for slush ice.
+                    legend[-1] = [layer.get_colour(), layer.get_norwegian_name()]
+                else:
+                    legend[layer.get_enum()] = [layer.get_colour(), layer.get_norwegian_name()]
+
+    # the limits of the left side y-axis is defined relative the lowest point in the ice cover
+    # and the highest point of the observed snow cover.
+    plt.ylim(min(-30, lowest_point*1.1), max(30, highest_point*1.1))
+    plt.ylabel('Høyde og dybde i [cm] relativt vannlinjen')
+
+    # Make legend
+    legend = collections.OrderedDict(sorted(legend.items()))
+    legend_handles = []
+    for k, v in legend.items():
+        legend_handles.append(mpatches.Patch(color=v[0], label=v[1]))
+    legend_handles = list(reversed(legend_handles))
+    plt.legend(handles=legend_handles)
+
+    ######## Temp and snow in separate subplot
+    plt.subplot2grid((4, 1), (3, 0), rowspan=1)
+    plt.grid(color='0.6', linestyle='--', linewidth=0.7, zorder=0)
+
+    # plot total snow depth on land
+    index_max_snotot = snotot.index(max(snotot))
+    max_snotot = snotot[index_max_snotot]
+    max_sno = max(sno)
+
+    if max_snotot != 0:
+        snotot = [s * 1.5 * max(max_sno, 5) / max_snotot for s in snotot]
+        dato_max_snotot = date[index_max_snotot]
+    else:
+        dato_max_snotot = date[-1]
+
+    relative_max_snotot = snotot[index_max_snotot]
+    plt.fill_between(date, 0, snotot, facecolor='0.95', edgecolor='k', linewidth=0.1, zorder=3)
+    plt.text(dato_max_snotot - dt.timedelta(days=len(date)/8),
+             relative_max_snotot - max(2.4 * max(sno), 20) * 0.08,
+             '{}cm snø i terrenget'.format(int(max_snotot)), color='0.5')
+    plt.plot(dato_max_snotot, relative_max_snotot, marker='o', color='0.5', zorder=4)
+
+    # plot new snow
+    plt.ylim(0, max(2.4 * max(sno), 20))
+    plt.ylabel('Nysnø i [cm]')
+    plt.bar(date, sno, width=0.7, facecolor='0.85', edgecolor=['black'] * len(date), linewidth=0.5, zorder=3)
+
+    # Plot temperatures on a separate y axis
+    plt.twinx()
+
+    temp_pluss = []
+    temp_minus = []
+
+    for i in range(0, len(temp), 1):
+        if temp[i] >= 0:
+            temp_pluss.append(temp[i])
+            temp_minus.append(np.nan)
+        else:
+            temp_minus.append(temp[i])
+            temp_pluss.append(np.nan)
+
+    plt.plot(date, temp, "black")
+    plt.plot(date, temp_pluss, "red")
+    plt.plot(date, temp_minus, "blue")
+
+    if min(temp) > 0:
+        plt.ylim(0, 1.2 * (max(temp)+2))
+    else:
+        plt.ylim(2. * min(temp), 1.2 * (max(temp)+2))
+    plt.ylabel('Temp i [C]')
+
+    plt.xlim(axis_date[0], axis_date[-1])
+    plt.gca().axes.get_xaxis().set_ticklabels([])
+    plt.gcf().text(0.78, 0.06, 'Figur laget {0:%Y-%m-%d %H:%M}'.format(dt.datetime.now()), color='0.5')
+
+    plt.savefig(filename)
+    plt.close()
+
+
 def plot_ice_cover_eb(
         ice_cover, energy_balance, observed_ice, date, temp, snotot, filename, prec=None, wind=None, clouds=None):
     """

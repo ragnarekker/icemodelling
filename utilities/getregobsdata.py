@@ -1179,35 +1179,6 @@ def get_observations_on_location_id(location_id, year, get_new=False):
     observations_on_location_for_modeling = []
 
     try:
-
-        """get_all_season_ice returns only ice columns. This code is not needed
-        
-        for o in all_locations[location_id]:
-            if isinstance(o, ice.IceCover):
-
-                if o.first_ice:
-                    fc = ice.IceColumn(o.date, 0)
-                    fc.add_metadata('LocationName', o.locationName)
-                    fc.add_metadata('RegID', o.RegID)
-                    fc.add_metadata('UTMNorth', o.metadata['UTMNorth'])
-                    fc.add_metadata('UTMEast', o.metadata['UTMEast'])
-                    fc.add_metadata('UTMZone', o.metadata['UTMZone'])
-                    observations_on_location_for_modeling.append(fc)
-
-                if o.ice_cover_lost:
-                    lc = ice.IceColumn(o.date, 0)
-                    lc.add_metadata('LocationName', o.locationName)
-                    lc.add_metadata('RegID', o.RegID)
-                    lc.add_metadata('UTMNorth', o.metadata['UTMZone'])
-                    lc.add_metadata('UTMEast', o.metadata['UTMZone'])
-                    lc.add_metadata('UTMZone', o.metadata['UTMZone'])
-                    observations_on_location_for_modeling.append(lc)
-
-            elif isinstance(o, ice.IceColumn):
-                observations_on_location_for_modeling.append(o)     
-                
-        """
-
         observations_on_location_for_modeling = all_locations[location_id]
 
     except Exception as e:

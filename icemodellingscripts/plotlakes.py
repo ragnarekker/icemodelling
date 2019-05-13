@@ -2,7 +2,10 @@
 """
 
 """
+import os
 import copy
+import json
+from ftplib import FTP
 import datetime as dt
 from icemodelling import constants as const, weatherelement as we, icethickness as it
 from icemodelling import parameterization as dp
@@ -246,22 +249,22 @@ def run_mosselva(from_date, to_date, make_plots=True, plot_folder=se.plot_folder
 
 if __name__ == "__main__":
 
-    run_semsvann('2017-11-01', '2018-06-01')
-    run_semsvann('2016-11-01', '2017-06-01')
-    run_semsvann('2015-11-01', '2016-06-01')
-    run_semsvann('2014-11-01', '2015-06-01')
+    #run_semsvann('2017-11-01', '2018-06-01')
+    #run_semsvann('2016-11-01', '2017-06-01')
+    #run_semsvann('2015-11-01', '2016-06-01')
+    #run_semsvann('2014-11-01', '2015-06-01')
 
-    run_semsvann('2017-11-01', '2018-06-01', forcing='eKlima')
-    run_semsvann('2016-11-01', '2017-06-01', forcing='eKlima')
-    run_semsvann('2015-11-01', '2016-06-01', forcing='eKlima')
+    #run_semsvann('2017-11-01', '2018-06-01', forcing='eKlima')
+    #run_semsvann('2016-11-01', '2017-06-01', forcing='eKlima')
+    #run_semsvann('2015-11-01', '2016-06-01', forcing='eKlima')
 
-    run_mosselva('2017-11-01', '2018-06-01')
-    run_mosselva('2016-11-01', '2017-06-01')
-    run_mosselva('2015-11-01', '2016-06-01')
+    #run_mosselva('2017-11-01', '2018-06-01')
+    #run_mosselva('2016-11-01', '2017-06-01')
+    #run_mosselva('2015-11-01', '2016-06-01')
 
-    run_mosselva('2017-11-01', '2018-06-01', forcing='eKlima')
-    run_mosselva('2016-11-01', '2017-06-01', forcing='eKlima')
-    run_mosselva('2015-11-01', '2016-06-01', forcing='eKlima')
+    #run_mosselva('2017-11-01', '2018-06-01', forcing='eKlima')
+    #run_mosselva('2016-11-01', '2017-06-01', forcing='eKlima')
+    #run_mosselva('2015-11-01', '2016-06-01', forcing='eKlima')
 
     # cap.calculate_and_plot_location('Semsvannet v/Lo 145 moh', '2016-10-01', '2017-07-01')
 

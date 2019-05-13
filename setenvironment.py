@@ -47,6 +47,8 @@ plot_folder = project_path + folders['plots']
 sesong_plots_folder = project_path + folders['sesong_plots']
 ni_dogn_plots_folder = project_path + folders['ni_dogn_plots']
 log_folder = project_path + folders['logs']
+reference_lakes_output_json_folder = project_path + folders['reference_lakes_output_json_folder']
+reference_lakes_plot_folder = project_path + folders['reference_lakes_plot_folder']
 
 # Create project folders if missing
 if project_path:
@@ -66,10 +68,18 @@ if project_path:
             os.makedirs(ni_dogn_plots_folder)
         if not os.path.exists(log_folder):
             os.makedirs(log_folder)
+        if not os.path.exists(reference_lakes_output_json_folder):
+            os.makedirs(reference_lakes_output_json_folder)
+        if not os.path.exists(reference_lakes_plot_folder):
+            os.makedirs(reference_lakes_plot_folder)
 
     except:
         error_msg = sys.exc_info()[0]
         print("setenvironment.py: Error creating folders: {}.".format(error_msg))
+
+# Resource files
+reference_lakes_input_json_file = project_path + folders['reference_lakes_input_json_file']
+reference_lakes_adjusted_location = project_path + folders['reference_lakes_adjusted_location']
 
 # Set resource folders
 logos = project_path + folders['logos']
