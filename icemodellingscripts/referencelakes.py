@@ -15,7 +15,7 @@ from utilities import getgts as gts
 __author__ = 'ragnarekker'
 
 
-def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=True, get_new_obs=True):
+def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=False, get_new_obs=False):
     """Plot ice thickness for this season for all reference lakes. Create a json-file with information about
     changes in the ice thickness last week and expected changes next week.
 
@@ -296,9 +296,8 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Tru
         outfile_latest.write(reference_lakes_output_json)
         outfile_latest.close()
 
-    return
-
 
 if __name__ == "__main__":
 
-    calculate_reference_lakes(dt.datetime(2019, 1, 1), get_new_obs=False)
+    # calculate_reference_lakes(dt.datetime(2019, 1, 1), make_plots=True, get_new_obs=False)
+    pass

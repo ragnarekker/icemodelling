@@ -8,7 +8,11 @@
     "logs" : "/logs/",
     "resources" : "/resources/",
     "time_series_data" : "/resources/timeseriesdata/",
-    "logos" : "/resources/logos/"
+    "logos" : "/resources/logos/",
+    "reference_lakes_input_json_file": "/resources/referansevann/referansevann.json",
+    "reference_lakes_output_json_folder" : "/output/plots/reference_lakes/",
+    "reference_lakes_plot_folder" : "/output/plots/reference_lakes/",
+    "reference_lakes_adjusted_location" : "/resources/referansevann/Adjusted_location_for_GTS.json"
 }
 
 

@@ -47,6 +47,7 @@ plot_folder = project_path + folders['plots']
 sesong_plots_folder = project_path + folders['sesong_plots']
 ni_dogn_plots_folder = project_path + folders['ni_dogn_plots']
 log_folder = project_path + folders['logs']
+data_sets_folder = project_path + folders['data_sets']
 reference_lakes_output_json_folder = project_path + folders['reference_lakes_output_json_folder']
 reference_lakes_plot_folder = project_path + folders['reference_lakes_plot_folder']
 
@@ -68,6 +69,8 @@ if project_path:
             os.makedirs(ni_dogn_plots_folder)
         if not os.path.exists(log_folder):
             os.makedirs(log_folder)
+        if not os.path.exists(data_sets_folder):
+            os.makedirs(data_sets_folder)
         if not os.path.exists(reference_lakes_output_json_folder):
             os.makedirs(reference_lakes_output_json_folder)
         if not os.path.exists(reference_lakes_plot_folder):
@@ -91,3 +94,4 @@ web_api_version = api['web_api_version']
 forecast_api_version = api['forecast_api_version']
 registration_basestring = api['registration_basestring']
 chart_server_basestring = api['chart_server_basestring']
+frost_client_id = api['frost_client_id']

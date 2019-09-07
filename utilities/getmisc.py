@@ -135,9 +135,40 @@ def get_masl_from_utm33(x, y):
         return int(masl)
 
 
+def get_lake_info(x, y, reference=4326):
+    """Method looks up lake parameters from NVEs lake database at a given coordinate.
+
+    :param x:
+    :param y:
+    :param reference:   [int] 4326 is lat/lon, 32633 is utm33N
+
+    :return:
+    """
+
+    url = 'https://gis3.nve.no/map/rest/services/Innsjodatabase1/MapServer/1/query' \
+          '?geometry={0}%2C{1}' \
+          '&geometryType=esriGeometryPoint' \
+          '&inSR={2}' \
+          '&spatialRel=esriSpatialRelIntersects' \
+          '&outFields=*' \
+          '&returnGeometry=false' \
+          '&f=json'.format(x, y, reference)
+
+    data = requests.get(url).json()
+    try:
+        lake_data = data['features'][0]['attributes']
+    except:
+        ml.log_and_print("getmisc.py -> get_lake_info: No lake info found at x={}, y={}, ({}).".format(x, y, reference))
+        lake_data = None
+
+    return lake_data
+
+
 if __name__ == "__main__":
 
     # height = get_masl_from_utm33(120613, 6834932)
     # from_date, to_date = get_dates_from_year('2099-00')
+    # get_lake_info(x=10.7754518, y=59.9855491)
+    get_lake_info(x=249607, y=6656667, reference=32633)
 
     pass

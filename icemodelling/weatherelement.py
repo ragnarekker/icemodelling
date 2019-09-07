@@ -116,6 +116,10 @@ def strip_metadata(weather_element_list, get_date_times=False):
     :return value_list, date_list:  [list(s)] date_list is optional and is returned if get_dates is True.
     """
 
+    if len(weather_element_list) == 0:
+        ml.log_and_print("[warning] weatherelement.py -> strip_metadata: weather_element_list of len=0")
+        return [], []
+
     if get_date_times:
 
         value_list = []
@@ -129,10 +133,7 @@ def strip_metadata(weather_element_list, get_date_times=False):
 
     else:
 
-        value_list = []
-
-        for e in weather_element_list:
-            value_list.append(e.Value)
+        value_list = [e.Value for e in weather_element_list]
 
         return value_list
 
@@ -205,6 +206,10 @@ def adjust_temperature_to_new_altitude(weather_element_list, new_altitude):
     :param new_altitude:
     :return:
     """
+
+    if len(weather_element_list) == 0:
+        ml.log_and_print("[warning] weatherelement.py -> adjust_temperature_to_new_altitude: weather_element_list of len=0")
+        return weather_element_list
 
     if new_altitude is None:
         ml.log_and_print("[warning] weatherelement.py -> adjust_temperature_to_new_altitude: new_element=None and no adjustments made.")

@@ -31,14 +31,14 @@ class ObsCalScatterData:
 
     """
 
-    def __init__(self, caluclated_draft_inn, observed_draft_inn, date_inn, location_inn):
+    def __init__(self, calculated_draft_inn, observed_draft_inn, date_inn, location_inn):
 
-        if caluclated_draft_inn < 0:
-            caluclated_draft_inn = 0
+        if calculated_draft_inn < 0:
+            calculated_draft_inn = 0
         if observed_draft_inn < 0:
             observed_draft_inn = 0
 
-        self.caluclated_draft = caluclated_draft_inn
+        self.caluclated_draft = calculated_draft_inn
         self.observed_draft = observed_draft_inn
         self.date = date_inn
         self.location = location_inn
@@ -169,6 +169,8 @@ def scatter_calculated_vs_observed(all_calculated, all_observed, year):
     plt.gcf().text(0.7, 0.05, 'Figure created {0:%Y-%m-%d %H:%M}'.format(dt.datetime.now()), color='0.5')
 
     plb.savefig(file_name)
+
+    return scatter_plot_data
 
 
 def plot_ice_cover_9dogn(ice_cover, observed_ice, date, temp, sno, snotot, filename):
