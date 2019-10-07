@@ -28,5 +28,4 @@ folders.json
 # Removing other content of private files when adding to git.
 plotsforisvarsling_1h.py
 plotsforisvarsling_24h.py
-calculatereferencelakes.py
 setenvironment_hb_int_app01.py

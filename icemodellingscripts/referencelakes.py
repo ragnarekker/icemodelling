@@ -39,11 +39,11 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
     fyear = calculation_date.year
     month = calculation_date.month
     if month < 9:
-        fyear = fyear - 1
+        fyear -= 1
     season = str(fyear) + '-' + str(fyear+1)[2:]
 
     # Calculate start of plot, use 30. september
-    start_season_date = dt.datetime(fyear, 9, 30)
+    start_season_date = dt.datetime(fyear, 9, 15)
     # Use 10 days before present date for the final plot
     start_plot_date = calculation_date - dt.timedelta(days=11)
 
@@ -118,13 +118,15 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
                     print(str(regobs_location_id) + ' - ' + location_name)
 
                     # Get start and end date for simulation
-                    first_possible_date = dt.datetime(fyear,9,1)
+                    freezeupgiven = False
                     if ref_lake['FreezeUpThisYear'] != '':
                         freezeup = ref_lake['FreezeUpThisYear']
                         freezup_dt = dt.datetime(int(freezeup[6:]), int(freezeup[3:5]), int(freezeup[0:2]))
-                        if freezup_dt < first_possible_date:
+                        if freezup_dt < start_season_date:
                             # Ignore this date, probably a left over from last season
                             freezeup = ref_lake['FreezeUpNormal']
+                        else:
+                            freezeupgiven = True
                     else:
                         freezeup = ref_lake['FreezeUpNormal']
 
@@ -134,6 +136,14 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
                         from_date = dt.datetime(fyear + 1, int(freezeup[3:5]), int(freezeup[0:2]))
                     else:
                         from_date = dt.datetime(fyear, int(freezeup[3:5]), int(freezeup[0:2]))
+
+                    if not freezeupgiven:
+                        # Set possible freezeup to 30 days earlier than normal, but not earlier than seasonstart.
+                        # This is to see possible freezeup before it actually happens
+                        from_date -= dt.timedelta(days=30)
+                        earliest_date = start_season_date + dt.timedelta(days=1)
+                        if from_date < earliest_date:
+                            from_date = earliest_date
 
                     to_date = calculation_date + dt.timedelta(days=9)
 
