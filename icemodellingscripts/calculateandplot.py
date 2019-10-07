@@ -246,7 +246,7 @@ def _plot_season(location_id, from_date, to_date, observed_ice, make_plots=True,
     return calculated_ice, observed_ice, plot_filename
 
 
-def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, get_new_obs=False, make_plots=False, delete_old_plots=False):
+def plot_season_for_all_regobs_locations(year='2019-20', calculate_new=False, get_new_obs=False, make_plots=False, delete_old_plots=False):
     """Method specialized for scheduled plotting for iskart.no.
     Method makes a season plot for all ObsLocations in regObs where we have a first ice date.
 
@@ -332,10 +332,10 @@ def plot_season_for_all_regobs_locations(year='2018-19', calculate_new=False, ge
         [all_calculated, all_observed] = mp.unpickle_anything(pickle_file_name_and_path)
 
     try:
-       pts.scatter_calculated_vs_observed(all_calculated, all_observed, year)
+        pts.scatter_calculated_vs_observed(all_calculated, all_observed, year)
     except:
-       error_msg = sys.exc_info()[0]
-       ml.log_and_print("[error] calculateandplot.py -> plot_season_for_all_regobs_locations: {}. Could not plot scatter {}.".format(error_msg, year))
+        error_msg = sys.exc_info()[0]
+        ml.log_and_print("[error] calculateandplot.py -> plot_season_for_all_regobs_locations: {}. Could not plot scatter {}.".format(error_msg, year))
 
 
 def calculate_and_plot9d_regid(regid, plot_folder=se.plot_folder, observed_ice=None):
@@ -387,7 +387,7 @@ def calculate_and_plot9d_regid(regid, plot_folder=se.plot_folder, observed_ice=N
         ml.log_and_print("[Error] calculateandplot.py -> calculate_and_plot9d_regid: {}. Could not plot {}.".format(error_msg, regid))
 
 
-def calculate_and_plot9d_season(period='2018-19'):
+def calculate_and_plot9d_season(period='2019-20'):
     """Calculate ice columns for 9 days and make plots of all ice thickness for a given season or optionally 'Today'.
 
     The inner workings:

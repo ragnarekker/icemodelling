@@ -1189,6 +1189,8 @@ def get_observations_on_location_id(location_id, year, get_new=False):
 
 def get_new_regobs_data():
 
+    get_all_season_ice('2019-20')
+    get_all_season_ice('2018-19')
     get_all_season_ice('2017-18')
     get_all_season_ice('2016-17')
     get_all_season_ice('2015-16')
@@ -1200,7 +1202,7 @@ def get_new_regobs_data():
 
 if __name__ == "__main__":
 
-    # get_new_regobs_data()
+    get_new_regobs_data()
     # ice_column = get_ice_thickness_on_regid(130979)
 
     # ice_thicks = get_ice_thickness_observations('2017-18')
