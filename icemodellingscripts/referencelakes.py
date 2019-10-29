@@ -54,7 +54,8 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
     output_folder = output_json_folder
     if output_folder[-1:] != '/':
         output_folder += '/'
-    output_filename = output_folder + f'Endringer_istykkelse-{calculation_date.year}-{calculation_date.month:02}-{calculation_date.day:02}.json'
+    cdate = calculation_date
+    output_filename = output_folder + f'Endringer_istykkelse-{cdate.year}-{cdate.month:02}-{cdate.day:02}.json'
     output_latest_filename_core = 'Endringer_istykkelse-latest.json'
     output_latest_filename = output_folder + output_latest_filename_core
 
@@ -121,8 +122,8 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
                     freezeupgiven = False
                     if ref_lake['FreezeUpThisYear'] != '':
                         freezeup = ref_lake['FreezeUpThisYear']
-                        freezup_dt = dt.datetime(int(freezeup[6:]), int(freezeup[3:5]), int(freezeup[0:2]))
-                        if freezup_dt < start_season_date:
+                        freezup_date = dt.datetime(int(freezeup[6:]), int(freezeup[3:5]), int(freezeup[0:2]))
+                        if freezup_date < start_season_date:
                             # Ignore this date, probably a left over from last season
                             freezeup = ref_lake['FreezeUpNormal']
                         else:
@@ -130,35 +131,48 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
                     else:
                         freezeup = ref_lake['FreezeUpNormal']
 
-                    # Adjust to correct start year and get from_date in datetime
+                    # Adjust to correct start year and get first_possible_completely_icecovered_date in datetime
                     if int(freezeup[3:5]) < 9:
                         # Passed new year
-                        from_date = dt.datetime(fyear + 1, int(freezeup[3:5]), int(freezeup[0:2]))
+                        first_possible_completely_icecovered_date = dt.datetime(fyear + 1, int(freezeup[3:5]),
+                                                                                int(freezeup[0:2]))
                     else:
-                        from_date = dt.datetime(fyear, int(freezeup[3:5]), int(freezeup[0:2]))
+                        first_possible_completely_icecovered_date = dt.datetime(fyear, int(freezeup[3:5]),
+                                                                                int(freezeup[0:2]))
 
                     if not freezeupgiven:
                         # Set possible freezeup to 30 days earlier than normal, but not earlier than seasonstart.
                         # This is to see possible freezeup before it actually happens
-                        from_date -= dt.timedelta(days=30)
+                        first_possible_completely_icecovered_date -= dt.timedelta(days=30)
                         earliest_date = start_season_date + dt.timedelta(days=1)
-                        if from_date < earliest_date:
-                            from_date = earliest_date
+                        if first_possible_completely_icecovered_date < earliest_date:
+                            first_possible_completely_icecovered_date = earliest_date
+                        if ref_lake['ConfirmedNoIceThisYear'] != '':
+                            # ConfirmedNoIceThisYear is a date that we know that it still is ice free conditions.
+                            # Calculations should not start earlier than this date
+                            confirmednoice = ref_lake['ConfirmedNoIceThisYear']
+                            confirmednoice_date = dt.datetime(int(confirmednoice[6:]), int(confirmednoice[3:5]),
+                                                              int(confirmednoice[0:2]))
+                            if first_possible_completely_icecovered_date < confirmednoice_date:
+                                first_possible_completely_icecovered_date = confirmednoice_date
 
                     to_date = calculation_date + dt.timedelta(days=9)
 
                     # Get regobs-observations, if any
                     observed_ice = gro.get_observations_on_location_id(regobs_location_id, season)
                     if len(observed_ice) > 0:
+                        # Only accept completely ice covered
+                        # for iceobs in observed_ice:
+
                         first_ice = observed_ice[0]
                         first_ice.ignore_slush_event_variable = False
                         first_ice.slush_event = False
                     else:
-                        first_ice = ice.IceColumn(from_date, [])
+                        first_ice = ice.IceColumn(first_possible_completely_icecovered_date, [])
                         first_ice.add_metadata('LocationName', location_name)  # used when plotting
                         observed_ice.append(first_ice)
 
-                    # Set from_date equal to when the calculations should start
+                    # Start calculations at the start of the season
                     from_date = start_season_date
 
                     gridTemp = gts.getgts(x, y, 'tm', from_date, to_date)
@@ -173,7 +187,8 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
                     sno_tot = we.strip_metadata(gridSnoTot)
                     cc = dp.clouds_from_precipitation(sno)
 
-                    calculated_ice = it.calculate_ice_cover_air_temp(copy.deepcopy(first_ice), date, temp, sno, cloud_cover=cc)
+                    calculated_ice = it.calculate_ice_cover_air_temp(copy.deepcopy(first_ice),
+                                                                     date, temp, sno, cloud_cover=cc)
 
                     # Create output json
                     wanted_output_dates = []
@@ -241,6 +256,10 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
                     # Add todays date
                     today_date = f'{calculation_date.day:02}.{calculation_date.month:02}.{calculation_date.year}'
                     ref_lake['Updated'] = today_date
+                    # Add todays date
+                    fp = first_possible_completely_icecovered_date
+                    firstpossibleice_date = f'{fp.day:02}.{fp.month:02}.{fp.year}'
+                    ref_lake['FirstPossibleIce'] = firstpossibleice_date
                     # Save present status
                     ref_lake['SnowThickness'] = f'{wanted_snow_thickness[1]:.2f}'
                     ref_lake['SlushThickness'] = f'{wanted_slush_thickness[1]:.2f}'
@@ -309,5 +328,6 @@ def calculate_reference_lakes(calculation_date=dt.datetime.now(), make_plots=Fal
 
 if __name__ == "__main__":
 
-    # calculate_reference_lakes(dt.datetime(2019, 1, 1), make_plots=True, get_new_obs=False)
+    calculate_reference_lakes(dt.datetime.now(), make_plots=True, get_new_obs=False)
+    #calculate_reference_lakes(dt.datetime(2019, 1, 1), make_plots=True, get_new_obs=False)
     pass

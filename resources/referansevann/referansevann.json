@@ -17,8 +17,10 @@
 								"lat": "59.097758",
 								"utm33x": "263515",
 								"utm33y": "6558255",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.12.2018"
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -33,8 +35,10 @@
 								"lat": "59.844873",
 								"utm33x": "243531",
 								"utm33y": "6643004",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.11.2018"
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -49,8 +53,10 @@
 								"lat": "59.77373",
 								"utm33x": "186036",
 								"utm33y": "6639474",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.11.2018"
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -65,8 +71,10 @@
 								"lat": "62.001474",
 								"utm33x": "114730",
 								"utm33y": "6896259",
-								"FreezeUpThisYear": "23.10.2018",
-								"FreezeUpNormal": "25.10.2018"
+								"ConfirmedNoIceThisYear": "24.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "25.10.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -81,8 +89,10 @@
 								"lat": "61.007148",
 								"utm33x": "127892",
 								"utm33y": "6783189",
-								"FreezeUpThisYear": "23.10.2018",
-								"FreezeUpNormal": "25.10.2019"
+								"ConfirmedNoIceThisYear": "04.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "25.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -102,8 +112,10 @@
 								"lat": "58.959696",
 								"utm33x": "180698",
 								"utm33y": "6548843",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "25.12.2018"
+								"FreezeUpNormal": "25.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -118,8 +130,10 @@
 								"lat": "60.073487",
 								"utm33x": "258494",
 								"utm33y": "6667531",
-								"FreezeUpThisYear": "05.12.2018",
-								"FreezeUpNormal": "01.12.2018"
+								"ConfirmedNoIceThisYear": "24.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -134,8 +148,10 @@
 								"lat": "60.996609",
 								"utm33x": "173711",
 								"utm33y": "6777467",
-								"FreezeUpThisYear": "20.11.2018",
-								"FreezeUpNormal": "15.11.2018"
+								"ConfirmedNoIceThisYear": "24.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -150,8 +166,10 @@
 								"lat": "60.711775",
 								"utm33x": "134195",
 								"utm33y": "6749400",
-								"FreezeUpThisYear": "19.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "24.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -166,8 +184,10 @@
 								"lat": "61.547857",
 								"utm33x": "141712",
 								"utm33y": "6842398",
-								"FreezeUpThisYear": "26.10.2018",
-								"FreezeUpNormal": "05.11.2019"
+								"ConfirmedNoIceThisYear": "24.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "05.11.2019",
+								"WebcameraExists": true
 							}
 						}
 					]
@@ -187,8 +207,10 @@
 								"lat": "59.171928",
 								"utm33x": "222419",
 								"utm33y": "6569312",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.12.2018"
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -203,8 +225,10 @@
 								"lat": "60.388757",
 								"utm33x": "352658",
 								"utm33y": "6697697",
-								"FreezeUpThisYear": "14.12.2019",
-								"FreezeUpNormal": "10.12.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -219,8 +243,10 @@
 								"lat": "61.884555",
 								"utm33x": "244863",
 								"utm33y": "6870864",
-								"FreezeUpThisYear": "23.11.2018",
-								"FreezeUpNormal": "25.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "25.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -235,8 +261,10 @@
 								"lat": "61.305195",
 								"utm33x": "161460",
 								"utm33y": "6813203",
-								"FreezeUpThisYear": "20.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -251,8 +279,10 @@
 								"lat": "61.002661",
 								"utm33x": "129548",
 								"utm33y": "6782511",
-								"FreezeUpThisYear": "20.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -272,8 +302,10 @@
 								"lat": "59.065214",
 								"utm33x": "213928",
 								"utm33y": "6558013",
-								"FreezeUpThisYear": "08.02.2019",
-								"FreezeUpNormal": "01.05.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.05.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -288,8 +320,10 @@
 								"lat": "60.4731816",
 								"utm33x": "228127",
 								"utm33y": "6714335",
-								"FreezeUpThisYear": "24.12.2018",
-								"FreezeUpNormal": "20.12.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.12.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -304,8 +338,10 @@
 								"lat": "62.2055478264087",
 								"utm33x": "339283",
 								"utm33y": "6900914",
-								"FreezeUpThisYear": "15.01.2019",
-								"FreezeUpNormal": "01.01.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -320,8 +356,10 @@
 								"lat": "61.349515",
 								"utm33x": "152788",
 								"utm33y": "6819026",
-								"FreezeUpThisYear": "03.02.2019",
-								"FreezeUpNormal": "25.01.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "25.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -336,8 +374,10 @@
 								"lat": "60.409027",
 								"utm33x": "98499",
 								"utm33y": "6719247",
-								"FreezeUpThisYear": "22.10.2018",
-								"FreezeUpNormal": "05.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "05.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -362,8 +402,10 @@
 								"lat": "58.784373",
 								"utm33x": "-30734",
 								"utm33y": "6552600",
-								"FreezeUpThisYear": "22.11.2018",
-								"FreezeUpNormal": "01.12.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -378,8 +420,10 @@
 								"lat": "58.642356",
 								"utm33x": "9319",
 								"utm33y": "6531278",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "25.11.2019"
+								"FreezeUpNormal": "25.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -394,8 +438,10 @@
 								"lat": "58.908734",
 								"utm33x": "31390",
 								"utm33y": "6558497",
-								"FreezeUpThisYear": "17.11.2018",
-								"FreezeUpNormal": "15.11.2018"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -410,8 +456,10 @@
 								"lat": "59.033086",
 								"utm33x": "54176",
 								"utm33y": "6569747",
-								"FreezeUpThisYear": "28.10.2018",
-								"FreezeUpNormal": "05.11.2018"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "05.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -426,8 +474,10 @@
 								"lat": "59.394283",
 								"utm33x": "48455",
 								"utm33y": "6611030",
-								"FreezeUpThisYear": "28.10.2018",
-								"FreezeUpNormal": "01.11.2018"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -447,8 +497,10 @@
 								"lat": "58.763393",
 								"utm33x": "-29493",
 								"utm33y": "6550062",
-								"FreezeUpThisYear": "18.01.2019",
-								"FreezeUpNormal": "15.01.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.01.2020",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -463,8 +515,10 @@
 								"lat": "58.772863",
 								"utm33x": "-2614",
 								"utm33y": "6547514",
-								"FreezeUpThisYear": "23.12.2018",
-								"FreezeUpNormal": "01.01.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -479,8 +533,10 @@
 								"lat": "58.911691",
 								"utm33x": "32546",
 								"utm33y": "6558688",
-								"FreezeUpThisYear": "22.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -495,8 +551,10 @@
 								"lat": "59.031467",
 								"utm33x": "55879",
 								"utm33y": "6569366",
-								"FreezeUpThisYear": "28.10.2018",
-								"FreezeUpNormal": "10.11.2019"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -511,8 +569,10 @@
 								"lat": "59.495268",
 								"utm33x": "54044",
 								"utm33y": "6621714",
-								"FreezeUpThisYear": "20.11.2019",
-								"FreezeUpNormal": "01.11.2018"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -532,8 +592,10 @@
 								"lat": "58.745716",
 								"utm33x": "-45953",
 								"utm33y": "6550375",
+								"ConfirmedNoIceThisYear": "21.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "05.01.2019"
+								"FreezeUpNormal": "05.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -548,8 +610,10 @@
 								"lat": "58.690846",
 								"utm33x": "-5185",
 								"utm33y": "6538612",
+								"ConfirmedNoIceThisYear": "21.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.01.2019"
+								"FreezeUpNormal": "15.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -564,8 +628,10 @@
 								"lat": "58.971081",
 								"utm33x": "85787",
 								"utm33y": "6559218",
-								"FreezeUpThisYear": "25.11.2018",
-								"FreezeUpNormal": "25.11.2018"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "25.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -580,8 +646,10 @@
 								"lat": "59.175927",
 								"utm33x": "56936",
 								"utm33y": "6585477",
-								"FreezeUpThisYear": "25.11.2018",
-								"FreezeUpNormal": "25.11.2018"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "25.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -596,8 +664,10 @@
 								"lat": "59.448632",
 								"utm33x": "54590",
 								"utm33y": "6616406",
-								"FreezeUpThisYear": "20.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "21.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -617,8 +687,10 @@
 								"lat": "58.63093",
 								"utm33x": "-7536",
 								"utm33y": "6532171",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.05.2019"
+								"FreezeUpNormal": "01.05.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -633,8 +705,10 @@
 								"lat": "58.400733",
 								"utm33x": "45945",
 								"utm33y": "6499644",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.01.2019"
+								"FreezeUpNormal": "01.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -649,8 +723,10 @@
 								"lat": "59.466538",
 								"utm33x": "61062",
 								"utm33y": "6617654",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.02.2019"
+								"FreezeUpNormal": "15.02.2020",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -665,8 +741,10 @@
 								"lat": "59.357398",
 								"utm33x": "41134",
 								"utm33y": "6607770",
-								"FreezeUpThisYear": "09.01.2019",
-								"FreezeUpNormal": "01.01.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -681,8 +759,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -707,8 +787,10 @@
 								"lat": "60.341172",
 								"utm33x": "-39364",
 								"utm33y": "6729618",
-								"FreezeUpThisYear": "10.12.2018",
-								"FreezeUpNormal": "10.12.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -723,8 +805,10 @@
 								"lat": "61.932639",
 								"utm33x": "56071",
 								"utm33y": "6895721",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.12.2019"
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -739,8 +823,10 @@
 								"lat": "60.3992719",
 								"utm33x": "-14076",
 								"utm33y": "6732473",
-								"FreezeUpThisYear": "20.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -755,8 +841,10 @@
 								"lat": "61.2348148",
 								"utm33x": "114985",
 								"utm33y": "6810135",
-								"FreezeUpThisYear": "26.10.2018",
-								"FreezeUpNormal": "01.11.2019"
+								"ConfirmedNoIceThisYear": "18.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -771,8 +859,10 @@
 								"lat": "61.55262",
 								"utm33x": "125070",
 								"utm33y": "6844705",
-								"FreezeUpThisYear": "03.11.2019",
-								"FreezeUpNormal": "01.11.2019"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "04.10.2019",
+								"FreezeUpNormal": "05.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -792,8 +882,10 @@
 								"lat": "60.360885",
 								"utm33x": "-47100",
 								"utm33y": "6733016",
-								"FreezeUpThisYear": "12.12.2018",
-								"FreezeUpNormal": "10.12.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.12.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -808,8 +900,10 @@
 								"lat": "60.599316",
 								"utm33x": "58587",
 								"utm33y": "6745321",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "05.12.2019"
+								"FreezeUpNormal": "05.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -824,8 +918,10 @@
 								"lat": "60.82097",
 								"utm33x": "21340",
 								"utm33y": "6775103",
-								"FreezeUpThisYear": "29.10.2018",
-								"FreezeUpNormal": "01.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -840,8 +936,10 @@
 								"lat": "60.62976",
 								"utm33x": "62523",
 								"utm33y": "6748261",
+								"ConfirmedNoIceThisYear": "18.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.11.2019"
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -856,8 +954,10 @@
 								"lat": "60.645646",
 								"utm33x": "67324",
 								"utm33y": "6749462",
-								"FreezeUpThisYear": "20.10.2018",
-								"FreezeUpNormal": "01.11.2019"
+								"ConfirmedNoIceThisYear": "18.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -877,8 +977,10 @@
 								"lat": "59.889463",
 								"utm33x": "-40137",
 								"utm33y": "6678691",
-								"FreezeUpThisYear": "03.02.2019",
-								"FreezeUpNormal": "01.02.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.02.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -893,8 +995,10 @@
 								"lat": "61.3054057",
 								"utm33x": "82247",
 								"utm33y": "6821844",
-								"FreezeUpThisYear": "12.12.2018",
-								"FreezeUpNormal": "10.12.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.12.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -909,8 +1013,10 @@
 								"lat": "60.521985",
 								"utm33x": "13364",
 								"utm33y": "6742484",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.12.2019"
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -925,8 +1031,10 @@
 								"lat": "60.547155",
 								"utm33x": "22185",
 								"utm33y": "6744131",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.01.2019"
+								"FreezeUpNormal": "01.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -941,8 +1049,10 @@
 								"lat": "60.7384968",
 								"utm33x": "95355",
 								"utm33y": "6756602",
-								"FreezeUpThisYear": "22.11.2018",
-								"FreezeUpNormal": "15.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": true
 							}
 						}
 					]
@@ -962,8 +1072,10 @@
 								"lat": "61.930952",
 								"utm33x": "45133",
 								"utm33y": "6896987",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.03.2019"
+								"FreezeUpNormal": "01.03.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -978,8 +1090,10 @@
 								"lat": "61.522363",
 								"utm33x": "35103",
 								"utm33y": "6852294",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.02.2019"
+								"FreezeUpNormal": "15.02.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -994,8 +1108,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1010,8 +1126,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1026,8 +1144,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1052,8 +1172,10 @@
 								"lat": "63.793998",
 								"utm33x": "257745",
 								"utm33y": "7083400",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "20.11.2019"
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1068,8 +1190,10 @@
 								"lat": "63.393968",
 								"utm33x": "264026",
 								"utm33y": "7038193",
-								"FreezeUpThisYear": "27.10.2018",
-								"FreezeUpNormal": "10.11.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1084,8 +1208,10 @@
 								"lat": "62.163102",
 								"utm33x": "47248",
 								"utm33y": "6922864",
-								"FreezeUpThisYear": "26.10.2018",
-								"FreezeUpNormal": "10.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1100,8 +1226,10 @@
 								"lat": "62.859621",
 								"utm33x": "337190",
 								"utm33y": "6973996",
-								"FreezeUpThisYear": "22.10.2018",
-								"FreezeUpNormal": "25.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "06.10.2019",
+								"FreezeUpNormal": "25.10.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1116,8 +1244,10 @@
 								"lat": "62.120169",
 								"utm33x": "110435",
 								"utm33y": "6910088",
-								"FreezeUpThisYear": "22.09.2018",
-								"FreezeUpNormal": "25.09.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "04.10.2019",
+								"FreezeUpNormal": "25.09.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1137,8 +1267,10 @@
 								"lat": "63.495202",
 								"utm33x": "239143",
 								"utm33y": "7051457",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.12.2019"
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1153,8 +1285,10 @@
 								"lat": "63.130926",
 								"utm33x": "163039",
 								"utm33y": "7017757",
-								"FreezeUpThisYear": "29.10.2018",
-								"FreezeUpNormal": "15.11.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1169,8 +1303,10 @@
 								"lat": "62.187792",
 								"utm33x": "92215",
 								"utm33y": "6919857",
-								"FreezeUpThisYear": "22.12.2019",
-								"FreezeUpNormal": "15.12.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1185,8 +1321,10 @@
 								"lat": "62.507839",
 								"utm33x": "236587",
 								"utm33y": "6941203",
-								"FreezeUpThisYear": "28.10.2018",
-								"FreezeUpNormal": "20.11.2019"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "26.10.2019",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1201,8 +1339,10 @@
 								"lat": "62.135455",
 								"utm33x": "116376",
 								"utm33y": "6911121",
-								"FreezeUpThisYear": "20.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "26.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1222,8 +1362,10 @@
 								"lat": "63.618583",
 								"utm33x": "262515",
 								"utm33y": "7063420",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "10.01.2019"
+								"FreezeUpNormal": "10.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1238,8 +1380,10 @@
 								"lat": "63.208225",
 								"utm33x": "256192",
 								"utm33y": "7018011",
-								"FreezeUpThisYear": "15.01.2019",
-								"FreezeUpNormal": "01.01.2019"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1254,8 +1398,10 @@
 								"lat": "62.67779",
 								"utm33x": "199934",
 								"utm33y": "6963353",
-								"FreezeUpThisYear": "19.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "26.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1270,8 +1416,10 @@
 								"lat": "63.192486",
 								"utm33x": "337004",
 								"utm33y": "7011151",
+								"ConfirmedNoIceThisYear": "26.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "20.11.2018"
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1286,8 +1434,10 @@
 								"lat": "62.089998",
 								"utm33x": "112486",
 								"utm33y": "6906461",
-								"FreezeUpThisYear": "20.11.2018",
-								"FreezeUpNormal": "20.11.2018"
+								"ConfirmedNoIceThisYear": "26.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1307,8 +1457,10 @@
 								"lat": "62.541125",
 								"utm33x": "149152",
 								"utm33y": "6953049",
+								"ConfirmedNoIceThisYear": "26.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.05.2019"
+								"FreezeUpNormal": "01.05.2020",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1323,8 +1475,10 @@
 								"lat": "63.261709",
 								"utm33x": "290004",
 								"utm33y": "7021603",
+								"ConfirmedNoIceThisYear": "26.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.05.2019"
+								"FreezeUpNormal": "01.05.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1339,8 +1493,10 @@
 								"lat": "62.692235",
 								"utm33x": "213973",
 								"utm33y": "6963719",
-								"FreezeUpThisYear": "19.12.2018",
-								"FreezeUpNormal": "20.12.2018"
+								"ConfirmedNoIceThisYear": "26.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.12.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1355,8 +1511,10 @@
 								"lat": "62.966706",
 								"utm33x": "350560",
 								"utm33y": "6985305",
-								"FreezeUpThisYear": "20.11.2018",
-								"FreezeUpNormal": "15.11.2019"
+								"ConfirmedNoIceThisYear": "26.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1371,8 +1529,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1397,8 +1557,10 @@
 								"lat": "68.226358",
 								"utm33x": "477352",
 								"utm33y": "7568202",
-								"FreezeUpThisYear": "01.12.2019",
-								"FreezeUpNormal": "01.12.2018"
+								"ConfirmedNoIceThisYear": "23.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1413,8 +1575,10 @@
 								"lat": "65.976299",
 								"utm33x": "446742",
 								"utm33y": "7317766",
+								"ConfirmedNoIceThisYear": "26.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.11.2018"
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1429,8 +1593,10 @@
 								"lat": "67.746784",
 								"utm33x": "538720",
 								"utm33y": "7514920",
-								"FreezeUpThisYear": "01.11.2018",
-								"FreezeUpNormal": "15.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "17.10.2019",
+								"FreezeUpNormal": "15.10.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1445,8 +1611,10 @@
 								"lat": "67.336012",
 								"utm33x": "541744",
 								"utm33y": "7469165",
-								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "10.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "13.10.2019",
+								"FreezeUpNormal": "10.10.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1461,8 +1629,10 @@
 								"lat": "66.819236",
 								"utm33x": "534915",
 								"utm33y": "7411452",
-								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "06.10.2019",
+								"FreezeUpNormal": "01.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1482,8 +1652,10 @@
 								"lat": "68.248309",
 								"utm33x": "481242",
 								"utm33y": "7570618",
+								"ConfirmedNoIceThisYear": "27.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.12.2018"
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1498,8 +1670,10 @@
 								"lat": "67.776672",
 								"utm33x": "541360",
 								"utm33y": "7518293",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.12.2018"
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1514,8 +1688,10 @@
 								"lat": "66.973561",
 								"utm33x": "501069",
 								"utm33y": "7428433",
+								"ConfirmedNoIceThisYear": "23.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.12.2018"
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1530,8 +1706,10 @@
 								"lat": "67.324692",
 								"utm33x": "542326",
 								"utm33y": "7467912",
+								"ConfirmedNoIceThisYear": "20.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "20.11.2018"
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1546,8 +1724,10 @@
 								"lat": "66.812877",
 								"utm33x": "535992",
 								"utm33y": "7410757",
-								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "10.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "11.10.2019",
+								"FreezeUpNormal": "10.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1567,8 +1747,10 @@
 								"lat": "66.907281",
 								"utm33x": "444216",
 								"utm33y": "7421615",
+								"ConfirmedNoIceThisYear": "28.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.01.2019"
+								"FreezeUpNormal": "01.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1583,8 +1765,10 @@
 								"lat": "68.210502",
 								"utm33x": "572845",
 								"utm33y": "7567372",
+								"ConfirmedNoIceThisYear": "23.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.12.2018"
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1599,8 +1783,10 @@
 								"lat": "67.07189",
 								"utm33x": "544901",
 								"utm33y": "7439767",
-								"FreezeUpThisYear": "13.11.2018",
-								"FreezeUpNormal": "10.11.2018"
+								"ConfirmedNoIceThisYear": "27.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.11.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1615,8 +1801,10 @@
 								"lat": "67.102681",
 								"utm33x": "553051",
 								"utm33y": "7443348",
-								"FreezeUpThisYear": "12.12.2018",
-								"FreezeUpNormal": "10.12.2018"
+								"ConfirmedNoIceThisYear": "28.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.12.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1631,8 +1819,10 @@
 								"lat": "67.300358",
 								"utm33x": "549607",
 								"utm33y": "7465324",
+								"ConfirmedNoIceThisYear": "23.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.11.2018"
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1652,8 +1842,10 @@
 								"lat": "67.367292",
 								"utm33x": "495840",
 								"utm33y": "7472329",
+								"ConfirmedNoIceThisYear": "23.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.01.2019"
+								"FreezeUpNormal": "15.01.2020",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1668,8 +1860,10 @@
 								"lat": "66.373584",
 								"utm33x": "458689",
 								"utm33y": "7361857",
+								"ConfirmedNoIceThisYear": "22.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "20.12.2018"
+								"FreezeUpNormal": "20.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1684,8 +1878,10 @@
 								"lat": "66.972018",
 								"utm33x": "540929",
 								"utm33y": "7428569",
-								"FreezeUpThisYear": "14.01.2019",
-								"FreezeUpNormal": "20.12.2018"
+								"ConfirmedNoIceThisYear": "25.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.12.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1700,8 +1896,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1716,8 +1914,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1742,8 +1942,10 @@
 								"lat": "69.77701",
 								"utm33x": "637571",
 								"utm33y": "7745027",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.11.2018"
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1758,8 +1960,10 @@
 								"lat": "69.023857",
 								"utm33x": "642471",
 								"utm33y": "7661166",
-								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.11.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "11.10.2019",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1774,8 +1978,10 @@
 								"lat": "68.97417",
 								"utm33x": "661742",
 								"utm33y": "7656810",
-								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.11.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "10.10.2019",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1790,8 +1996,10 @@
 								"lat": "69.444777",
 								"utm33x": "742876",
 								"utm33y": "7716292",
-								"FreezeUpThisYear": "22.10.2018",
-								"FreezeUpNormal": "20.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "04.10.2019",
+								"FreezeUpNormal": "20.10.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1806,8 +2014,10 @@
 								"lat": "69.020672",
 								"utm33x": "630280",
 								"utm33y": "7660131",
-								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "20.10.2019"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "01.10.2019",
+								"FreezeUpNormal": "20.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1819,16 +2029,18 @@
 							"name": "Kystnært svært lavt (0 – 200 moh)",
 							"index": "0",
 							"reference_lake": {
-								"name": "Nedre Svolværvatnet",
-								"locationId": "30521",
-								"height": "6",
-								"length": "1",
-								"lon": "14.5464271498936",
-								"lat": "68.248309",
-								"utm33x": "481242",
-								"utm33y": "7570618",
+								"name": "Møkkalandsvatnet",
+								"locationId": "52504",
+								"height": "13",
+								"length": "2",
+								"lon": "16.4289256375723",
+								"lat": "68.8189911975834",
+								"utm33x": "557614",
+								"utm33y": "7634849",
+								"ConfirmedNoIceThisYear": "25.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.01.2019"
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1843,8 +2055,10 @@
 								"lat": "69.568917",
 								"utm33x": "743605",
 								"utm33y": "7730292",
+								"ConfirmedNoIceThisYear": "23.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.11.2019"
+								"FreezeUpNormal": "15.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1859,8 +2073,10 @@
 								"lat": "68.61731",
 								"utm33x": "607418",
 								"utm33y": "7613997",
-								"FreezeUpThisYear": "25.10.2018",
-								"FreezeUpNormal": "25.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "16.10.2019",
+								"FreezeUpNormal": "25.10.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -1875,8 +2091,10 @@
 								"lat": "69.443577",
 								"utm33x": "741444",
 								"utm33y": "7716012",
+								"ConfirmedNoIceThisYear": "20.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "25.10.2018"
+								"FreezeUpNormal": "25.10.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1891,8 +2109,10 @@
 								"lat": "69.584942",
 								"utm33x": "776365",
 								"utm33y": "7735691",
-								"FreezeUpThisYear": "23.10.2018",
-								"FreezeUpNormal": "20.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "15.10.2019",
+								"FreezeUpNormal": "20.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1912,8 +2132,10 @@
 								"lat": "68.64538",
 								"utm33x": "591328",
 								"utm33y": "7616490",
-								"FreezeUpThisYear": "15.12.2018",
-								"FreezeUpNormal": "15.12.2018"
+								"ConfirmedNoIceThisYear": "26.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1928,8 +2150,10 @@
 								"lat": "69.005186",
 								"utm33x": "683718",
 								"utm33y": "7661828",
+								"ConfirmedNoIceThisYear": "27.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "25.11.2019"
+								"FreezeUpNormal": "25.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1944,8 +2168,10 @@
 								"lat": "68.656954",
 								"utm33x": "658727",
 								"utm33y": "7621159",
-								"FreezeUpThisYear": "27.11.2018",
-								"FreezeUpNormal": "10.11.2018"
+								"ConfirmedNoIceThisYear": "23.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "10.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1960,8 +2186,10 @@
 								"lat": "69.342229",
 								"utm33x": "740207",
 								"utm33y": "7704521",
-								"FreezeUpThisYear": "28.10.2018",
-								"FreezeUpNormal": "01.11.2018"
+								"ConfirmedNoIceThisYear": "23.10.2019",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -1976,8 +2204,10 @@
 								"lat": "68.552852",
 								"utm33x": "626898",
 								"utm33y": "7607712",
-								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.11.2019"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "23.10.2019",
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -1997,8 +2227,10 @@
 								"lat": "69.95284",
 								"utm33x": "659016",
 								"utm33y": "7766039",
+								"ConfirmedNoIceThisYear": "21.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.12.2019"
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2013,8 +2245,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2029,8 +2263,10 @@
 								"lat": "68.553769",
 								"utm33x": "681496",
 								"utm33y": "7611173",
+								"ConfirmedNoIceThisYear": "23.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "15.12.2018"
+								"FreezeUpNormal": "15.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2045,8 +2281,10 @@
 								"lat": "68.477991",
 								"utm33x": "685031",
 								"utm33y": "7602956",
+								"ConfirmedNoIceThisYear": "23.10.2019",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.12.2018"
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2061,8 +2299,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -2087,8 +2327,10 @@
 								"lat": "70.654964",
 								"utm33x": "821076",
 								"utm33y": "7861999",
-								"FreezeUpThisYear": "25.11.2019",
-								"FreezeUpNormal": "05.11.2019"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "19.10.2019",
+								"FreezeUpNormal": "05.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2103,8 +2345,10 @@
 								"lat": "69.844558",
 								"utm33x": "821237",
 								"utm33y": "7770631",
-								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "25.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "20.10.2019",
+								"FreezeUpNormal": "25.10.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2119,8 +2363,10 @@
 								"lat": "69.256012",
 								"utm33x": "840191",
 								"utm33y": "7706927",
-								"FreezeUpThisYear": "05.10.2018",
-								"FreezeUpNormal": "15.10.2019"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "10.10.2019",
+								"FreezeUpNormal": "15.10.2019",
+								"WebcameraExists": true
 							}
 						},
 						{
@@ -2135,8 +2381,10 @@
 								"lat": "69.667991",
 								"utm33x": "831079",
 								"utm33y": "7752099",
-								"FreezeUpThisYear": "28.09.2018",
-								"FreezeUpNormal": "05.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "05.10.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2151,8 +2399,10 @@
 								"lat": "69.427239",
 								"utm33x": "803858",
 								"utm33y": "7721319",
-								"FreezeUpThisYear": "29.09.2018",
-								"FreezeUpNormal": "01.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "01.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -2172,8 +2422,10 @@
 								"lat": "70.589653",
 								"utm33x": "772270",
 								"utm33y": "7848145",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "20.11.2018"
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2188,8 +2440,10 @@
 								"lat": "70.110516",
 								"utm33x": "824190",
 								"utm33y": "7801030",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "05.11.2018"
+								"FreezeUpNormal": "05.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2204,8 +2458,10 @@
 								"lat": "69.193782",
 								"utm33x": "844192",
 								"utm33y": "7700478",
-								"FreezeUpThisYear": "06.10.2018",
-								"FreezeUpNormal": "25.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "25.10.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2220,8 +2476,10 @@
 								"lat": "69.658657",
 								"utm33x": "833898",
 								"utm33y": "7751446",
-								"FreezeUpThisYear": "26.10.2018",
-								"FreezeUpNormal": "20.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "20.10.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2236,8 +2494,10 @@
 								"lat": "69.481849",
 								"utm33x": "803638",
 								"utm33y": "7727437",
-								"FreezeUpThisYear": "24.10.2018",
-								"FreezeUpNormal": "15.10.2018"
+								"ConfirmedNoIceThisYear": "",
+								"FreezeUpThisYear": "",
+								"FreezeUpNormal": "15.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -2257,8 +2517,10 @@
 								"lat": "70.596361",
 								"utm33x": "911832",
 								"utm33y": "7870364",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.12.2018"
+								"FreezeUpNormal": "01.12.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2273,8 +2535,10 @@
 								"lat": "69.338845",
 								"utm33x": "1054746",
 								"utm33y": "7756869",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "20.11.2018"
+								"FreezeUpNormal": "20.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2289,8 +2553,10 @@
 								"lat": "68.70804",
 								"utm33x": "824211",
 								"utm33y": "7755654",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "10.11.2018"
+								"FreezeUpNormal": "10.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2305,8 +2571,10 @@
 								"lat": "69.53957",
 								"utm33x": "825205",
 								"utm33y": "7736802",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "01.11.2018"
+								"FreezeUpNormal": "01.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2321,8 +2589,10 @@
 								"lat": "69.418558",
 								"utm33x": "808692",
 								"utm33y": "7720964",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "25.10.2018"
+								"FreezeUpNormal": "25.10.2019",
+								"WebcameraExists": false
 							}
 						}
 					]
@@ -2342,8 +2612,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2358,8 +2630,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2374,8 +2648,10 @@
 								"lat": "69.632459",
 								"utm33x": "854846",
 								"utm33y": "7751564",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": "10.11.2018"
+								"FreezeUpNormal": "10.11.2019",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2390,8 +2666,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						},
 						{
@@ -2406,8 +2684,10 @@
 								"lat": "0",
 								"utm33x": "0",
 								"utm33y": "0",
+								"ConfirmedNoIceThisYear": "",
 								"FreezeUpThisYear": "",
-								"FreezeUpNormal": ""
+								"FreezeUpNormal": "",
+								"WebcameraExists": false
 							}
 						}
 					]

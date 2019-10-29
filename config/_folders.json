@@ -8,6 +8,7 @@
     "logs" : "/logs/",
     "resources" : "/resources/",
     "time_series_data" : "/resources/timeseriesdata/",
+    "data_sets" : "/resources/datasets/",
     "logos" : "/resources/logos/",
     "reference_lakes_input_json_file": "/resources/referansevann/referansevann.json",
     "reference_lakes_output_json_folder" : "/output/plots/reference_lakes/",
